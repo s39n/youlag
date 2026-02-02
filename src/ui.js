@@ -92,6 +92,9 @@ function setupVideoClickListener() {
       history.back();
       return;
     }
+    else {
+      app.state.popstate.ignoreNext = false;
+    }
   });
 }
 
@@ -165,15 +168,27 @@ function setupArticleClickListener() {
       return;
     }
     if (isModeMiniplayer() && !getOpenArticle()) {
-      history.back();
+      if (!app.state.popstate.ignoreNext) {
+        app.state.popstate.ignoreNext = true;
+        history.back();
+      }
+      else {
+        app.state.popstate.ignoreNext = false;
+      }
+      return;
     }
     if (!getOpenArticle()) {
-      history.back();
-    }
-    else {
-      if (getOpenArticle()) {
-        closeArticle(event);
+      if (!app.state.popstate.ignoreNext) {
+        app.state.popstate.ignoreNext = true;
+        history.back();
       }
+      else {
+        app.state.popstate.ignoreNext = false;
+      }
+      return;
+    }
+    if (getOpenArticle()) {
+      closeArticle(event);
     }
   });
 
