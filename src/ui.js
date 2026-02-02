@@ -231,7 +231,7 @@ function setupTagsDropdownOverride() {
       if (iconImg) {
         prevSrc = iconImg.src;
         iconImg.classList.add('loading');
-        iconImg.src = '../themes/icons/spinner.svg';
+        iconImg.src = app.frss.img.spinner;
       }
       let tags = await getItemTags(entryId);
       if (iconImg) {
@@ -751,11 +751,11 @@ function setPageTitle(title) {
 
 function toggleFavorite(url, container, feedItemEl) {
   const favoriteButton = container.querySelector(`#${app.modal.id.favorite}`);
-  const favoriteButtonIcon = favoriteButton ? favoriteButton.querySelector('.youlag-favorited-icon') : null;
+  const favoriteButtonIcon = favoriteButton ? favoriteButton.querySelector(`.${app.modal.class.favoriteIcon}`) : null;
   if (!favoriteButton) return;
 
   // Show loading spinner while processing
-  favoriteButtonIcon.style.backgroundImage = 'url("../themes/icons/spinner.svg")';
+  favoriteButtonIcon.style.backgroundImage = `url("${app.frss.img.spinner}")`;
   favoriteButtonIcon.style.filter = 'invert(1)';
   favoriteButtonIcon.style.backgroundSize = '1.2rem';
 
@@ -779,13 +779,13 @@ function toggleFavorite(url, container, feedItemEl) {
           if (currentlyTrue) {
             feedItemEl.classList.remove(app.modal.class.favorite);
             if (bookmarkIcon) {
-              bookmarkIcon.src = '../themes/Mapco/icons/non-starred.svg';
+              bookmarkIcon.src = app.frss.img.favoriteInactive;
             }
           }
           else {
             feedItemEl.classList.add(app.modal.class.favorite);
             if (bookmarkIcon) {
-              bookmarkIcon.src = '../themes/Mapco/icons/starred.svg';
+              bookmarkIcon.src = app.frss.img.favoriteActive;
             }
           }
         }
@@ -817,7 +817,7 @@ function updateVideoAuthor() {
   // youlag-active: On video cards, use move out the `.author` element outside of the video title.
   // This prevents the author from being truncated in the title line, and is always displayed regardless of title length.
   
-  // TODO: refactor hardcoded querySelectorAll 
+  // TODO: refactor hardcoded querySelectorAll to use global `app` references.
   const feedCards = document.querySelectorAll('#stream div[data-feed]:not(.yl-modified--author)');
   feedCards.forEach(card => {
     const author = card.querySelector('.flux_header .item.titleAuthorSummaryDate .title .author');
@@ -838,7 +838,7 @@ function updateVideoAuthor() {
 function updateVideoDateFormat() {
   // youlag-active: On video cards, update to use relative date.
 
-  // TODO: refactor hardcoded querySelectorAll
+  // TODO: refactor hardcoded querySelectorAll to use global `app` references.
   const feedCards = document.querySelectorAll('#stream div[data-feed]:not(.yl-modified--date)');
   feedCards.forEach(card => {
     const date = card.querySelector('.flux_header .item.titleAuthorSummaryDate .date time');

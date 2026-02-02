@@ -3,9 +3,9 @@
  * 
  * Handles disclosures for both videos and articles,
  * such as modals and accordion/expansion panels.
+ * 
+ * NOTE: For simplicity, both the video modal and article expansion panels are referred to as "modal" in this context.
  */
-
-// TODO: Pop state handling don't properly work after the refactoring. Abstract all modal functions and reimplement popstates.
 
 function handleActiveVideo(eventOrVideoObject, isVideoObject = false) {
   // Handles activation of a feed item (video or article) and opens the video modal.

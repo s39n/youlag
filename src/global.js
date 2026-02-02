@@ -79,6 +79,7 @@ app.modal = {
     iframe: 'youlag-iframe',
     iframeContainer: 'youlag-iframe-container',
     favorite: 'youlag-favorited',
+    favoriteIcon: 'youlag-favorited-icon',
   },
   queue: {
     queue: null,
@@ -96,8 +97,13 @@ app.frss = {
   el: {
     feedRoot: '#stream',
     current: '#stream div[data-entry].active.current',    // Currently opened feed entry in the stream.
-    entry: 'div[data-entry]',   
-    global: '#global',                     // Feed entries general selector.
+    entry: 'div[data-entry]',                             // Feed entry element in the stream.
+    global: '#global',                                    
+  },
+  img: {
+    spinner: '../themes/icons/spinner.svg',
+    favoriteInactive: '../themes/Mapco/icons/non-starred.svg',
+    favoriteActive: '../themes/Mapco/icons/starred.svg',
   }
 }
 

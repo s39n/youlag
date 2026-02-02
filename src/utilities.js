@@ -76,7 +76,7 @@ function updateSidenavLinks() {
   // Update sidenav links for custom links.
 
   // Sort 'Watch later' by 'User modified 9→1': most recently added/modified feed items first.
-  // TODO: refactor hardcoded classList.contains
+  // TODO: refactor hardcoded classList.contains to use global `app` references.
   isWatchLaterSortModified = document.body.classList.contains('youlag-sort-watch_later--user-modified');
 
   if (!isWatchLaterSortModified) return;
