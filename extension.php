@@ -337,7 +337,14 @@ class YoulagExtension extends Minz_Extension {
         if (class_exists('FreshRSS_Factory')) {
             $dao = FreshRSS_Factory::createCategoryDao();
             if (method_exists($dao, 'listCategories')) {
-                return $dao->listCategories();
+                $categories = $dao->listCategories();
+                // Sort categories by 'Display position' attribute
+                usort($categories, function($a, $b) {
+                    $pa = method_exists($a, 'attributes') && isset($a->attributes()['position']) ? $a->attributes()['position'] : 0;
+                    $pb = method_exists($b, 'attributes') && isset($b->attributes()['position']) ? $b->attributes()['position'] : 0;
+                    return $pa <=> $pb;
+                });
+                return $categories;
             }
         }
         return array();
@@ -377,6 +384,7 @@ class YoulagExtension extends Minz_Extension {
         $categories = $this->getUserCategories();
         foreach ($categories as $cat) {
             $name = $cat?->name();
+            $priority = $cat?->priority();
             if (is_object($cat) && method_exists($cat, 'id') && $cat->id() == $catId) {
                 return $name ?? '';
             }
@@ -439,7 +447,8 @@ class YoulagExtension extends Minz_Extension {
             $catId = $m[1];
             if (property_exists('FreshRSS_Context', 'category') && isset(FreshRSS_Context::$category)) {
                 $categoryTitle = FreshRSS_Context::$category?->name() ?? $this->getCategoryNameById($catId);
-            } else {
+            }
+            else {
                 $categoryTitle = $this->getCategoryNameById($catId);
             }
         }
