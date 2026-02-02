@@ -389,6 +389,7 @@ function closeModalVideo() {
     history.back();
   }
   else {
+    app.state.popstate.ignoreNext = false;
     resetHistoryState();
   }
   setModalState(false);
