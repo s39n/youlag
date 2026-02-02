@@ -529,7 +529,7 @@ function renderToolbar() {
           if (dropdownItem) {
             setTimeout(() => {
               dropdownItem.click();
-            }, 500); // Delay to allow FreshRSS click events to attach.
+            }, 200); // Delay to allow FreshRSS click events to attach.
           } else if (attempts < 10) {
             attempts++;
             setTimeout(pollDropdown, 50);
