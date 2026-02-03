@@ -5265,7 +5265,7 @@ body.youlag-tags-modal-open {
 #yl_stream_category_filter_toggle {
   // Filter "Watch later" page by category.
   // NOTE: Experiemental feature, hidden by default.
-  visibility: var(--experimental-feature--category-filter, hidden);
+  visibility: var(--yl-experimental-feature--category-filter, hidden);
 }
 
 #yl_stream_category_filter {
