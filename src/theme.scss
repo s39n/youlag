@@ -5264,12 +5264,17 @@ body.youlag-tags-modal-open {
 #yl_stream_category_filter,
 #yl_stream_category_filter_toggle {
   // Filter "Watch later" page by category.
-  // NOTE: Experiemental feature, hidden by default.
+
+  // NOTE 2026-02-03: Experiemental feature, hidden by default.
   visibility: var(--yl-experimental-feature--category-filter, hidden);
 }
 
+#yl_stream_category_filter_toggle {
+  display: none !important;
+}
+
 #yl_stream_category_filter {
-  display: none;
+  display: none; // Collapsed by default.
   padding-top: var(--yl-space-2xs);
   padding-bottom: var(--yl-space-2xs);
 
