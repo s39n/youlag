@@ -765,7 +765,7 @@ function showUpdateAvailableNotice() {
 }
 
 function setWatchLaterCategoryFilter() {
-  // NOTE: Experimental feature to filter videos in "Watch Later" by category.
+  // NOTE 2026-02-03: Experimental feature to filter videos in "Watch Later" by category.
   // It utilizes CSS hacks to hide/show videos based on selected categories.
 
   const categoryFilterMenu = document.getElementById('yl_stream_category_filter');
@@ -800,6 +800,15 @@ function setWatchLaterCategoryFilter() {
   const checkboxes = categoryFilterMenu.querySelectorAll('.yl-stream-category-filter__checkbox');
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener('change', updateCategoryVisibility);
+  });
+
+  const clearAllButton = categoryFilterMenu.querySelector('#yl_stream_category_filter_clear');
+  clearAllButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+    updateCategoryVisibility();
   });
 
   updateCategoryVisibility();

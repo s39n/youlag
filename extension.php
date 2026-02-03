@@ -546,6 +546,9 @@ class YoulagExtension extends Minz_Extension {
           }
           $html .= <<<HTML
         </div>
+        <div class="yl-stream-category-filter__actions">
+            <div id="yl_stream_category_filter_clear" class="yl-stream-category-filter__button" role="button">Clear all</div>
+        </div>
       </div>
       HTML;
       return $html;
