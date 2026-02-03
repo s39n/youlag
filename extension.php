@@ -1,617 +1,649 @@
 <?php
 
-class YoulagExtension extends Minz_Extension {
-    /**
-     * Stores the user's selected category whitelist for UI use.
-     * @var array
-     */
-    protected $yl_category_whitelist = ['all'];
-    /**
-     * Set related videos suggestion source
-     * @var string
-     */
-    protected $yl_related_videos = 'watch_later';
-    /**
-    * Set two-column grid layout on viewport width ≤ 600px.
-     * @var bool
-     */
-    protected $yl_feed_view_mobile_grid_enabled = false;
-    /**
-     * Enable swipe-to-mini-player by default
-     * @var bool
-     */
-    protected $yl_miniplayer_swipe_enabled = true;
-    /**
-     * Use video platform labels (Favorite → Watch later, Tags → Playlists)
-     * @var bool
-     */
-    protected $yl_video_labels_enabled = true;
-    /**
-     * Whether to use Invidious for playback
-     * @var bool
-     */
-    private $yl_invidious_enabled = false;
-    /**
-     * Invidious instance to use
-     * @var string
-     */
-    protected $instance = '';
-    /**
-     * Show "New" badge for unwatched videos
-     * @var bool
-     */
-    protected $yl_video_unread_badge_enabled = false;
-    /**
-     * Enable sorting by modified date for Watch later/Playlists
-     * @var bool
-     */
-    protected $yl_video_sort_modified_enabled = false;
+class YoulagExtension extends Minz_Extension
+{
+  /**
+   * Stores the user's selected category whitelist for UI use.
+   * @var array
+   */
+  protected $yl_category_whitelist = ['all'];
+  /**
+   * Set related videos suggestion source
+   * @var string
+   */
+  protected $yl_related_videos = 'watch_later';
+  /**
+   * Set two-column grid layout on viewport width ≤ 600px.
+   * @var bool
+   */
+  protected $yl_feed_view_mobile_grid_enabled = false;
+  /**
+   * Enable swipe-to-mini-player by default
+   * @var bool
+   */
+  protected $yl_miniplayer_swipe_enabled = true;
+  /**
+   * Use video platform labels (Favorite → Watch later, Tags → Playlists)
+   * @var bool
+   */
+  protected $yl_video_labels_enabled = true;
+  /**
+   * Whether to use Invidious for playback
+   * @var bool
+   */
+  private $yl_invidious_enabled = false;
+  /**
+   * Invidious instance to use
+   * @var string
+   */
+  protected $instance = '';
+  /**
+   * Show "New" badge for unwatched videos
+   * @var bool
+   */
+  protected $yl_video_unread_badge_enabled = false;
+  /**
+   * Enable sorting by modified date for Watch later/Playlists
+   * @var bool
+   */
+  protected $yl_video_sort_modified_enabled = false;
 
-    /**
-     * Initialize this extension
-     */
-    public function init() {
-        // TODO: Refactor to pass data with `Minz_HookType::JsVars` instead.
-        $this->registerHook('entry_before_display', array($this, 'setInvidiousURL'));
-        $this->registerHook('nav_entries', array($this, 'createFreshRssLogo'), 6);
-        $this->registerHook('nav_entries', array($this, 'createCategoryTitle'), 7);
-        $this->registerHook('nav_entries', array($this, 'setCategoryWhitelist'), 10);
-        $this->registerHook('nav_entries', array($this, 'setVideoLabels'), 11);
-        $this->registerHook('nav_entries', array($this, 'setVideoUnreadBadge'), 12);
-        $this->registerHook('nav_entries', array($this, 'setMiniplayerSwipeEnabled'), 13);
-        $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 14);
-        $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 15);
-        $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 16);
-        if (Minz_Request::paramString('get', '') === 's') {
-          // Watch later page: add category filter
-          $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 17);
-        }
-
-        // Add Youlag theme and script to all extension pages
-        Minz_View::appendStyle($this->getFileUrl('theme.min.css'));
-        Minz_View::appendScript($this->getFileUrl('script.min.js'));
-
-        // Required user settings to properly render Youlag styling
-        // See FreshRSS `config-user.php` and the html form fields with `for="{setting_name}"` in settings for reference. This is not in the official documentation.
-        FreshRSS_Context::userConf()->theme = 'Mapco';
-        FreshRSS_Context::userConf()->topline_website = 'full';
-        FreshRSS_Context::userConf()->topline_thumbnail = 'landscape';
-        FreshRSS_Context::userConf()->topline_summary = true;
-        FreshRSS_Context::userConf()->topline_date = true;
-        FreshRSS_Context::userConf()->sticky_post = false; // Option to auto-scroll to article top. Youlag handles this itself for articles. Videos should not auto scroll.
-        FreshRSS_Context::userConf()->show_feed_name = 'a';
-        FreshRSS_Context::userConf()->show_author_date = 'h';
-        FreshRSS_Context::userConf()->show_tags = 'f';
-
-        // Register hook to block incoming YouTube shorts
-        $this->registerHook('entry_before_insert', [$this, 'blockYoutubeShorts']);
+  /**
+   * Initialize this extension
+   */
+  public function init(): void
+  {
+    // TODO: Refactor to pass data with `Minz_HookType::JsVars` instead.
+    $this->registerHook('entry_before_display', array($this, 'setInvidiousURL'));
+    $this->registerHook('nav_entries', array($this, 'createFreshRssLogo'), 6);
+    $this->registerHook('nav_entries', array($this, 'createCategoryTitle'), 7);
+    $this->registerHook('nav_entries', array($this, 'setCategoryWhitelist'), 10);
+    $this->registerHook('nav_entries', array($this, 'setVideoLabels'), 11);
+    $this->registerHook('nav_entries', array($this, 'setVideoUnreadBadge'), 12);
+    $this->registerHook('nav_entries', array($this, 'setMiniplayerSwipeEnabled'), 13);
+    $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 14);
+    $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 15);
+    $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 16);
+    if (Minz_Request::paramString('get', '') === 's') {
+      // Watch later page: add category filter
+      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 17);
     }
 
-    /**
-     * Initializes the extension configuration, if the user context is available.
-     * Do not call that in your extensions init() method, it can't be used there.
-     */
-    public function loadConfigValues() {
-        if (!class_exists('FreshRSS_Context', false) || null === FreshRSS_Context::$user_conf) {
-            return;
-        }
+    // Add Youlag theme and script to all extension pages
+    Minz_View::appendStyle($this->getFileUrl('theme.min.css'));
+    Minz_View::appendScript($this->getFileUrl('script.min.js'));
 
-        $yl_related_videos = FreshRSS_Context::userConf()->attributeString('yl_related_videos');
-        if ($yl_related_videos !== null) {
-            $this->yl_related_videos = $yl_related_videos;
-        }
+    // Required user settings to properly render Youlag styling
+    // See FreshRSS `config-user.php` and the html form fields with `for="{setting_name}"` in settings for reference. This is not in the official documentation.
+    FreshRSS_Context::userConf()->theme = 'Mapco';
+    FreshRSS_Context::userConf()->topline_website = 'full';
+    FreshRSS_Context::userConf()->topline_thumbnail = 'landscape';
+    FreshRSS_Context::userConf()->topline_summary = true;
+    FreshRSS_Context::userConf()->topline_date = true;
+    FreshRSS_Context::userConf()->sticky_post = false; // Option to auto-scroll to article top. Youlag handles this itself for articles. Videos should not auto scroll.
+    FreshRSS_Context::userConf()->show_feed_name = 'a';
+    FreshRSS_Context::userConf()->show_author_date = 'h';
+    FreshRSS_Context::userConf()->show_tags = 'f';
 
-        $yl_invidious_enabled = FreshRSS_Context::userConf()->attributeBool('yl_invidious_enabled');
-		if ($yl_invidious_enabled !== null) {
-			$this->yl_invidious_enabled = $yl_invidious_enabled;
-		}
+    // Register hook to block incoming YouTube shorts
+    $this->registerHook('entry_before_insert', [$this, 'blockYoutubeShorts']);
+  }
 
-        if (FreshRSS_Context::$user_conf->yl_invidious_url_1 != '') {
-            $this->instance = FreshRSS_Context::$user_conf->yl_invidious_url_1;
-        }
-
-        $val = FreshRSS_Context::userConf()->attributeArray('yl_category_whitelist');
-        $attributes = is_array(FreshRSS_Context::$user_conf->_attributes) ? FreshRSS_Context::$user_conf->_attributes : [];
-        // Default video mode to ['all'] when Youlag is activated for the first time.
-        if (!is_array($val) || (is_array($val) && count($val) === 0 && !array_key_exists('yl_category_whitelist', $attributes))) {
-            $this->yl_category_whitelist = ['all'];
-        }
-        else {
-            $this->yl_category_whitelist = $val;
-        }
-
-        $miniplayerSwipeEnabled = FreshRSS_Context::userConf()->attributeBool('yl_miniplayer_swipe_enabled');
-        $this->yl_miniplayer_swipe_enabled = ($miniplayerSwipeEnabled === null) ? true : $miniplayerSwipeEnabled;
-
-        $feedViewMobileGridEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_view_mobile_grid_enabled');
-        $this->yl_feed_view_mobile_grid_enabled = ($feedViewMobileGridEnabled === null) ? false : $feedViewMobileGridEnabled;
-
-        $labelsEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_labels_enabled');
-        $this->yl_video_labels_enabled = ($labelsEnabled === null) ? true : $labelsEnabled;
-
-        $unreadBadgeEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_unread_badge_enabled');
-        $this->yl_video_unread_badge_enabled = ($unreadBadgeEnabled === null) ? false : $unreadBadgeEnabled;
-
-        $sortModifiedEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_sort_modified_enabled');
-        $this->yl_video_sort_modified_enabled = ($sortModifiedEnabled === null) ? false : $sortModifiedEnabled;
+  /**
+   * Initializes the extension configuration, if the user context is available.
+   * Do not call that in your extensions init() method, it can't be used there.
+   */
+  public function loadConfigValues(): void
+  {
+    if (!class_exists(class: 'FreshRSS_Context', autoload: false) || null === FreshRSS_Context::$user_conf) {
+      return;
     }
 
-
-
-    /**
-     * Returns the stored category whitelist for UI (after loadConfigValues()).
-     * @return array
-     */
-    public function getCategoryWhitelist() {
-        return $this->yl_category_whitelist;
+    $yl_related_videos = FreshRSS_Context::userConf()->attributeString('yl_related_videos');
+    if ($yl_related_videos !== null) {
+      $this->yl_related_videos = $yl_related_videos;
     }
 
-    /**
-     * Pass the category whitelist data to be read in the DOM via nav_entries hook.
-     * The frontend js handles the behavior based on this the value in `data-yl-category-whitelist`.
-     * @return string
-     */
-    public function setCategoryWhitelist() {
-        $whitelist = FreshRSS_Context::userConf()->attributeArray('yl_category_whitelist');
-        $dataAttr = '';
-        if (!empty($whitelist)) {
-            $dataAttr = ' data-yl-category-whitelist="' . htmlspecialchars(implode(', ', $whitelist)) . '"';
-        }
-        return '<div id="yl_category_whitelist"' . $dataAttr . '></div>';
+    $yl_invidious_enabled = FreshRSS_Context::userConf()->attributeBool('yl_invidious_enabled');
+    if ($yl_invidious_enabled !== null) {
+      $this->yl_invidious_enabled = $yl_invidious_enabled;
     }
 
-    /**
-     * Pass the related videos source to be read in the DOM via nav_entries hook.
-     * The frontend js handles the behavior based on this the value in `data-yl-related-videos-source`.
-     * @return string
-     */
-    public function setRelatedVideosSource() {
-        $source = htmlspecialchars($this->yl_related_videos, ENT_QUOTES);
-        return '<div id="yl_related_videos_source" data-yl-related-videos-source="' . $source . '"></div>';
+    if (FreshRSS_Context::$user_conf->yl_invidious_url_1 != '') {
+      $this->instance = FreshRSS_Context::$user_conf->yl_invidious_url_1;
     }
 
-    /**
-     * Pass the mobile grid layout setting to be read in the DOM via nav_entries hook.
-     * The frontend js handles the behavior based on this the value in `data-yl-feed-view-mobile-grid-enabled`.
-     */
-    public function setFeedViewLayoutMobileGrid() {
-        $enabled = $this->yl_feed_view_mobile_grid_enabled ? 'true' : 'false';
-        return '<div id="yl_feed_view_mobile_grid_enabled" data-yl-feed-view-mobile-grid-enabled="' . $enabled . '"></div>';
+    $val = FreshRSS_Context::userConf()->attributeArray('yl_category_whitelist');
+    $attributes = is_array(value: FreshRSS_Context::$user_conf->_attributes) ? FreshRSS_Context::$user_conf->_attributes : [];
+    // Default video mode to ['all'] when Youlag is activated for the first time.
+    if (!is_array(value: $val) || (is_array(value: $val) && count(value: $val) === 0 && !array_key_exists(key: 'yl_category_whitelist', array: $attributes))) {
+      $this->yl_category_whitelist = ['all'];
+    } else {
+      $this->yl_category_whitelist = $val;
     }
 
-    /**
-     * Pass the mini player swipe setting to be read in the DOM via nav_entries hook.
-     * The frontend js handles the behavior based on this the value in `data-yl-mini-player-swipe-enabled`.
-     */
-    public function setMiniplayerSwipeEnabled() {
-        $enabled = $this->yl_miniplayer_swipe_enabled ? 'true' : 'false';
-        return '<div id="yl_miniplayer_swipe_enabled" data-yl-mini-player-swipe-enabled="' . $enabled . '"></div>';
+    $miniplayerSwipeEnabled = FreshRSS_Context::userConf()->attributeBool('yl_miniplayer_swipe_enabled');
+    $this->yl_miniplayer_swipe_enabled = ($miniplayerSwipeEnabled === null) ? true : $miniplayerSwipeEnabled;
+
+    $feedViewMobileGridEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_view_mobile_grid_enabled');
+    $this->yl_feed_view_mobile_grid_enabled = ($feedViewMobileGridEnabled === null) ? false : $feedViewMobileGridEnabled;
+
+    $labelsEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_labels_enabled');
+    $this->yl_video_labels_enabled = ($labelsEnabled === null) ? true : $labelsEnabled;
+
+    $unreadBadgeEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_unread_badge_enabled');
+    $this->yl_video_unread_badge_enabled = ($unreadBadgeEnabled === null) ? false : $unreadBadgeEnabled;
+
+    $sortModifiedEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_sort_modified_enabled');
+    $this->yl_video_sort_modified_enabled = ($sortModifiedEnabled === null) ? false : $sortModifiedEnabled;
+  }
+
+
+
+  /**
+   * Returns the stored category whitelist for UI (after loadConfigValues()).
+   * @return array
+   */
+  public function getCategoryWhitelist(): array
+  {
+    return $this->yl_category_whitelist;
+  }
+
+  /**
+   * Pass the category whitelist data to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-category-whitelist`.
+   * @return string
+   */
+  public function setCategoryWhitelist(): string
+  {
+    $whitelist = FreshRSS_Context::userConf()->attributeArray('yl_category_whitelist');
+    $dataAttr = '';
+    if (!empty($whitelist)) {
+      $dataAttr = ' data-yl-category-whitelist="' . htmlspecialchars(string: implode(separator: ', ', array: $whitelist)) . '"';
+    }
+    return '<div id="yl_category_whitelist"' . $dataAttr . '></div>';
+  }
+
+  /**
+   * Pass the related videos source to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-related-videos-source`.
+   * @return string
+   */
+  public function setRelatedVideosSource(): string
+  {
+    $source = htmlspecialchars(string: $this->yl_related_videos, flags: ENT_QUOTES);
+    return '<div id="yl_related_videos_source" data-yl-related-videos-source="' . $source . '"></div>';
+  }
+
+  /**
+   * Pass the mobile grid layout setting to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-feed-view-mobile-grid-enabled`.
+   */
+  public function setFeedViewLayoutMobileGrid(): string
+  {
+    $enabled = $this->yl_feed_view_mobile_grid_enabled ? 'true' : 'false';
+    return '<div id="yl_feed_view_mobile_grid_enabled" data-yl-feed-view-mobile-grid-enabled="' . $enabled . '"></div>';
+  }
+
+  /**
+   * Pass the mini player swipe setting to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-mini-player-swipe-enabled`.
+   */
+  public function setMiniplayerSwipeEnabled(): string
+  {
+    $enabled = $this->yl_miniplayer_swipe_enabled ? 'true' : 'false';
+    return '<div id="yl_miniplayer_swipe_enabled" data-yl-mini-player-swipe-enabled="' . $enabled . '"></div>';
+  }
+
+  /**
+   * Returns whether video platform labels is enabled or not.
+   * @return bool
+   */
+  public function isVideoLabelsEnabled(): bool
+  {
+    return $this->yl_video_labels_enabled;
+  }
+
+  /**
+   * Pass the video platform labels state to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-video-labels`.
+   * @param bool $enabled
+   */
+  public function setVideoLabels(): string
+  {
+    $enabled = $this->yl_video_labels_enabled ? 'true' : 'false';
+    return '<div id="yl_video_labels" data-yl-video-labels="' . $enabled . '"></div>';
+  }
+
+  /**
+   * Pass the "New" badge setting for unwatched videos state to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-video-unread-badge`.
+   * @param bool $enabled
+   */
+  public function setVideoUnreadBadge(): string
+  {
+    $enabled = $this->yl_video_unread_badge_enabled ? 'true' : 'false';
+    return '<div id="yl_video_unread_badge" data-yl-video-unread-badge="' . $enabled . '"></div>';
+  }
+
+  /**
+   * Pass the sort modified setting to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-video-sort-modified`.
+   */
+  public function setVideoSortModifiedEnabled(): string
+  {
+    $enabled = $this->yl_video_sort_modified_enabled ? 'true' : 'false';
+    return '<div id="yl_video_sort_modified" data-yl-video-sort-modified="' . $enabled . '"></div>';
+  }
+
+  /**
+   * Returns whether Invidious is enabled or not.
+   * Load $this->loadConfigValues(); before calling this method.
+   * @return bool
+   */
+  public function isInvidiousEnabled(): bool
+  {
+    return $this->yl_invidious_enabled;
+  }
+
+  /**
+   * Returns whether Invidious is enabled or not.
+   * Load $this->loadConfigValues(); before calling this method.
+   * @return bool
+   */
+  public function isInvidiousSet(): bool
+  {
+    return $this->instance != '';
+  }
+
+  public function embedVideoIframe($entry): mixed
+  {
+    $this->loadConfigValues();
+
+    // Youlag-inactive: Embed YouTube video for regular articles.
+    $content = $entry->content();
+    $link = $entry->link();
+    if (
+      preg_match(pattern: '#https?://(?:www\.)?youtube\.com/watch\?v=([\w-]+)#i', subject: $link, matches: $m) ||
+      preg_match(pattern: '#https?://youtu\.be/([\w-]+)#i', subject: $link, matches: $m)
+    ) {
+      $videoId = $m[1];
+      /* 
+       * HACK: Use 'data-original' instead of 'src' to prevent FreshRSS from lazy-loading through its injected 'grey.gif',
+       * which creates an http call for every iframe. 'data-original' is not a standard attribute, but handled through Youlag's script.js.
+       * 
+       * NOTE: The attribute naming scheme follows what is used in FreshRSS for lazyload:
+       * https://github.com/FreshRSS/FreshRSS/blob/131f4f8e636fd2d0b7652c3afeb54eaaa48b283a/lib/lib_rss.php#L279
+       */
+      $iframeSrc = htmlspecialchars(string: "https://www.youtube.com/embed/{$videoId}", flags: ENT_QUOTES);
+      $iframe = <<<HTML
+        <iframe
+          class="aspect-ratio-16-9 rounded-md"
+          width="100%"
+          height="auto"
+          data-original="{$iframeSrc}"
+          frameborder="0"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin">
+        </iframe>
+      HTML;
+      $content = "$iframe\n$content";
+    }
+    return $content;
+  }
+
+  /**
+   * Replaces all youtube.com domains in entry links/content with the user Invidious instance.
+   * @param FreshRSS_Entry $entry
+   * @return FreshRSS_Entry
+   */
+  public function setInvidiousURL($entry): FreshRSS_Entry
+  {
+    $this->loadConfigValues();
+    $invidious = $this->instance;
+
+    if (!$this->isInvidiousSet()) {
+      return $entry;
+    }
+    if (!$invidious) {
+      return $entry;
     }
 
-    /**
-     * Returns whether video platform labels is enabled or not.
-     * @return bool
+    $invidious = trim(string: $invidious);
+    if (!preg_match(pattern: '#^https?://#i', subject: $invidious)) {
+      $invidious = "https://{$invidious}";
+    }
+    $invidious = rtrim(string: $invidious, characters: '/');
+
+
+    /** 
+     * Create elements containing the Invidious instance URL and user-selected default video source option. 
+     * These elements are rendered in the article content to expose the Youlag extension settings,
+     * to allow frontend js to access them.
      */
-    public function isVideoLabelsEnabled() {
-        return $this->yl_video_labels_enabled;
+    $content = $entry->content();
+    $spanInvidiousUrl = '<span data-yl-invidious-instance="' . htmlspecialchars(string: $invidious, flags: ENT_QUOTES) . '"></span>';
+    $videoSource = $this->yl_invidious_enabled ? 'invidious_1' : 'youtube';
+    $spanVideoSource = '<span data-yl-video-source-default="' . htmlspecialchars(string: $videoSource, flags: ENT_QUOTES) . '"></span>';
+    if (strpos(haystack: $content, needle: 'yl-invidious-instance') === false && strpos(haystack: $content, needle: 'yl-video-source-default') === false) {
+      $entry->_content($spanInvidiousUrl . $spanVideoSource . $content);
     }
 
-    /**
-     * Pass the video platform labels state to be read in the DOM via nav_entries hook.
-     * The frontend js handles the behavior based on this the value in `data-yl-video-labels`.
-     * @param bool $enabled
-     */
-    public function setVideoLabels() {
-        $enabled = $this->yl_video_labels_enabled ? 'true' : 'false';
-        return '<div id="yl_video_labels" data-yl-video-labels="' . $enabled . '"></div>';
+    // Embed video iframe
+    $content = $this->embedVideoIframe(entry: $entry);
+
+    if ($this->isInvidiousSet() && $this->isInvidiousEnabled()) {
+      // Replace in entry link
+      $link = $entry->link();
+      $newLink = preg_replace(pattern: '#https?://(www\.)?youtube\.com/#', replacement: $invidious . '/', subject: $link);
+      if ($newLink !== $link) {
+        $entry->_link($newLink);
+      }
+
+      // Replace in entry content
+      $newContent = preg_replace(pattern: '#https?://(www\.)?youtube\.com/#', replacement: $invidious . '/', subject: $content);
+      if ($newContent !== $content) {
+        $entry->_content($newContent);
+      } else {
+        $entry->_content($content);
+      }
+    } else {
+      $entry->_content($content);
     }
 
-    /**
-     * Pass the "New" badge setting for unwatched videos state to be read in the DOM via nav_entries hook.
-     * The frontend js handles the behavior based on this the value in `data-yl-video-unread-badge`.
-     * @param bool $enabled
-     */
-    public function setVideoUnreadBadge() {
-        $enabled = $this->yl_video_unread_badge_enabled ? 'true' : 'false';
-        return '<div id="yl_video_unread_badge" data-yl-video-unread-badge="' . $enabled . '"></div>';
+    return $entry;
+  }
+
+  /**
+   * Get the current user's categories.
+   * @return array
+   */
+  protected function getUserCategories(): array
+  {
+    if (class_exists(class: 'FreshRSS_Factory')) {
+      $dao = FreshRSS_Factory::createCategoryDao();
+      if (method_exists(object_or_class: $dao, method: 'listCategories')) {
+        $categories = $dao->listCategories();
+        // Sort categories by 'Display position' attribute
+        usort(array: $categories, callback: function ($a, $b): int {
+          $pa = method_exists(object_or_class: $a, method: 'attributes') && isset($a->attributes()['position']) ? $a->attributes()['position'] : 0;
+          $pb = method_exists(object_or_class: $b, method: 'attributes') && isset($b->attributes()['position']) ? $b->attributes()['position'] : 0;
+          return $pa <=> $pb;
+        });
+        return $categories;
+      }
     }
+    return [];
+  }
 
-    /**
-     * Pass the sort modified setting to be read in the DOM via nav_entries hook.
-     * The frontend js handles the behavior based on this the value in `data-yl-video-sort-modified`.
-     */
-    public function setVideoSortModifiedEnabled() {
-        $enabled = $this->yl_video_sort_modified_enabled ? 'true' : 'false';
-        return '<div id="yl_video_sort_modified" data-yl-video-sort-modified="' . $enabled . '"></div>';
-    }
-
-    /**
-     * Returns whether Invidious is enabled or not.
-     * Load $this->loadConfigValues(); before calling this method.
-     * @return bool
-     */
-    public function isInvidiousEnabled() {
-        return $this->yl_invidious_enabled;
-    }
-
-    /**
-     * Returns whether Invidious is enabled or not.
-     * Load $this->loadConfigValues(); before calling this method.
-     * @return bool
-     */
-    public function isInvidiousSet() {
-        return $this->instance != '';
-    }
-
-    public function embedVideoIframe($entry) {
-        $this->loadConfigValues();
-
-        // Youlag-inactive: Embed YouTube video for regular articles.
-        $content = $entry->content();
-        $link = $entry->link();
-        if (preg_match('#https?://(?:www\.)?youtube\.com/watch\?v=([\w-]+)#i', $link, $m) ||
-            preg_match('#https?://youtu\.be/([\w-]+)#i', $link, $m)) {
-            $videoId = $m[1];
-            /* 
-             * HACK: Use 'data-original' instead of 'src' to prevent FreshRSS from lazy-loading through its injected 'grey.gif',
-             * which creates an http call for every iframe. 'data-original' is not a standard attribute, but handled through Youlag's script.js.
-             * 
-             * NOTE: The attribute naming scheme follows what is used in FreshRSS for lazyload:
-             * https://github.com/FreshRSS/FreshRSS/blob/131f4f8e636fd2d0b7652c3afeb54eaaa48b283a/lib/lib_rss.php#L279
-             */
-            $iframe = '<iframe'
-                . ' class="aspect-ratio-16-9 rounded-md"'
-                . ' width="100%"'
-                . ' height="auto"'
-                . ' data-original="' . htmlspecialchars('https://www.youtube.com/embed/' . $videoId, ENT_QUOTES) . '"'
-                . ' frameborder="0"'
-                . ' allowfullscreen'
-                . ' referrerpolicy="strict-origin-when-cross-origin"></iframe>';
-            $content = $iframe . "\n" . $content;
-        }
-        return $content;
-    }
-
-    /**
-     * Replaces all youtube.com domains in entry links/content with the user Invidious instance.
-     * @param FreshRSS_Entry $entry
-     * @return FreshRSS_Entry
-     */
-    public function setInvidiousURL($entry) {
-        $this->loadConfigValues();
-        $invidious = $this->instance;
-
-        if (!$this->isInvidiousSet()) {
-            return $entry;
-        }
-        if (!$invidious) {
-            return $entry;
-        }
-
-        $invidious = trim($invidious);
-        if (!preg_match('#^https?://#i', $invidious)) {
-            $invidious = 'https://' . $invidious;
-        }
-        $invidious = rtrim($invidious, '/');
-
-
-        /** 
-         * Create elements containing the Invidious instance URL and user-selected default video source option. 
-         * These elements are rendered in the article content to expose the Youlag extension settings,
-         * to allow frontend js to access them.
-         */
-        $content = $entry->content();
-        $spanInvidiousUrl = '<span data-yl-invidious-instance="' . htmlspecialchars($invidious, ENT_QUOTES) . '"></span>';
-        $videoSource = $this->yl_invidious_enabled ? 'invidious_1' : 'youtube';
-        $spanVideoSource = '<span data-yl-video-source-default="' . htmlspecialchars($videoSource, ENT_QUOTES) . '"></span>';
-        if (strpos($content, 'yl-invidious-instance') === false && strpos($content, 'yl-video-source-default') === false) {
-            $entry->_content($spanInvidiousUrl . $spanVideoSource . $content);
-        }
-
-        // Embed video iframe
-        $content =  $this->embedVideoIframe($entry);
-
-        if ($this->isInvidiousSet() && $this->isInvidiousEnabled()) {
-            // Replace in entry link
-            $link = $entry->link();
-            $newLink = preg_replace('#https?://(www\.)?youtube\.com/#', $invidious . '/', $link);
-            if ($newLink !== $link) {
-                $entry->_link($newLink);
-            }
-
-            // Replace in entry content
-            $newContent = preg_replace('#https?://(www\.)?youtube\.com/#', $invidious . '/', $content);
-            if ($newContent !== $content) {
-                $entry->_content($newContent);
-            } else {
-                $entry->_content($content);
-            }
-        } else {
-            $entry->_content($content);
-        }
-
-        return $entry;
-    }
-
-    /**
-     * Get the current user's categories.
-     * @return array
-     */
-    protected function getUserCategories() {
-        if (class_exists('FreshRSS_Factory')) {
-            $dao = FreshRSS_Factory::createCategoryDao();
-            if (method_exists($dao, 'listCategories')) {
-                $categories = $dao->listCategories();
-                // Sort categories by 'Display position' attribute
-                usort($categories, function($a, $b) {
-                    $pa = method_exists($a, 'attributes') && isset($a->attributes()['position']) ? $a->attributes()['position'] : 0;
-                    $pb = method_exists($b, 'attributes') && isset($b->attributes()['position']) ? $b->attributes()['position'] : 0;
-                    return $pa <=> $pb;
-                });
-                return $categories;
-            }
-        }
-        return array();
-    }
-
-    /**
-     * Get the name of a feed/filter by its ID.
-     * Undocumented reference: See FreshRSS core, the `transition()` function in `app/Controllers/indexController.php`:
-     *   'f.name' => $entry->feed()?->name() ?? ''
-     * @param int|string $feedId
-     * @return string
-     */
-    protected function getFeedNameById($feedId) {
-        if (class_exists('FreshRSS_Factory')) {
-            $feedDao = FreshRSS_Factory::createFeedDao();
-            if (method_exists($feedDao, 'listFeeds')) {
-                $feeds = $feedDao->listFeeds();
-                foreach ($feeds as $feed) {
-                    $name = $feed?->name();
-                    if (is_object($feed) && method_exists($feed, 'id') && $feed->id() == $feedId) {
-                        return $name ?? 'Filtered';
-                    }
-                }
-            }
-        }
-        return 'Filtered'; // Fallback if not found
-    }
-
-    /**
-     * Get the name of a category by its ID.
-     * Undocumented reference: See FreshRSS core, the `transition()` function in `app/Controllers/indexController.php`:
-     *   'c.name' => $entry->feed()?->category()?->name() ?? ''
-     * @param int|string $catId
-     * @return string
-     */
-    protected function getCategoryNameById($catId) {
-        $categories = $this->getUserCategories();
-        foreach ($categories as $cat) {
-            $name = $cat?->name();
-            if (is_object($cat) && method_exists($cat, 'id') && $cat->id() == $catId) {
-                return $name ?? '';
-            }
-        }
-        return '';
-    }
-
-    /**
-     * Get the name of a tag (label/playlist) by its ID.
-     * Undocumented reference: See FreshRSS core, the `labels()` function in `app/Models/Context.php`.
-     * @param int|string $tagId Tag (label) ID to resolve
-     * @return string Tag name, or fallback to 'Tag {ID}' if not found
-     */
-    protected function getTagNameById($tagId) {
-        $tags = FreshRSS_Context::labels();
-        foreach ($tags as $id => $tag) {
-            if ((string)$id === (string)$tagId || (is_object($tag) && method_exists($tag, 'id') && $tag->id() == $tagId)) {
-                return is_object($tag) && method_exists($tag, 'name') ? $tag->name() : ('Tag ' . $tagId);
-            }
-        }
-        return 'Tag ' . $tagId;
-    }
-
-    /**
-     * Block incoming YouTube shorts from being saved to the database.
-     * @param FreshRSS_Entry $entry
-     * @return FreshRSS_Entry|null
-     */
-    public function blockYoutubeShorts($entry) {
-        if (is_object($entry) === true) {
-            // Only block if user setting is enabled
-            $blockShorts = FreshRSS_Context::$user_conf->yl_block_youtube_shorts ?? false;
-            if ($blockShorts) {
-                $link = $entry->link();
-                // Match links that start with e.g. https://www.youtube.com/shorts/
-                if (preg_match('#^https?://(www\.)?youtube\.com/shorts/#i', $link)) {
-                    // Block YouTube shorts from being saved to the database
-                    Minz_Log::warning('Youlag: ' . $entry->link());
-                    return null;
-                }
-            }
-        }
-        return $entry;
-    }
-
-    /**
-     * Extract the current category/tag/filter title from FreshRSS request params
-     * This logic replicates some of the FreshRSS core behavior.
-     * See the PHPDoc in `getFeedNameById()`, `getCategoryNameById()`, `getTagNameById()`. 
-     * @return string HTML content for the category title container
-     */
-    public function createCategoryTitle() {
-        $categoryTitle = '';
-        $getParam = Minz_Request::paramString('get', '');
-        $categories = $this->getUserCategories();
-
-        // Category page `c_{n}`
-        // Prefer FreshRSS_Context::$category?->name() for accuracy, fallback to getCategoryNameById() if unavailable.
-        if (preg_match('/^c_(\d+)$/', $getParam, $m)) {
-            $catId = $m[1];
-            if (property_exists('FreshRSS_Context', 'category') && isset(FreshRSS_Context::$category)) {
-                $categoryTitle = FreshRSS_Context::$category?->name() ?? $this->getCategoryNameById($catId);
-            }
-            else {
-                $categoryTitle = $this->getCategoryNameById($catId);
-            }
-        }
-        // Tag page `t_{n}`
-        elseif (preg_match('/^t_(\d+)$/', $getParam, $m)) {
-            $tagId = $m[1];
-            $categoryTitle = $this->getTagNameById($tagId);
-        }
-        // Filter/feed page `f_{n}`
-        elseif (preg_match('/^f_(\d+)$/', $getParam, $m)) {
-            $filterId = $m[1];
-            // Prefer FreshRSS_Context::$feed?->name() for accuary, fallback to getFeedNameById() if unavailable.
-            if (property_exists('FreshRSS_Context', 'feed') && isset(FreshRSS_Context::$feed)) {
-                $categoryTitle = FreshRSS_Context::$feed?->name() ?? $this->getFeedNameById($filterId);
-            } else {
-                $categoryTitle = $this->getFeedNameById($filterId);
-            }
-        }
-        // Specific top level category pages.
-        elseif ($getParam === 'T') {
-            // 'My labels' page. Use 'Playlists' if video labels are enabled.
-            $categoryTitle = $this->isVideoLabelsEnabled() ? 'Playlists' : 'My labels';
-        }
-        elseif ($getParam === 'i') {
-            $categoryTitle = 'Important';
-        }
-        elseif ($getParam === 's') {
-            // 'Favorites' page. Use 'Watch later' if video labels are enabled.
-            $categoryTitle = $this->isVideoLabelsEnabled() ? 'Watch later' : 'Favorites';
-        }
-        elseif ($getParam === '') {
-            $categoryTitle = 'Subscriptions';
-        }
-        else {
-            if (property_exists('FreshRSS_Context', 'category') && isset(FreshRSS_Context::$category)) {
-                $categoryTitle = FreshRSS_Context::$category?->name() ?? '';
-            } else {
-                $categoryTitle = '';
-            }
-        }
-
-        $categoryTitle = htmlspecialchars($categoryTitle);
-
-          $html = '<div id="yl_category_toolbar">'
-              .     '<div id="yl_category_title_container">'
-              .         '<div id="yl_category_title" data-yl-category-title="' . $categoryTitle . '">' . $categoryTitle . '</div>';
-          if (Minz_Request::paramString('get', '') === 's') {
-            // 'Watch later' page: add category filter button
-            $html .= '<button id="yl_stream_category_filter_toggle">'
-                . 'Filter category '
-                . '<span id="yl_stream_category_filter_count"></span>'
-                . '</button>';
+  /**
+   * Get the name of a feed/filter by its ID.
+   * Undocumented reference: See FreshRSS core, the `transition()` function in `app/Controllers/indexController.php`:
+   *   'f.name' => $entry->feed()?->name() ?? ''
+   * @param int|string $feedId
+   * @return string
+   */
+  protected function getFeedNameById($feedId): mixed
+  {
+    if (class_exists(class: 'FreshRSS_Factory')) {
+      $feedDao = FreshRSS_Factory::createFeedDao();
+      if (method_exists(object_or_class: $feedDao, method: 'listFeeds')) {
+        $feeds = $feedDao->listFeeds();
+        foreach ($feeds as $feed) {
+          $name = $feed?->name();
+          if (is_object(value: $feed) && method_exists(object_or_class: $feed, method: 'id') && $feed->id() == $feedId) {
+            return $name ?? 'Filtered';
           }
-          $html .=     '<button id="yl_nav_menu_container_toggle">Configure view</button>'
-              .     '</div>'
-              .     '<div id="yl_nav_menu_container">'
-              .         '<nav id="yl_nav_menu_container_content"></nav>'
-              .     '</div>'
-              . '</div>';
-          return $html;
+        }
+      }
+    }
+    return 'Filtered'; // Fallback if not found
+  }
+
+  /**
+   * Get the name of a category by its ID.
+   * Undocumented reference: See FreshRSS core, the `transition()` function in `app/Controllers/indexController.php`:
+   *   'c.name' => $entry->feed()?->category()?->name() ?? ''
+   * @param int|string $catId
+   * @return string
+   */
+  protected function getCategoryNameById($catId): mixed
+  {
+    $categories = $this->getUserCategories();
+    foreach ($categories as $cat) {
+      $name = $cat?->name();
+      if (is_object(value: $cat) && method_exists(object_or_class: $cat, method: 'id') && $cat->id() == $catId) {
+        return $name ?? '';
+      }
+    }
+    return '';
+  }
+
+  /**
+   * Get the name of a tag (label/playlist) by its ID.
+   * Undocumented reference: See FreshRSS core, the `labels()` function in `app/Models/Context.php`.
+   * @param int|string $tagId Tag (label) ID to resolve
+   * @return string Tag name, or fallback to 'Tag {ID}' if not found
+   */
+  protected function getTagNameById($tagId): mixed
+  {
+    $tags = FreshRSS_Context::labels();
+    foreach ($tags as $id => $tag) {
+      if ((string) $id === (string) $tagId || (is_object(value: $tag) && method_exists(object_or_class: $tag, method: 'id') && $tag->id() == $tagId)) {
+        return is_object(value: $tag) && method_exists(object_or_class: $tag, method: 'name') ? $tag->name() : ('Tag ' . $tagId);
+      }
+    }
+    return "Tag {$tagId}";
+  }
+
+  /**
+   * Block incoming YouTube shorts from being saved to the database.
+   * @param FreshRSS_Entry $entry
+   * @return FreshRSS_Entry|null
+   */
+  public function blockYoutubeShorts($entry): FreshRSS_Entry|null
+  {
+    if (is_object(value: $entry) === true) {
+      // Only block if user setting is enabled
+      $blockShorts = FreshRSS_Context::$user_conf->yl_block_youtube_shorts ?? false;
+      if ($blockShorts) {
+        $link = $entry->link();
+        // Match links that start with e.g. https://www.youtube.com/shorts/
+        if (preg_match(pattern: '#^https?://(www\.)?youtube\.com/shorts/#i', subject: $link)) {
+          // Block YouTube shorts from being saved to the database
+          Minz_Log::warning('Youlag: ' . $entry->link());
+          return null;
+        }
+      }
+    }
+    return $entry;
+  }
+
+  /**
+   * Extract the current category/tag/filter title from FreshRSS request params
+   * This logic replicates some of the FreshRSS core behavior.
+   * See the PHPDoc in `getFeedNameById()`, `getCategoryNameById()`, `getTagNameById()`. 
+   * @return string HTML content for the category title container
+   */
+  public function createCategoryTitle(): string
+  {
+    $categoryTitle = '';
+    $getParam = Minz_Request::paramString('get', '');
+    //$categories = $this->getUserCategories();
+
+    // Category page `c_{n}`
+    // Prefer FreshRSS_Context::$category?->name() for accuracy, fallback to getCategoryNameById() if unavailable.
+    if (preg_match(pattern: '/^c_(\d+)$/', subject: $getParam, matches: $m)) {
+      $catId = $m[1];
+      if (property_exists(object_or_class: 'FreshRSS_Context', property: 'category') && isset(FreshRSS_Context::$category)) {
+        $categoryTitle = FreshRSS_Context::$category?->name() ?? $this->getCategoryNameById(catId: $catId);
+      } else {
+        $categoryTitle = $this->getCategoryNameById(catId: $catId);
+      }
+    }
+    // Tag page `t_{n}`
+    elseif (preg_match(pattern: '/^t_(\d+)$/', subject: $getParam, matches: $m)) {
+      $tagId = $m[1];
+      $categoryTitle = $this->getTagNameById(tagId: $tagId);
+    }
+    // Filter/feed page `f_{n}`
+    elseif (preg_match(pattern: '/^f_(\d+)$/', subject: $getParam, matches: $m)) {
+      $filterId = $m[1];
+      // Prefer FreshRSS_Context::$feed?->name() for accuary, fallback to getFeedNameById() if unavailable.
+      if (property_exists(object_or_class: 'FreshRSS_Context', property: 'feed') && isset(FreshRSS_Context::$feed)) {
+        $categoryTitle = FreshRSS_Context::$feed?->name() ?? $this->getFeedNameById(feedId: $filterId);
+      } else {
+        $categoryTitle = $this->getFeedNameById(feedId: $filterId);
+      }
+    }
+    // Specific top level category pages.
+    elseif ($getParam === 'T') {
+      // 'My labels' page. Use 'Playlists' if video labels are enabled.
+      $categoryTitle = $this->isVideoLabelsEnabled() ? 'Playlists' : 'My labels';
+    } elseif ($getParam === 'i') {
+      $categoryTitle = 'Important';
+    } elseif ($getParam === 's') {
+      // 'Favorites' page. Use 'Watch later' if video labels are enabled.
+      $categoryTitle = $this->isVideoLabelsEnabled() ? 'Watch later' : 'Favorites';
+    } elseif ($getParam === '') {
+      $categoryTitle = 'Subscriptions';
+    } else {
+      if (property_exists(object_or_class: 'FreshRSS_Context', property: 'category') && isset(FreshRSS_Context::$category)) {
+        $categoryTitle = FreshRSS_Context::$category?->name() ?: '';
+      } else {
+        $categoryTitle = '';
+      }
     }
 
-    public function createFreshRssLogo() {
-        $html = '<div id="yl_freshrss_logo_container">'
-              .     '<a href="/i/">'
-              .         '<img id="yl_freshrss_logo" src="' . '../themes/icons/FreshRSS-logo.svg' . '" alt="FreshRSS" loading="lazy" />'
-              .     '</a>'
-              . '</div>';
-        return $html;
-    }
+    $categoryTitle = htmlspecialchars(string: $categoryTitle);
 
-    public function createWatchLaterCategoryFilter() {
-      // Lists all available categories for filtering the 'Watch later' page. Click events are handled by the frontend js.
-      $categories = $this->getUserCategories();
-      $html = <<<HTML
+    $filterButton = '';
+    if (Minz_Request::paramString('get', '') === 's') {
+      // 'Watch later' page: add category filter button
+      $filterButton = <<<HTML
+        <button id="yl_stream_category_filter_toggle">
+          Filter category <span id="yl_stream_category_filter_count"></span>
+        </button>
+      HTML;
+    }
+    $html = <<<HTML
+      <div id="yl_category_toolbar">
+        <div id="yl_category_title_container">
+          <div id="yl_category_title" data-yl-category-title="{$categoryTitle}">{$categoryTitle}</div>
+          {$filterButton}
+          <button id="yl_nav_menu_container_toggle">Configure view</button>
+        </div>
+        <div id="yl_nav_menu_container">
+          <nav id="yl_nav_menu_container_content"></nav>
+        </div>
+      </div>
+    HTML;
+    return $html;
+  }
+
+  public function createFreshRssLogo(): string
+  {
+    $logoSrc = '../themes/icons/FreshRSS-logo.svg';
+    $html = <<<HTML
+      <div id="yl_freshrss_logo_container">
+        <a href="/i/">
+          <img id="yl_freshrss_logo" src="{$logoSrc}" alt="FreshRSS" loading="lazy" />
+        </a>
+      </div>
+    HTML;
+    return $html;
+  }
+
+  public function createWatchLaterCategoryFilter()
+  {
+    // Lists all available categories for filtering the 'Watch later' page. Click events are handled by the frontend js.
+    $categories = $this->getUserCategories();
+    $html = <<<HTML
       <div id="yl_stream_category_filter" class="yl-stream-category-filter">
         <div id="yl_stream_category_filter_options" class="yl-stream-category-filter-options">
       HTML;
-          foreach ($categories as $cat) {
-              $catIdRaw = is_object($cat) && method_exists($cat, 'id') ? $cat->id() : '';
-              $catNameRaw = is_object($cat) && method_exists($cat, 'name') ? $cat->name() : '';
-              $catId = htmlspecialchars($catIdRaw, ENT_QUOTES);
-              $catName = htmlspecialchars($catNameRaw, ENT_QUOTES);
-              $html .= <<<HTML
+    foreach ($categories as $cat) {
+      $catIdRaw = is_object(value: $cat) && method_exists(object_or_class: $cat, method: 'id') ? $cat->id() : '';
+      $catNameRaw = is_object(value: $cat) && method_exists(object_or_class: $cat, method: 'name') ? $cat->name() : '';
+      $catId = htmlspecialchars(string: $catIdRaw, flags: ENT_QUOTES);
+      $catName = htmlspecialchars(string: $catNameRaw, flags: ENT_QUOTES);
+      $html .= <<<HTML
           <div class="yl-stream-category-filter-options__item" data-category="$catId">
-              <label class="yl-stream-category-filter__label" for="yl-stream-category-filter-$catId">
-                  <input type="checkbox" class="yl-stream-category-filter__checkbox" id="yl-stream-category-filter-$catId" />
-                  <span class="yl-stream-category-filter__name">$catName</span>
-              </label>
+            <label class="yl-stream-category-filter__label" for="yl-stream-category-filter-$catId">
+              <input type="checkbox" class="yl-stream-category-filter__checkbox" id="yl-stream-category-filter-$catId" />
+              <span class="yl-stream-category-filter__name">$catName</span>
+            </label>
           </div>
           HTML;
-          }
-          $html .= <<<HTML
+    }
+    $html .= <<<HTML
         </div>
         <div class="yl-stream-category-filter__actions">
-            <div id="yl_stream_category_filter_clear" class="yl-stream-category-filter__button" role="button">Clear all</div>
+          <div id="yl_stream_category_filter_clear" class="yl-stream-category-filter__button" role="button">Clear all</div>
         </div>
       </div>
       HTML;
-      return $html;
+    return $html;
+  }
+
+  /**
+   * Saves the user settings for this extension.
+   */
+  public function handleConfigureAction(): void
+  {
+    $this->loadConfigValues();
+
+    if (Minz_Request::isPost()) {
+      // Invidious settings
+      FreshRSS_Context::userConf()->_attribute('yl_invidious_enabled', Minz_Request::paramBoolean('yl_invidious_enabled'));
+      FreshRSS_Context::$user_conf->yl_invidious_url_1 = (string) Minz_Request::paramString('yl_invidious_url_1', '');
+
+      // Category whitelist
+      $catWhitelist = Minz_Request::paramArray('yl_category_whitelist', true);
+      if (!is_array(value: $catWhitelist)) {
+        $catWhitelist = [];
+      }
+      if (count(value: $catWhitelist) === 0) {
+        // Allow disabling video mode for all categories and pages, by unchecking all checkboxes.
+        $catWhitelist = ['none'];
+      }
+      FreshRSS_Context::userConf()->_attribute('yl_category_whitelist', $catWhitelist);
+
+      // Related videos source
+      $relatedVideosSource = Minz_Request::paramString('yl_related_videos', 'watch_later');
+      FreshRSS_Context::userConf()->_attribute('yl_related_videos', $relatedVideosSource);
+
+      // Feed view mobile grid layout
+      $feedViewMobileGridEnabled = Minz_Request::paramBoolean('yl_feed_view_mobile_grid_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_feed_view_mobile_grid_enabled', $feedViewMobileGridEnabled);
+
+      // Mini player swipe
+      $miniplayerSwipeEnabled = Minz_Request::paramBoolean('yl_miniplayer_swipe_enabled', true);
+      FreshRSS_Context::userConf()->_attribute('yl_miniplayer_swipe_enabled', $miniplayerSwipeEnabled);
+
+      // Video platform labels
+      $labelsEnabled = Minz_Request::paramBoolean('yl_video_labels_enabled', true);
+      FreshRSS_Context::userConf()->_attribute('yl_video_labels_enabled', $labelsEnabled);
+
+      // "New" badge for unwatched videos
+      $unreadBadgeEnabled = Minz_Request::paramBoolean('yl_video_unread_badge_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_video_unread_badge_enabled', $unreadBadgeEnabled);
+
+      // Sort by modified date for Watch later/Playlists
+      $sortModifiedEnabled = Minz_Request::paramBoolean('yl_video_sort_modified_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_video_sort_modified_enabled', $sortModifiedEnabled);
+
+      // YouTube shorts blocking
+      FreshRSS_Context::userConf()->_attribute('yl_block_youtube_shorts', Minz_Request::paramBoolean('yl_block_youtube_shorts', true));
+
+      FreshRSS_Context::$user_conf->save();
+
+      $this->loadConfigValues();
+      $_SESSION['ext_categories'] = $this->getUserCategories();
+    } else {
+      $_SESSION['ext_categories'] = $this->getUserCategories();
     }
-
-    /**
-     * Saves the user settings for this extension.
-     */
-    public function handleConfigureAction() {
-        $this->loadConfigValues();
-
-        if (Minz_Request::isPost()) {
-            // Invidious settings
-            FreshRSS_Context::userConf()->_attribute('yl_invidious_enabled', Minz_Request::paramBoolean('yl_invidious_enabled'));
-            FreshRSS_Context::$user_conf->yl_invidious_url_1 = (string)Minz_Request::paramString('yl_invidious_url_1', '');
-
-            // Category whitelist
-            $catWhitelist = Minz_Request::paramArray('yl_category_whitelist', true);
-            if (!is_array($catWhitelist)) {
-                $catWhitelist = [];
-            }
-            if (count($catWhitelist) === 0) {
-                // Allow disabling video mode for all categories and pages, by unchecking all checkboxes.
-                $catWhitelist = ['none'];
-            }
-            FreshRSS_Context::userConf()->_attribute('yl_category_whitelist', $catWhitelist);
-
-            // Related videos source
-            $relatedVideosSource = Minz_Request::paramString('yl_related_videos', 'watch_later');
-            FreshRSS_Context::userConf()->_attribute('yl_related_videos', $relatedVideosSource);
-
-            // Feed view mobile grid layout
-            $feedViewMobileGridEnabled = Minz_Request::paramBoolean('yl_feed_view_mobile_grid_enabled', false);
-            FreshRSS_Context::userConf()->_attribute('yl_feed_view_mobile_grid_enabled', $feedViewMobileGridEnabled);
-
-            // Mini player swipe
-            $miniplayerSwipeEnabled = Minz_Request::paramBoolean('yl_miniplayer_swipe_enabled', true);
-            FreshRSS_Context::userConf()->_attribute('yl_miniplayer_swipe_enabled', $miniplayerSwipeEnabled);
-
-            // Video platform labels
-            $labelsEnabled = Minz_Request::paramBoolean('yl_video_labels_enabled', true);
-            FreshRSS_Context::userConf()->_attribute('yl_video_labels_enabled', $labelsEnabled);
-
-            // "New" badge for unwatched videos
-            $unreadBadgeEnabled = Minz_Request::paramBoolean('yl_video_unread_badge_enabled', false);
-            FreshRSS_Context::userConf()->_attribute('yl_video_unread_badge_enabled', $unreadBadgeEnabled);
-
-            // Sort by modified date for Watch later/Playlists
-            $sortModifiedEnabled = Minz_Request::paramBoolean('yl_video_sort_modified_enabled', false);
-            FreshRSS_Context::userConf()->_attribute('yl_video_sort_modified_enabled', $sortModifiedEnabled);
-
-            // YouTube shorts blocking
-            FreshRSS_Context::userConf()->_attribute('yl_block_youtube_shorts', Minz_Request::paramBoolean('yl_block_youtube_shorts', true));
-
-            FreshRSS_Context::$user_conf->save();
-
-            $this->loadConfigValues();
-            $_SESSION['ext_categories'] = $this->getUserCategories();
-        } 
-        else {
-            $_SESSION['ext_categories'] = $this->getUserCategories();
-        }
-    }
+  }
 
 
 }
