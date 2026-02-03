@@ -23,6 +23,7 @@ const srcFiles = [
   '../src/events.js',
 ];
 const scriptTempDest = path.join(tempDir, 'script.min.js');
+
 const minifyAndInjectVersion = async () => {
   const terser = require('terser');
   let srcContent = srcFiles.map(f => fs.readFileSync(path.resolve(__dirname, f), 'utf8')).join('\n');
@@ -41,7 +42,24 @@ const minifyAndInjectVersion = async () => {
   }
 };
 
+const preprocessScss = async () => {
+  const { execSync } = require('child_process');
+  try {
+    execSync('npx sass src/theme.scss static/theme.min.css --no-source-map --style=compressed', { stdio: 'inherit', cwd: path.resolve(__dirname, '..') });
+    return true;
+  } catch (err) {
+    console.error('SCSS preprocessing error:', err);
+    return false;
+  }
+};
+
+
 (async () => {
+  const scssOk = await preprocessScss();
+  if (!scssOk) {
+    process.exit(1);
+  }
+
   await minifyAndInjectVersion();
 
   const extensionFiles = [
