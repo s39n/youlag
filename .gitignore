@@ -22,3 +22,7 @@ Thumbs.db
 
 # Temp build folder
 .tmp/
+
+# IDE specific files
+.vscode/
+.idea/
