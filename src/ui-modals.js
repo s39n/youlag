@@ -566,7 +566,7 @@ function closeArticle(event) {
     }
 
     // Prevent sticky transition title from showing when auto-scrolling.
-    const ylCategoryToolbar = document.getElementById('yl_category_toolbar');
+    const ylCategoryToolbar = document.getElementById(app.ui.id.toolbar);
     setToolbarStickyState(true);
     ylCategoryToolbar.classList.remove('sticky-visible');
     ylCategoryToolbar.classList.add('sticky-hidden');

@@ -534,7 +534,8 @@ body {
   }
 
   #yl_nav_menu_container_toggle,
-  #yl_nav_menu_manage_current_feed {
+  #yl_nav_menu_manage_current_feed,
+  #yl_stream_category_filter_toggle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -554,6 +555,7 @@ body {
 
   #yl_nav_menu_container {
     /* Custom element for placing the FreshRSS `.nav_menu`. */
+    /* TODO: Refactor, rename nav_menu to toolbar */
 
     &.yl-nav-menu-container--sticky {
       position: sticky;
@@ -568,7 +570,7 @@ body {
     }
   }
 
-  &.yl-nav-menu-container--open {   
+  &.yl-toolbar-open--viewOptions {   
     
     #yl_nav_menu_container_content {
       display: flex;
@@ -582,6 +584,17 @@ body {
       }
     }
   }
+
+  &.yl-toolbar-open--categoryFilter {
+    .yl-stream-category-filter {
+      display: flex;
+
+      &-options {
+        width: 100%;
+      }
+    }
+  }
+
 }
 
 .youlag-inactive {
@@ -5140,6 +5153,14 @@ body.youlag-tags-modal-open {
   display: flex !important;
 }
 
+.flex-col {
+  flex-direction: column !important;
+}
+
+.justify-start {
+  justify-content: flex-start !important;
+}
+
 .mb-auto {
   margin-bottom: auto !important;
 }
@@ -5220,6 +5241,70 @@ body.youlag-tags-modal-open {
     }
   }
 }
+
+#yl_stream_category_filter,
+#yl_stream_category_filter_toggle {
+  // Filter "Watch later" page by category.
+  // NOTE: Experiemental feature, hidden by default.
+  visibility: var(--experimental-feature--category-filter, hidden);
+}
+
+#yl_stream_category_filter {
+  display: none;
+  padding-top: var(--yl-space-2xs);
+  padding-bottom: var(--yl-space-2xs);
+
+  .yl-stream-category-filter-options {
+    display: grid;
+    gap: var(--yl-space-3xs);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+
+    &__item[data-category="1"] {
+      // Hide "Uncategorized" option.
+      display: none;
+    }
+
+    &__item {
+      &:hover {
+        background: var(--yl-color-gradient-surface-3);
+        border-radius: 8px;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .yl-stream-category-filter {
+    &__label {
+      display: flex;
+      align-items: center;
+      gap: var(--yl-space-3xs);
+      padding: var(--yl-p-3xs) var(--yl-p-2xs);
+    }
+    
+    &__name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+body.youlag-active:not(.reader) {
+  &.yl-stream-category-filter--active {
+    #stream div.flux {
+      // When category filter is active, hide all feeds by default and show only `.yl-stream-category-filter--#{$i}`.
+      display: none;
+    }
+  }
+}
+
+@for $i from 1 through 200 {
+  body.yl-stream-category-filter--#{$i} #stream div.flux[data-category="#{$i}"] {
+    // Show only feeds matching the selected category filter id.
+    display: flex !important;
+  }
+}
+
 
 [data-yl-invidious-instance],
 [data-yl-video-source-default],

@@ -18,6 +18,9 @@ function init() {
     if (isLayoutVideo()) {
       updateVideoAuthor();
       updateVideoDateFormat();
+      if (isWatchLaterPage()) {
+        setWatchLaterCategoryFilter();
+      }
     }
     onNewFeedItems();
     restoreVideoQueue();

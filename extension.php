@@ -62,6 +62,10 @@ class YoulagExtension extends Minz_Extension {
         $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 14);
         $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 15);
         $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 16);
+        if (Minz_Request::paramString('get', '') === 's') {
+          // Watch later page: add category filter
+          $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 17);
+        }
 
         // Add Youlag theme and script to all extension pages
         Minz_View::appendStyle($this->getFileUrl('theme.min.css'));
@@ -144,7 +148,7 @@ class YoulagExtension extends Minz_Extension {
 
     /**
      * Pass the category whitelist data to be read in the DOM via nav_entries hook.
-     * The `script.js` handles the behavior based on this the value in `data-yl-category-whitelist`.
+     * The frontend js handles the behavior based on this the value in `data-yl-category-whitelist`.
      * @return string
      */
     public function setCategoryWhitelist() {
@@ -158,7 +162,7 @@ class YoulagExtension extends Minz_Extension {
 
     /**
      * Pass the related videos source to be read in the DOM via nav_entries hook.
-     * The `script.js` handles the behavior based on this the value in `data-yl-related-videos-source`.
+     * The frontend js handles the behavior based on this the value in `data-yl-related-videos-source`.
      * @return string
      */
     public function setRelatedVideosSource() {
@@ -168,7 +172,7 @@ class YoulagExtension extends Minz_Extension {
 
     /**
      * Pass the mobile grid layout setting to be read in the DOM via nav_entries hook.
-     * The `script.js` handles the behavior based on this the value in `data-yl-feed-view-mobile-grid-enabled`.
+     * The frontend js handles the behavior based on this the value in `data-yl-feed-view-mobile-grid-enabled`.
      */
     public function setFeedViewLayoutMobileGrid() {
         $enabled = $this->yl_feed_view_mobile_grid_enabled ? 'true' : 'false';
@@ -177,7 +181,7 @@ class YoulagExtension extends Minz_Extension {
 
     /**
      * Pass the mini player swipe setting to be read in the DOM via nav_entries hook.
-     * The `script.js` handles the behavior based on this the value in `data-yl-mini-player-swipe-enabled`.
+     * The frontend js handles the behavior based on this the value in `data-yl-mini-player-swipe-enabled`.
      */
     public function setMiniplayerSwipeEnabled() {
         $enabled = $this->yl_miniplayer_swipe_enabled ? 'true' : 'false';
@@ -194,7 +198,7 @@ class YoulagExtension extends Minz_Extension {
 
     /**
      * Pass the video platform labels state to be read in the DOM via nav_entries hook.
-     * The `script.js` handles the behavior based on this the value in `data-yl-video-labels`.
+     * The frontend js handles the behavior based on this the value in `data-yl-video-labels`.
      * @param bool $enabled
      */
     public function setVideoLabels() {
@@ -204,7 +208,7 @@ class YoulagExtension extends Minz_Extension {
 
     /**
      * Pass the "New" badge setting for unwatched videos state to be read in the DOM via nav_entries hook.
-     * The `script.js` handles the behavior based on this the value in `data-yl-video-unread-badge`.
+     * The frontend js handles the behavior based on this the value in `data-yl-video-unread-badge`.
      * @param bool $enabled
      */
     public function setVideoUnreadBadge() {
@@ -214,7 +218,7 @@ class YoulagExtension extends Minz_Extension {
 
     /**
      * Pass the sort modified setting to be read in the DOM via nav_entries hook.
-     * The `script.js` handles the behavior based on this the value in `data-yl-video-sort-modified`.
+     * The frontend js handles the behavior based on this the value in `data-yl-video-sort-modified`.
      */
     public function setVideoSortModifiedEnabled() {
         $enabled = $this->yl_video_sort_modified_enabled ? 'true' : 'false';
@@ -294,7 +298,7 @@ class YoulagExtension extends Minz_Extension {
         /** 
          * Create elements containing the Invidious instance URL and user-selected default video source option. 
          * These elements are rendered in the article content to expose the Youlag extension settings,
-         * to allow `script.js` to access them.
+         * to allow frontend js to access them.
          */
         $content = $entry->content();
         $spanInvidiousUrl = '<span data-yl-invidious-instance="' . htmlspecialchars($invidious, ENT_QUOTES) . '"></span>';
@@ -384,7 +388,6 @@ class YoulagExtension extends Minz_Extension {
         $categories = $this->getUserCategories();
         foreach ($categories as $cat) {
             $name = $cat?->name();
-            $priority = $cat?->priority();
             if (is_object($cat) && method_exists($cat, 'id') && $cat->id() == $catId) {
                 return $name ?? '';
             }
@@ -492,16 +495,23 @@ class YoulagExtension extends Minz_Extension {
 
         $categoryTitle = htmlspecialchars($categoryTitle);
 
-        $html = '<div id="yl_category_toolbar">'
+          $html = '<div id="yl_category_toolbar">'
               .     '<div id="yl_category_title_container">'
-              .         '<div id="yl_category_title" data-yl-category-title="' . $categoryTitle . '">' . $categoryTitle . '</div>'
-              .         '<button id="yl_nav_menu_container_toggle">Configure view</button>'
+              .         '<div id="yl_category_title" data-yl-category-title="' . $categoryTitle . '">' . $categoryTitle . '</div>';
+          if (Minz_Request::paramString('get', '') === 's') {
+            // 'Watch later' page: add category filter button
+            $html .= '<button id="yl_stream_category_filter_toggle">'
+                . 'Filter category '
+                . '<span id="yl_stream_category_filter_count"></span>'
+                . '</button>';
+          }
+          $html .=     '<button id="yl_nav_menu_container_toggle">Configure view</button>'
               .     '</div>'
               .     '<div id="yl_nav_menu_container">'
               .         '<nav id="yl_nav_menu_container_content"></nav>'
               .     '</div>'
               . '</div>';
-        return $html;
+          return $html;
     }
 
     public function createFreshRssLogo() {
@@ -511,6 +521,34 @@ class YoulagExtension extends Minz_Extension {
               .     '</a>'
               . '</div>';
         return $html;
+    }
+
+    public function createWatchLaterCategoryFilter() {
+      // Lists all available categories for filtering the 'Watch later' page. Click events are handled by the frontend js.
+      $categories = $this->getUserCategories();
+      $html = <<<HTML
+      <div id="yl_stream_category_filter" class="yl-stream-category-filter">
+        <div id="yl_stream_category_filter_options" class="yl-stream-category-filter-options">
+      HTML;
+          foreach ($categories as $cat) {
+              $catIdRaw = is_object($cat) && method_exists($cat, 'id') ? $cat->id() : '';
+              $catNameRaw = is_object($cat) && method_exists($cat, 'name') ? $cat->name() : '';
+              $catId = htmlspecialchars($catIdRaw, ENT_QUOTES);
+              $catName = htmlspecialchars($catNameRaw, ENT_QUOTES);
+              $html .= <<<HTML
+          <div class="yl-stream-category-filter-options__item" data-category="$catId">
+              <label class="yl-stream-category-filter__label" for="yl-stream-category-filter-$catId">
+                  <input type="checkbox" class="yl-stream-category-filter__checkbox" id="yl-stream-category-filter-$catId" />
+                  <span class="yl-stream-category-filter__name">$catName</span>
+              </label>
+          </div>
+          HTML;
+          }
+          $html .= <<<HTML
+        </div>
+      </div>
+      HTML;
+      return $html;
     }
 
     /**

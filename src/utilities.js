@@ -382,6 +382,11 @@ function isFeedPage() {
   return feedPageNames.has(page.name);
 }
 
+function isWatchLaterPage() {
+  const page = getCurrentPage();
+  return page.name === 'watch_later';
+}
+
 function getFeedRoot() {
   return document.querySelector(app.frss.el.feedRoot);
 }

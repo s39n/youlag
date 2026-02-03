@@ -15,6 +15,7 @@ app.state = {
   youlag: {
     init: false,                // Whether the Youlag script has initialized.
     toolbarInit: false,         // The toolbar (nav_menu) displaying the feed category title and view options.
+    toolbarActiveMenu: null,    // Currently active menu in the toolbar: 'viewOptions' || 'categoryFilter' || null
     clickListenerInit: false,
     restoreVideoInit: false,    // If miniplayer was restored after page refresh.
   },
@@ -60,7 +61,6 @@ app.modal = {
     tagsClose: 'yl-tags-modal-close',
     moreContainer: 'youlagVideoMoreContentContainer',
     relatedContainer: 'youlagRelatedVideosContainer',
-    toolbar: 'yl_category_toolbar', // TODO: Toolbar is not with the modal, create new object for generic 'page'
   },
   class: {
     typeArticle: 'youlag-modal-feed-item--text',
@@ -87,6 +87,12 @@ app.modal = {
     localStorageKey: 'youlagVideoQueue'
   }
 };
+
+app.ui = {
+  id: {
+    toolbar: 'yl_category_toolbar',
+  }
+}
 
 app.frss = {
   // FreshRSS selectors
