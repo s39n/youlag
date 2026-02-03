@@ -846,7 +846,8 @@ function setPageTitle(title) {
   }
 }
 
-function toggleFavorite(url, container, feedItemEl) {
+function toggleFavorite(url, container, feedItemEl = null) {
+  const hasFeedStream = isFeedPage();
   const favoriteButton = container.querySelector(`#${app.modal.id.favorite}`);
   const favoriteButtonIcon = favoriteButton ? favoriteButton.querySelector(`.${app.modal.class.favoriteIcon}`) : null;
   if (!favoriteButton) return;
@@ -860,9 +861,7 @@ function toggleFavorite(url, container, feedItemEl) {
     .then(response => {
 
       // Remove loading spinner
-      favoriteButtonIcon.style.backgroundImage = '';
-      favoriteButtonIcon.style.filter = '';
-      favoriteButtonIcon.style.backgroundSize = '';
+      favoriteButtonIcon.removeAttribute('style');
 
       if (response.ok) {
         // Toggle favorite classes and icons.
@@ -870,8 +869,18 @@ function toggleFavorite(url, container, feedItemEl) {
         favoriteButton.classList.remove(`${app.modal.class.favorite}--${currentlyTrue}`);
         favoriteButton.classList.add(`${app.modal.class.favorite}--${!currentlyTrue}`);
 
-        // Only update DOM if feedItemEl exists (i.e., not restoring from localStorage).
-        if (feedItemEl) {
+        if (!feedItemEl && hasFeedStream || feedItemEl && !(feedItemEl instanceof Element) && hasFeedStream) {
+          // Try to find the feed entry in the feed stream if not provided.
+          // This may be needed when restoring modal event listeners after `visibilitychange`: `setupVisibilityEventListeners()`.
+          const entryId = getModalVideo()?.getAttribute('data-entry');
+          if (entryId) {
+            feedItemEl = document.querySelector(`${app.frss.el.feedRoot} div.flux${app.frss.el.entry}[data-entry="${entryId}"]`);
+          }
+        }
+
+        // Keep the feed entry in the feed stream in sync, if the current page is a feed page and the entry exists in the feed stream.
+        // The miniplayer video modal could be restored to a different page/state, meaning that the feed entry might not exist in the view. 
+        if (feedItemEl && feedItemEl instanceof Element && hasFeedStream) {
           const bookmarkIcon = feedItemEl.querySelector('.item-element.bookmark img.icon');
           if (currentlyTrue) {
             feedItemEl.classList.remove(app.modal.class.favorite);
@@ -892,12 +901,6 @@ function toggleFavorite(url, container, feedItemEl) {
       }
     })
     .catch(error => {
-      // Remove loading spinner and filter on error
-      favoriteButton.style.backgroundImage = '';
-      favoriteButton.style.filter = '';
-      favoriteButton.style.backgroundRepeat = '';
-      favoriteButton.style.backgroundPosition = '';
-      favoriteButton.style.backgroundSize = '';
       console.error('Error:', error);
     });
 }

@@ -60,8 +60,6 @@ function renderModalVideo(videoObject) {
 
   setModalType(videoObject);
   
-  handleModalDescription(videoObject);
-
   setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
 
   renderRelatedVideos(videoObject);
@@ -79,6 +77,8 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
   let container = document.createElement('div');
   container.classList.add(app.modal.class.container);
   modal.id = app.modal.id.root;
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('data-entry', videoObject.entryId);
   modal.appendChild(container);
 
   // Video: playback source state handling
@@ -240,19 +240,23 @@ function handleModalDescription(videoObject) {
   if (
     shouldCollapseDescription && videoDescContainer && videoDescContainer.offsetHeight > 90 || 
     shouldCollapseDescription && isModeMiniplayer()) {
-    // Setup the click listener to expand description only once.
-    const descExpand = function () {
-      videoDescContainer.classList.remove(app.modal.class.descContainerCollapsed);
-      videoDescContainer.removeEventListener('click', descExpand);
-    };
-    videoDescContainer.addEventListener('click', descExpand);
-    if (modal._videoModalListeners) {
-      modal._videoModalListeners.push({
-        el: videoDescContainer,
-        type: 'click',
-        handler: descExpand
-      });
-    }
+    setupModalDescriptionEventListeners();
+  }
+}
+
+function setupModalDescriptionEventListeners() {
+  // Setup the click listener to expand description only once.
+  const modal = getModalVideo();
+  if (!modal) return;
+  const videoDescContainer = modal.querySelector(`.${app.modal.class.descContainer}`);
+
+  const descExpand = function () {
+    videoDescContainer.classList.remove(app.modal.class.descContainerCollapsed);
+    videoDescContainer.removeEventListener('click', descExpand);
+  };
+  videoDescContainer.addEventListener('click', descExpand);
+  if (modal._videoModalListeners) {
+    modal._videoModalListeners.push({ el: videoDescContainer, type: 'click', handler: descExpand });
   }
 }
 
@@ -282,25 +286,53 @@ function setupModalVideoEventListeners(videoObject) {
   const modal = getModalVideo();
   if (!modal || !videoObject) return;
 
+  // Setup modal event listener tracking
+  if (!modal._videoModalListeners) {
+    modal._videoModalListeners = [];
+  }
+
   // Close modal button
-  modal.querySelector(`#${app.modal.id.close}`)?.addEventListener('click', closeModalVideo);
-  
+  const closeBtn = modal.querySelector(`#${app.modal.id.close}`);
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModalVideo);
+    modal._videoModalListeners.push({ el: closeBtn, type: 'click', handler: closeModalVideo });
+  }
+
   // Toggle modal to fullscreen/miniplayer button
-  modal.querySelector(`#${app.modal.id.minimize}`)?.addEventListener('click', toggleModalMode);
-  
+  const minimizeBtn = modal.querySelector(`#${app.modal.id.minimize}`);
+  if (minimizeBtn) {
+    minimizeBtn.addEventListener('click', toggleModalMode);
+    modal._videoModalListeners.push({ el: minimizeBtn, type: 'click', handler: toggleModalMode });
+  }
+
   // Toggle favorite video button
-  modal.querySelector(`#${app.modal.id.favorite}`)?.addEventListener('click', (e) => {
-    e.preventDefault();
-    toggleFavorite(videoObject.favorite_toggle_url, modal, videoObject.feedItemEl);
-  });
-  modal.querySelector(`#${app.modal.id.tags}`)?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const tagsButtonIcon = modal.querySelector(`#${app.modal.id.tags} img.icon`);
-    if (tagsButtonIcon) tagsButtonIcon.classList.add('loading');
-    const tags = await getItemTags(videoObject.entryId);
-    if (tagsButtonIcon) tagsButtonIcon.classList.remove('loading');
-    renderTagsModal(videoObject.entryId, tags);
-  });
+  const favoriteBtn = modal.querySelector(`#${app.modal.id.favorite}`);
+  if (favoriteBtn) {
+    const favoriteHandler = (e) => {
+      e.preventDefault();
+      toggleFavorite(videoObject.favorite_toggle_url, modal, videoObject.feedItemEl);
+    };
+    favoriteBtn.addEventListener('click', favoriteHandler);
+    modal._videoModalListeners.push({ el: favoriteBtn, type: 'click', handler: favoriteHandler });
+  }
+
+  // Assign labels/tags (playlists) button
+  const tagsBtn = modal.querySelector(`#${app.modal.id.tags}`);
+  if (tagsBtn) {
+    const tagsHandler = async (e) => {
+      e.preventDefault();
+      const tagsButtonIcon = modal.querySelector(`#${app.modal.id.tags} img.icon`);
+      if (tagsButtonIcon) tagsButtonIcon.classList.add('loading');
+      const tags = await getItemTags(videoObject.entryId);
+      if (tagsButtonIcon) tagsButtonIcon.classList.remove('loading');
+      renderTagsModal(videoObject.entryId, tags);
+    };
+    tagsBtn.addEventListener('click', tagsHandler);
+    modal._videoModalListeners.push({ el: tagsBtn, type: 'click', handler: tagsHandler });
+  }
+
+  // Expand description box on click
+  handleModalDescription(videoObject);
 
   // Escape key closes fullscreen modal
   const escHandler = (event) => {
@@ -309,19 +341,17 @@ function setupModalVideoEventListeners(videoObject) {
     }
   };
   document.addEventListener('keydown', escHandler);
-  modal._videoModalListeners.push({
-    el: document,
-    type: 'keydown',
-    handler: escHandler
-  });
+  modal._videoModalListeners.push({ el: document, type: 'keydown', handler: escHandler });
 
   // Select video source change handling: YouTube, Invidious
   const videoSourceSelect = modal.querySelector(`#${app.modal.id.source}`);
   const iframe = modal.querySelector(`.${app.modal.class.iframe}`);
   if (videoSourceSelect && iframe) {
-    videoSourceSelect.addEventListener('change', function () {
+    const sourceHandler = function () {
       iframe.src = getEmbedUrl(videoSourceSelect.value);
-    });
+    };
+    videoSourceSelect.addEventListener('change', sourceHandler);
+    modal._videoModalListeners.push({ el: videoSourceSelect, type: 'change', handler: sourceHandler });
   }
 
   function getEmbedUrl(source) {
@@ -335,6 +365,30 @@ function setupModalVideoEventListeners(videoObject) {
     return '';
   }
 
+}
+
+function restoreModalEventListeners() {
+  // Re-attach modal event listeners, to prevent mobile browser unloading event listeners.
+  const modal = getModalVideo();
+  if (!modal) return;
+
+  let videoQueue; // Localstorage: youlagVideoQueue
+  try {
+    videoQueue = JSON.parse(localStorage.getItem(app.modal.queue.localStorageKey));
+  }
+  catch (e) {
+    videoQueue = null;
+  }
+  if (!videoQueue || !Array.isArray(videoQueue.queue)) return;
+
+  const entryId = modal.getAttribute('data-entry') || videoQueue.queue[videoQueue.queue_active_index]?.entryId;
+  if (!entryId) return;
+
+  const videoObject = videoQueue.queue.find(v => v.entryId === entryId);
+  if (!videoObject) return;
+
+  setupModalVideoEventListeners(videoObject);
+  setupModalDescriptionEventListeners();
 }
 
 function forceFrssEntryToCollapse(target) {

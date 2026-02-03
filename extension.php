@@ -118,7 +118,8 @@ class YoulagExtension extends Minz_Extension
     // Default video mode to ['all'] when Youlag is activated for the first time.
     if (!is_array(value: $val) || (is_array(value: $val) && count(value: $val) === 0 && !array_key_exists(key: 'yl_category_whitelist', array: $attributes))) {
       $this->yl_category_whitelist = ['all'];
-    } else {
+    }
+    else {
       $this->yl_category_whitelist = $val;
     }
 
@@ -344,10 +345,12 @@ class YoulagExtension extends Minz_Extension
       $newContent = preg_replace(pattern: '#https?://(www\.)?youtube\.com/#', replacement: $invidious . '/', subject: $content);
       if ($newContent !== $content) {
         $entry->_content($newContent);
-      } else {
+      }
+      else {
         $entry->_content($content);
       }
-    } else {
+    }
+    else {
       $entry->_content($content);
     }
 
@@ -477,7 +480,8 @@ class YoulagExtension extends Minz_Extension
       $catId = $m[1];
       if (property_exists(object_or_class: 'FreshRSS_Context', property: 'category') && isset(FreshRSS_Context::$category)) {
         $categoryTitle = FreshRSS_Context::$category?->name() ?? $this->getCategoryNameById(catId: $catId);
-      } else {
+      }
+      else {
         $categoryTitle = $this->getCategoryNameById(catId: $catId);
       }
     }
@@ -492,7 +496,8 @@ class YoulagExtension extends Minz_Extension
       // Prefer FreshRSS_Context::$feed?->name() for accuary, fallback to getFeedNameById() if unavailable.
       if (property_exists(object_or_class: 'FreshRSS_Context', property: 'feed') && isset(FreshRSS_Context::$feed)) {
         $categoryTitle = FreshRSS_Context::$feed?->name() ?? $this->getFeedNameById(feedId: $filterId);
-      } else {
+      }
+      else {
         $categoryTitle = $this->getFeedNameById(feedId: $filterId);
       }
     }
@@ -500,17 +505,22 @@ class YoulagExtension extends Minz_Extension
     elseif ($getParam === 'T') {
       // 'My labels' page. Use 'Playlists' if video labels are enabled.
       $categoryTitle = $this->isVideoLabelsEnabled() ? 'Playlists' : 'My labels';
-    } elseif ($getParam === 'i') {
+    }
+    elseif ($getParam === 'i') {
       $categoryTitle = 'Important';
-    } elseif ($getParam === 's') {
+    }
+    elseif ($getParam === 's') {
       // 'Favorites' page. Use 'Watch later' if video labels are enabled.
       $categoryTitle = $this->isVideoLabelsEnabled() ? 'Watch later' : 'Favorites';
-    } elseif ($getParam === '') {
+    }
+    elseif ($getParam === '') {
       $categoryTitle = 'Subscriptions';
-    } else {
+    }
+    else {
       if (property_exists(object_or_class: 'FreshRSS_Context', property: 'category') && isset(FreshRSS_Context::$category)) {
         $categoryTitle = FreshRSS_Context::$category?->name() ?: '';
-      } else {
+      }
+      else {
         $categoryTitle = '';
       }
     }
@@ -640,7 +650,8 @@ class YoulagExtension extends Minz_Extension
 
       $this->loadConfigValues();
       $_SESSION['ext_categories'] = $this->getUserCategories();
-    } else {
+    }
+    else {
       $_SESSION['ext_categories'] = $this->getUserCategories();
     }
   }

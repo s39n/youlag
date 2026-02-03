@@ -47,7 +47,7 @@ function setModeState(mode) {
 }
 
 function getModalState() {
-  return app.state.modal.active; // true = modal is active
+  return app.state.modal.active; // true = modal is active. Miniplayer does not count as active.
 }
 
 function setModalState(boolean) {
