@@ -282,9 +282,7 @@ function setupModalVideoEventListeners(videoObject) {
   if (!modal || !videoObject) return;
 
   // Setup modal event listener tracking
-  if (!modal._videoModalListeners) {
-    modal._videoModalListeners = [];
-  }
+  if (!modal._videoModalListeners) modal._videoModalListeners = [];
 
   // Close modal button
   const closeBtn = modal.querySelector(`#${app.modal.id.close}`);
@@ -372,7 +370,7 @@ function setupModalVideoEventListeners(videoObject) {
 function restoreModalEventListeners() {
   // Restore modal event listeners after browser suspension.
   // Primarily to address how mobile devices handles tab suspension.
-  
+
   const modal = getModalVideo();
   if (!modal) return;
 
