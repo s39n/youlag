@@ -151,6 +151,23 @@ declare(strict_types=1);
           </div>
         </div>
       </label>
+      <label for="yl_watch_later_category_filter_enabled" class="flex">
+          <input type="checkbox" id="yl_watch_later_category_filter_enabled" name="yl_watch_later_category_filter_enabled" value="1" class="mb-auto"
+            <?php echo ($this->yl_watch_later_category_filter_enabled) ? ' checked="checked"' : ''; ?>>
+        <div class="inline-block">
+          Enable category filter in the
+          <span class="yl-form-category__original-label">Favorites</span>
+          <span class="yl-form-category__video-label">Watch later</span>
+          page
+          <div class="yl-badge yl-badge--warning pointer-events-none">Experimental</div>
+          <div class="yl-form-group-help">
+            Ability to filter the feed entries by their category in the
+            <span class="yl-form-category__original-label">Favorites</span>
+            <span class="yl-form-category__video-label">Watch later</span>
+            page.
+          </div>
+        </div>
+      </label>
 
       <h4 class="mb-0">
         Labels

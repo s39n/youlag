@@ -18,6 +18,11 @@ class YoulagExtension extends Minz_Extension
    */
   protected $yl_feed_view_mobile_grid_enabled = false;
   /**
+   * Experimental feature: Enable filtering entries by category on Watch later page.
+   * @var bool
+   */
+  protected $yl_watch_later_category_filter_enabled = false;
+  /**
    * Enable swipe-to-mini-player by default
    * @var bool
    */
@@ -64,9 +69,10 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 14);
     $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 15);
     $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 16);
+    $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 17);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
-      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 17);
+      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 18);
     }
 
     // Add Youlag theme and script to all extension pages
@@ -129,6 +135,9 @@ class YoulagExtension extends Minz_Extension
     $feedViewMobileGridEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_view_mobile_grid_enabled');
     $this->yl_feed_view_mobile_grid_enabled = ($feedViewMobileGridEnabled === null) ? false : $feedViewMobileGridEnabled;
 
+    $watchLaterCategoryFilterEnabled = FreshRSS_Context::userConf()->attributeBool('yl_watch_later_category_filter_enabled');
+    $this->yl_watch_later_category_filter_enabled = ($watchLaterCategoryFilterEnabled === null) ? false : $watchLaterCategoryFilterEnabled;
+
     $labelsEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_labels_enabled');
     $this->yl_video_labels_enabled = ($labelsEnabled === null) ? true : $labelsEnabled;
 
@@ -184,6 +193,16 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_feed_view_mobile_grid_enabled ? 'true' : 'false';
     return '<div id="yl_feed_view_mobile_grid_enabled" data-yl-feed-view-mobile-grid-enabled="' . $enabled . '"></div>';
+  }
+
+  /**
+   * Pass the Watch later category filter setting to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-watch-later-category-filter-enabled`.
+   */
+  public function setWatchLaterCategoryFilterEnabled(): string
+  {
+    $enabled = $this->yl_watch_later_category_filter_enabled ? 'true' : 'false';
+    return '<div id="yl_watch_later_category_filter_enabled" data-yl-watch-later-category-filter-enabled="' . $enabled . '"></div>';
   }
 
   /**
@@ -627,6 +646,10 @@ class YoulagExtension extends Minz_Extension
       // Feed view mobile grid layout
       $feedViewMobileGridEnabled = Minz_Request::paramBoolean('yl_feed_view_mobile_grid_enabled', false);
       FreshRSS_Context::userConf()->_attribute('yl_feed_view_mobile_grid_enabled', $feedViewMobileGridEnabled);
+
+      // Watch later category filter
+      $watchLaterCategoryFilterEnabled = Minz_Request::paramBoolean('yl_watch_later_category_filter_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_watch_later_category_filter_enabled', $watchLaterCategoryFilterEnabled);
 
       // Mini player swipe
       $miniplayerSwipeEnabled = Minz_Request::paramBoolean('yl_miniplayer_swipe_enabled', true);

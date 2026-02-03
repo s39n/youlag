@@ -5236,6 +5236,28 @@ body.youlag-tags-modal-open {
   pointer-events: none;
 }
 
+.pointer-events-none {
+  pointer-events: none !important;
+}
+
+.yl-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border: 1px solid hsla(0, 0%, 100%, .08);
+  border-radius: 4px;
+  background-color: hsla(0, 0%, 100%, .04);
+  font-size: var(--yl-text-2xs);
+  color: var(--yl-color-text-default);
+  cursor: default;
+
+  &--warning {
+    @include yl-gradient-bg(#fbb324, #b97d0d, false);
+    color: #fbb324;
+  }
+}
+
 @media (min-width: 841px) {
   #aside_feed:not(.visible) {
     /* Sidenav is not visible, hide and show sidenav toggle button based on scroll down or up. */
@@ -5262,15 +5284,8 @@ body.youlag-tags-modal-open {
   }
 }
 
-#yl_stream_category_filter,
 #yl_stream_category_filter_toggle {
-  // Filter "Watch later" page by category.
-
   // NOTE 2026-02-03: Experiemental feature, hidden by default.
-  visibility: var(--yl-experimental-feature--category-filter, hidden);
-}
-
-#yl_stream_category_filter_toggle {
   display: none !important;
 }
 
