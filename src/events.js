@@ -34,6 +34,7 @@ function init() {
   setAddFeedCategoryValue();
   setMissingLogo();
   showUpdateAvailableNotice();
+  handleSliderHashChange(); // TODO: Remove once `FreshRSS/FreshRSS/issues/8488` is addressed.
   handleExperimentalFeature(); // TODO: Temporary handler for experimental features, remove later.
   removeYoulagLoadingState();
 

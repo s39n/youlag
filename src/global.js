@@ -18,6 +18,7 @@ app.state = {
     toolbarActiveMenu: null,    // Currently active menu in the toolbar: 'viewOptions' || 'categoryFilter' || null
     clickListenerInit: false,
     restoreVideoInit: false,    // If miniplayer was restored after page refresh.
+    sliderListeners: null,      // Store slider event listener.
   },
   modal: {
     active: false,              // Whether an article/video is currently active. Miniplayer does not count as active.

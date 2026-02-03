@@ -253,6 +253,22 @@ function setupSidenavStateListener() {
   observer.observe(sidenav, { attributes: true, attributeFilter: ['class'] });
 }
 
+function handleSliderHashChange() {
+  // Temporary fix for page scroll being locked after closing a slider via browser's back navigation.
+  // FreshRSS/FreshRSS/issues/8488
+
+  if (!app.state.youlag.sliderListeners) app.state.youlag.sliderListeners = [];
+
+  const sliderHandler = function () {
+    if (window.location.hash !== '#slider') {
+      document.documentElement.classList.remove('slider-active');
+      clearPathHash();
+    }
+  };
+  window.addEventListener('hashchange', sliderHandler);
+  app.state.youlag.sliderListeners.push({ el: window, type: 'hashchange', handler: sliderHandler });
+}
+
 function isHashUrl() {
   const currentPathnameSearch = window.location.pathname + window.location.search;
   const isHash = app.state.popstate.pathPrev === currentPathnameSearch && window.location.hash;
