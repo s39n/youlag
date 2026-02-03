@@ -831,9 +831,9 @@ function setWatchLaterCategoryFilter() {
     e.preventDefault();
     clearAllCategoryFilters();
     updateCategoryVisibility();
-    updateCategoryEntryCounts(); // Run once, let `onNewFeedItems()` handle subsequent updates.
   });
-
+  
+  updateCategoryEntryCounts(); // Run once, let `onNewFeedItems()` handle subsequent updates.
   updateCategoryVisibility();
 }
 
