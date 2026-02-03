@@ -55,6 +55,7 @@ function handleExperimentalFeature() {
   // Temporary handler for experimental features.
 
   // Show the category filter toggle if the feature is disabled.
+  if (!isWatchLaterPage()) return;
   const categoryFilterToggle = document.getElementById('yl_stream_category_filter_toggle');
   const watchLaterCategoryFilterEnabledElement = document.getElementById('yl_watch_later_category_filter_enabled');
   const watchLaterCategoryFilterEnabledSetting = watchLaterCategoryFilterEnabledElement.getAttribute('data-yl-watch-later-category-filter-enabled');
