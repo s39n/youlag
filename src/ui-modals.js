@@ -98,6 +98,7 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
     }
     return '';
   }
+
   const videoSourceDefaultNormalized = videoSourceDefault === 'invidious_1' ? 'invidious_1' : 'youtube';
   const defaultEmbedUrl = getEmbedUrl(videoSourceDefaultNormalized);
 
@@ -107,12 +108,6 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
     ? modal.classList.add('youlag-modal-feed-item--has-thumbnail')
     : modal.classList.add('youlag-modal-feed-item--no-thumbnail');
   
-  // Mode miniplayer: Settings state handling, if swipe-to-miniplayer is enabled.
-  const miniplayerSwipeEnabledElement = document.querySelector('#yl_miniplayer_swipe_enabled');
-  const miniplayerSwipeEnabled = miniplayerSwipeEnabledElement?.getAttribute('data-yl-mini-player-swipe-enabled') === 'true';
-  if (miniplayerSwipeEnabled) {
-    setupSwipeToMiniplayer(modal);
-  }
 
   // Video: Description box state handling
   const isMobile = window.innerWidth <= app.breakpoints.desktop_md_max; 
@@ -305,6 +300,13 @@ function setupModalVideoEventListeners(videoObject) {
     modal._videoModalListeners.push({ el: minimizeBtn, type: 'click', handler: toggleModalMode });
   }
 
+  // Mode miniplayer: Settings state handling, if swipe-to-miniplayer is enabled.
+  const miniplayerSwipeEnabledElement = document.querySelector('#yl_miniplayer_swipe_enabled');
+  const miniplayerSwipeEnabled = miniplayerSwipeEnabledElement?.getAttribute('data-yl-mini-player-swipe-enabled') === 'true';
+  if (miniplayerSwipeEnabled) {
+    setupSwipeToMiniplayer(modal);
+  }
+
   // Toggle favorite video button
   const favoriteBtn = modal.querySelector(`#${app.modal.id.favorite}`);
   if (favoriteBtn) {
@@ -368,9 +370,19 @@ function setupModalVideoEventListeners(videoObject) {
 }
 
 function restoreModalEventListeners() {
-  // Re-attach modal event listeners, to prevent mobile browser unloading event listeners.
+  // Restore modal event listeners after browser suspension.
+  // Primarily to address how mobile devices handles tab suspension.
+  
   const modal = getModalVideo();
   if (!modal) return;
+
+  // Remove all existing modal event listeners before reattaching new ones, to prevent stacking.
+  if (modal._videoModalListeners && Array.isArray(modal._videoModalListeners)) {
+    for (const {el, type, handler} of modal._videoModalListeners) {
+      el.removeEventListener(type, handler);
+    }
+    modal._videoModalListeners.length = 0;
+  }
 
   let videoQueue; // Localstorage: youlagVideoQueue
   try {
@@ -388,7 +400,6 @@ function restoreModalEventListeners() {
   if (!videoObject) return;
 
   setupModalVideoEventListeners(videoObject);
-  setupModalDescriptionEventListeners();
 }
 
 function forceFrssEntryToCollapse(target) {

@@ -81,38 +81,46 @@ function setModeFullscreen(state, prevState) {
 
 function setupSwipeToMiniplayer(modal) {
   // Allow video modal overscroll to enter miniplayer mode on touch devices.
-  if (modal._swipeToMiniplayer) return;
 
   let touchStartY = null;
   let overscrollActive = false;
 
-  modal.addEventListener('touchstart', function (e) {
+  function touchStartHandler(e) {
     if (modal.scrollTop === 0 && e.touches.length === 1) {
       touchStartY = e.touches[0].clientY;
       overscrollActive = false;
     }
-  }, { passive: false });
-  modal.addEventListener('touchmove', function (e) {
+  }
+  function touchMoveHandler(e) {
     if (touchStartY !== null && modal.scrollTop === 0 && e.touches.length === 1) {
       const moveY = e.touches[0].clientY;
       if (moveY - touchStartY > 0) {
-        // Touch is moving downward while scroll is at the very top; start tracking overscroll gesture
+        // Touch is moving downwards while scroll is at the very top: start tracking overscroll. gesture
         overscrollActive = true;
-        e.preventDefault(); // Prevent native scroll bounce to allow custom overscroll detection
+        e.preventDefault(); // Prevent native scroll bounce to allow custom overscroll detection.
       }
     }
-  }, { passive: false });
-  modal.addEventListener('touchend', function (e) {
+  }
+  function touchEndHandler(e) {
     if (touchStartY !== null && overscrollActive && e.changedTouches.length === 1) {
       const endY = e.changedTouches[0].clientY;
       if (endY - touchStartY > 40 && modal.scrollTop === 0) {
-        // Overscroll (pull-down) detected at top, toggle miniplayer mode.
         toggleModalMode(true);
       }
     }
     touchStartY = null;
     overscrollActive = false;
-  }, { passive: false });
+  }
 
-  modal._swipeToMiniplayer = true;
+  modal.addEventListener('touchstart', touchStartHandler, { passive: false });
+  modal.addEventListener('touchmove', touchMoveHandler, { passive: false });
+  modal.addEventListener('touchend', touchEndHandler, { passive: false });
+
+  if (modal._videoModalListeners) {
+    modal._videoModalListeners.push(
+      { el: modal, type: 'touchstart', handler: touchStartHandler },
+      { el: modal, type: 'touchmove', handler: touchMoveHandler },
+      { el: modal, type: 'touchend', handler: touchEndHandler }
+    );
+  }
 }
