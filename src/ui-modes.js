@@ -99,10 +99,11 @@ function setupSwipeToMiniplayer(modal) {
   let touchStartY = null;
   let overscrollActive = false;
   const swipeThreshold = 50; // Minimum distance in pixels to consider a swipe.
+  const scrollTolerance = 30; // Allow a larger tolerance for scrollTop to improve swipe reliability
 
-  // Track the initial Y position when a single touch starts at the top of the modal.
+  // Track the initial Y position when a single touch starts near the top of the modal.
   function touchStartHandler(e) {
-    if (modal.scrollTop === 0 && e.touches.length === 1) {
+    if (modal.scrollTop <= scrollTolerance && e.touches.length === 1) {
       touchStartY = e.touches[0].clientY;
       overscrollActive = false;
     }
@@ -110,7 +111,7 @@ function setupSwipeToMiniplayer(modal) {
 
   // Detect downward movement from the top of the modal to track overscroll gesture.
   function touchMoveHandler(e) {
-    if (touchStartY !== null && modal.scrollTop === 0 && e.touches.length === 1) {
+    if (touchStartY !== null && modal.scrollTop <= scrollTolerance && e.touches.length === 1) {
       const moveY = e.touches[0].clientY;
       if (moveY - touchStartY > 0) {
         overscrollActive = true;
@@ -123,7 +124,7 @@ function setupSwipeToMiniplayer(modal) {
   function touchEndHandler(e) {
     if (touchStartY !== null && overscrollActive && e.changedTouches.length === 1) {
       const endY = e.changedTouches[0].clientY;
-      if (endY - touchStartY > swipeThreshold && modal.scrollTop === 0) {
+      if (endY - touchStartY > swipeThreshold && modal.scrollTop <= scrollTolerance) {
         toggleModalMode(true);
       }
     }

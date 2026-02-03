@@ -50,6 +50,10 @@ function renderModalVideo(videoObject) {
     modal._videoModalListeners = [];
   }
   else {
+    // Remove all previous listeners before updating content
+    for (const {el, type, handler} of modal._videoModalListeners) {
+      el.removeEventListener(type, handler);
+    }
     modal._videoModalListeners.length = 0;
   }
 
