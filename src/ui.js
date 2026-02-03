@@ -831,9 +831,38 @@ function setWatchLaterCategoryFilter() {
     e.preventDefault();
     clearAllCategoryFilters();
     updateCategoryVisibility();
+    updateCategoryEntryCounts(); // Run once, let `onNewFeedItems()` handle subsequent updates.
   });
 
   updateCategoryVisibility();
+}
+
+function updateCategoryEntryCounts() {
+  // Update the counts shown in the category filter menu.
+  const categoryFilterMenu = document.getElementById('yl_stream_category_filter');
+  if (!categoryFilterMenu) return;
+
+  countObj = app.state.youlag.categoryFilterEntryCount || {};
+
+  const categoryFilter = categoryFilterMenu.querySelectorAll('.yl-stream-category-filter-options__item');
+
+  categoryFilter.forEach(filter => {
+    let categoryId = filter?.getAttribute('data-category');
+    const countSpan = filter?.querySelector('.yl-stream-category-filter__count');
+
+    if (categoryId && countSpan) {
+      const key = `c_${categoryId}`;
+      // TODO: Currently using naive implementation of count during experimental phase.
+      // Optimize later when the proper implementation `setWatchLaterCategoryFilter()` is defined. 
+      count = document.querySelectorAll(`${app.frss.el.entry}[data-category="${categoryId}"]`).length;
+
+      countObj[key] = { count };
+      app.state.youlag.categoryFilterEntryCount = countObj;
+
+      countSpan.textContent = `(${count})`;
+      filter.setAttribute('data-yl-entry-count', count);
+    }
+  });
 }
 
 /*****************************************
@@ -978,6 +1007,10 @@ function onNewFeedItems() {
     if (isLayoutVideo()) {
       updateVideoAuthor();
       updateVideoDateFormat();
+
+      if (isWatchLaterPage() && app.state.youlag.experimentalFeatureEnabled === true) {
+        updateCategoryEntryCounts();
+      }
     }
   }, false);
 }

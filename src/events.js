@@ -54,14 +54,18 @@ function setupVisibilityEventListeners() {
 function handleExperimentalFeature() {
   // Temporary handler for experimental features.
 
-  // Hide the category filter toggle if the feature is disabled.
-  const rootStyles = getComputedStyle(document.documentElement);
-  const categoryFilterFeature = rootStyles.getPropertyValue('--yl-experimental-feature--category-filter').trim();
-  const categoryFilterToggle = document.getElementById('yl_stream_category_filter_toggle');
-  if (categoryFilterFeature === 'visible' && categoryFilterToggle) {
-    console.info('%cYoulag: Experimental feature "Category filter" for Watch later (Favorite) page is enabled.', 'color: #2196f3; font-weight: bold');
-    categoryFilterToggle.style.setProperty('display', 'flex', 'important');
-  }
+  // Leave some leeway for User CSS load.
+  setTimeout(() => {    
+    // Hide the category filter toggle if the feature is disabled.
+    const rootStyles = getComputedStyle(document.documentElement);
+    const categoryFilterFeature = rootStyles.getPropertyValue('--yl-experimental-feature--category-filter').trim();
+    const categoryFilterToggle = document.getElementById('yl_stream_category_filter_toggle');
+    if (categoryFilterFeature === 'visible' && categoryFilterToggle) {
+      app.state.youlag.experimentalFeatureEnabled = true;
+      console.info('%cYoulag: Experimental feature "Category filter" for Watch later (Favorite) page is enabled.', 'color: #2196f3; font-weight: bold');
+      categoryFilterToggle.style.setProperty('display', 'flex', 'important');
+    }
+  }, 200);
 }
 
 function removeYoulagLoadingState() {

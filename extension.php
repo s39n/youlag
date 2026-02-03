@@ -582,6 +582,7 @@ class YoulagExtension extends Minz_Extension
             <label class="yl-stream-category-filter__label" for="yl-stream-category-filter-$catId">
               <input type="checkbox" class="yl-stream-category-filter__checkbox" id="yl-stream-category-filter-$catId" />
               <span class="yl-stream-category-filter__name">$catName</span>
+              <span class="yl-stream-category-filter__count">(0)</span>
             </label>
           </div>
           HTML;

@@ -19,6 +19,8 @@ app.state = {
     clickListenerInit: false,
     restoreVideoInit: false,    // If miniplayer was restored after page refresh.
     sliderListeners: null,      // Store slider event listener.
+    categoryFilterEntryCount: {},   // Type: `categoryFilterEntryCountType`. Number of entries for each category filter on the Watch later filter menu.
+    experimentalFeatureEnabled: false, // Whether experimental features are enabled.
   },
   modal: {
     active: false,              // Whether an article/video is currently active. Miniplayer does not count as active.
@@ -117,6 +119,11 @@ app.frss = {
 app.types = {
   // Workaround for lack of typescript in vanilla js.
 
+  // Category filter entry count type for `categoryFilterEntryCount`. c_{n}, where n is category ID.
+  categoryFilterEntryCountType: {
+    c_1: { count: 0 },
+  },
+
   videoObject: {
     entryId: null,
     author: '',
@@ -142,6 +149,7 @@ app.types = {
     queue: null,
     queue_active_index: -1
   },
+
   pageObject: {
     name: '',
     class: '',

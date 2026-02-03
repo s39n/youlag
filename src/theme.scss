@@ -5310,6 +5310,10 @@ body.youlag-tags-modal-open {
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    &__count {
+      opacity: 0.7;
+    }
   }
 }
 
