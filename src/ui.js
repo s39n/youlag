@@ -771,6 +771,19 @@ function setWatchLaterCategoryFilter() {
   const categoryFilterMenu = document.getElementById('yl_stream_category_filter');
   if (!categoryFilterMenu) return;
 
+  const checkboxes = categoryFilterMenu.querySelectorAll('.yl-stream-category-filter__checkbox');
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', updateCategoryVisibility);
+  });
+
+  function clearAllCategoryFilters() {
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+  }
+
+  clearAllCategoryFilters();
+
   function updateCategoryVisibility() {
     // Handle the visiblity of feed entries based on filtered categories.
     const checked = Array.from(categoryFilterMenu.querySelectorAll('.yl-stream-category-filter__checkbox:checked'))
@@ -797,17 +810,10 @@ function setWatchLaterCategoryFilter() {
     }
   }
 
-  const checkboxes = categoryFilterMenu.querySelectorAll('.yl-stream-category-filter__checkbox');
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', updateCategoryVisibility);
-  });
-
   const clearAllButton = categoryFilterMenu.querySelector('#yl_stream_category_filter_clear');
   clearAllButton.addEventListener('click', (e) => {
     e.preventDefault();
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = false;
-    });
+    clearAllCategoryFilters();
     updateCategoryVisibility();
   });
 
