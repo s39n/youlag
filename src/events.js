@@ -43,11 +43,12 @@ function init() {
 }
 
 function setupVisibilityEventListeners() {
-  // Handle visibility change events, e.g. when the user switches tabs and returns from a hidden state.
+  // Restore event listeners when the page becomes visible, primarily for the video modal.
+  // E.g. when the user switches tabs and returns, reset and reattach event listeners to improve reliability.
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       restoreModalEventListeners();
-        setupModalVideoControlEventListeners();
+      setupModalVideoControlEventListeners();
     }
   });
 }

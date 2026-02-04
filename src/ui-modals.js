@@ -296,16 +296,23 @@ function setupModalVideoControlEventListeners() {
 
   if (!modal._videoModalListeners) modal._videoModalListeners = [];
   
-  // Reset existing chapter item listeners
-  modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
-    if (listener.type === 'click' && listener.el.classList) {
-      listener.el.removeEventListener(listener.type, listener.handler);
-      return false;
-    }
-    return true;
-  });
+  // Remove existing listeners for chapter items
+  if (modal._videoModalListeners && Array.isArray(modal._videoModalListeners)) {
+    modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
+      if (
+        listener.type === 'click' &&
+        listener.el &&
+        listener.el.classList &&
+        listener.el.classList.contains('yl-video-chapter-list-item')
+      ) {
+        listener.el.removeEventListener(listener.type, listener.handler);
+        return false;
+      }
+      return true;
+    });
+  }
 
-  // Attach new chapter click listeners
+  // Attach new chapter click listeners.
   const chapterItems = modal.querySelectorAll('.yl-video-chapter-list-item');
   chapterItems.forEach(item => {
     const seconds = parseInt(item.getAttribute('data-seconds'), 10);
@@ -317,8 +324,22 @@ function setupModalVideoControlEventListeners() {
     modal._videoModalListeners.push({ el: item, type: 'click', handler: chapterClickHandler });
   });
 
-  // Toggle chapter list visibility by clicking the current chapter.
+  // Remove existing click listener for chapterCurrent
   const chapterCurrent = modal.querySelector(`#${app.modal.id.chapterCurrent}`);
+  if (modal._videoModalListeners && Array.isArray(modal._videoModalListeners)) {
+    modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
+      if (
+        listener.type === 'click' &&
+        listener.el === chapterCurrent
+      ) {
+        listener.el.removeEventListener(listener.type, listener.handler);
+        return false;
+      }
+      return true;
+    });
+  }
+  
+  // Toggle chapter list visibility by clicking the current chapter.
   const chapterCurrentClickHandler = function(e) {
     e.preventDefault();
     if (!chapterCurrent) return;
@@ -599,8 +620,8 @@ function setupModalVideoEventListeners(videoObject) {
 }
 
 function restoreModalEventListeners() {
-  // Restore modal event listeners after browser suspension.
-  // Primarily to address how mobile devices handles tab suspension.
+  // Restore modal event listeners after tab suspension.
+  // Primarily to address how moobile devices handles tab suspension,
 
   const modal = getModalVideo();
   if (!modal) return;
@@ -608,7 +629,9 @@ function restoreModalEventListeners() {
   // Remove all existing modal event listeners before reattaching new ones, to prevent stacking.
   if (modal._videoModalListeners && Array.isArray(modal._videoModalListeners)) {
     for (const {el, type, handler} of modal._videoModalListeners) {
-      el.removeEventListener(type, handler);
+      if (el && type && handler) {
+        el.removeEventListener(type, handler);
+      }
     }
     modal._videoModalListeners.length = 0;
   }
@@ -627,6 +650,10 @@ function restoreModalEventListeners() {
 
   const videoObject = videoQueue.queue.find(v => v.entryId === entryId);
   if (!videoObject) return;
+
+  const hasVideoIframe = !!modal.querySelector(`#${app.modal.id.videoIframe}`);
+  const hasChapterCurrent = !!modal.querySelector(`#${app.modal.id.chapterCurrent}`);
+  if (!hasVideoIframe || !hasChapterCurrent) return;
 
   setupModalVideoEventListeners(videoObject);
   setupModalVideoControlEventListeners();
