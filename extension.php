@@ -28,6 +28,11 @@ class YoulagExtension extends Minz_Extension
    */
   protected $yl_miniplayer_swipe_enabled = true;
   /**
+   * Enable chapter progress indicator in video player
+   * @var bool
+   */
+  protected $yl_chapter_progress_enabled = true;
+  /**
    * Use video platform labels (Favorite → Watch later, Tags → Playlists)
    * @var bool
    */
@@ -66,13 +71,14 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setVideoLabels'), 11);
     $this->registerHook('nav_entries', array($this, 'setVideoUnreadBadge'), 12);
     $this->registerHook('nav_entries', array($this, 'setMiniplayerSwipeEnabled'), 13);
-    $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 14);
-    $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 15);
-    $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 16);
-    $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 17);
+    $this->registerHook('nav_entries', array($this, 'setChapterProgressEnabled'), 14);
+    $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 15);
+    $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 16);
+    $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 17);
+    $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 18);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
-      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 18);
+      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 19);
     }
 
     // Add Youlag theme and script to all extension pages
@@ -131,6 +137,9 @@ class YoulagExtension extends Minz_Extension
 
     $miniplayerSwipeEnabled = FreshRSS_Context::userConf()->attributeBool('yl_miniplayer_swipe_enabled');
     $this->yl_miniplayer_swipe_enabled = ($miniplayerSwipeEnabled === null) ? true : $miniplayerSwipeEnabled;
+
+    $chapterProgressEnabled = FreshRSS_Context::userConf()->attributeBool('yl_chapter_progress_enabled');
+    $this->yl_chapter_progress_enabled = ($chapterProgressEnabled === null) ? true : $chapterProgressEnabled;
 
     $feedViewMobileGridEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_view_mobile_grid_enabled');
     $this->yl_feed_view_mobile_grid_enabled = ($feedViewMobileGridEnabled === null) ? false : $feedViewMobileGridEnabled;
@@ -213,6 +222,12 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_miniplayer_swipe_enabled ? 'true' : 'false';
     return '<div id="yl_miniplayer_swipe_enabled" data-yl-mini-player-swipe-enabled="' . $enabled . '"></div>';
+  }
+
+  public function setChapterProgressEnabled(): string
+  {
+    $enabled = $this->yl_chapter_progress_enabled ? 'true' : 'false';
+    return '<div id="yl_chapter_progress_enabled" data-yl-chapter-progress-enabled="' . $enabled . '"></div>';
   }
 
   /**
@@ -654,6 +669,10 @@ class YoulagExtension extends Minz_Extension
       // Mini player swipe
       $miniplayerSwipeEnabled = Minz_Request::paramBoolean('yl_miniplayer_swipe_enabled', true);
       FreshRSS_Context::userConf()->_attribute('yl_miniplayer_swipe_enabled', $miniplayerSwipeEnabled);
+
+      // Chapter progress indicator
+      $chapterProgressEnabled = Minz_Request::paramBoolean('yl_chapter_progress_enabled', true);
+      FreshRSS_Context::userConf()->_attribute('yl_chapter_progress_enabled', $chapterProgressEnabled);
 
       // Video platform labels
       $labelsEnabled = Minz_Request::paramBoolean('yl_video_labels_enabled', true);

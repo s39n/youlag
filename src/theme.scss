@@ -4455,6 +4455,8 @@ body {
     padding-bottom: var(--yl-space-xs);
     font-size: var(--yl-text-xs);
     border-bottom: 1px solid hsl(0deg 0% 100% / 9%);
+    max-height: 700px;
+    overflow-y: auto;
     
     &-item {
       padding: var(--yl-space-2xs);

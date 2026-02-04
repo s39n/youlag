@@ -94,6 +94,24 @@ declare(strict_types=1);
       </label>
 
       <h4 class="mb-0">
+        Video chapters
+
+        <div class="yl-form-group-help">
+          Chapters are automatically displayed for videos that provide timestamps in the video description.
+        </div>
+      </h4>
+      <label for="yl_chapter_progress_enabled" class="flex">
+          <input type="checkbox" id="yl_chapter_progress_enabled" name="yl_chapter_progress_enabled" value="1" class="mb-auto"
+            <?php echo ($this->yl_chapter_progress_enabled) ? ' checked="checked"' : ''; ?>>
+        <div class="inline-block">
+          Show chapter progress indicator
+          <div class="yl-form-group-help">
+            A faint indicator of chapter playback progress displayed below the video.
+          </div>
+        </div>
+      </label>
+
+      <h4 class="mb-0">
         Watch more suggestions
 
         <div class="yl-form-group-help">

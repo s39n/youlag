@@ -421,7 +421,9 @@ function updateActiveChapterDisplay() {
       });
 
       // Update chapter progress bar
-      if (chapterCurrentProgress) {
+      const isVideoChapterProgressEnabledElement = document.querySelector('#yl_chapter_progress_enabled');
+      const isVideoChapterProgressEnabled = isVideoChapterProgressEnabledElement?.getAttribute('data-yl-chapter-progress-enabled') === 'true';
+      if (chapterCurrentProgress && isVideoChapterProgressEnabled) {
         let chapterStart = chapters[activeIndex].seconds;
         let chapterEnd = (activeIndex + 1 < chapters.length) ? chapters[activeIndex + 1].seconds : null;
         let percent = 0;
