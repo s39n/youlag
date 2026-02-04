@@ -44,7 +44,7 @@ function renderModalVideo(videoObject) {
     document.body.appendChild(modal);
     if (isModeFullscreen()) setModalState(true);
   }
-  
+
   if (!modal._videoModalListeners) {
     // Track modal event listeners for later removal
     modal._videoModalListeners = [];
@@ -115,7 +115,6 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
     ? modal.classList.add('youlag-modal-feed-item--has-thumbnail')
     : modal.classList.add('youlag-modal-feed-item--no-thumbnail');
   
-
   // Video: Description box state handling
   const isMobile = window.innerWidth <= app.breakpoints.desktop_md_max; 
   const isArticle = !videoObject.youtubeId;
@@ -146,9 +145,9 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
         </div>
       </div>
 
-      <div id="${app.modal.id.chaptersContainer}" class="${videoObject.video_chapters !== null && videoObject.video_chapters.length > 0 ? '' : 'display-none'}">
-        <div class="yl-video-chapter-active">
-          Current chapter: (todo)
+      <div id="${app.modal.id.chapterContainer}" class="${Array.isArray(videoObject?.video_chapters) && videoObject?.video_chapters.length > 0 ? '' : 'display-none'}">
+        <div id="${app.modal.id.chapterActive}" class="yl-video-chapter-active">
+          Current chapter:
           <span class="yl-video-chapter-active__time"></span>
           <span class="yl-video-chapter-active__label"></span>
         </div>
@@ -256,17 +255,13 @@ function handleModalDescription(videoObject) {
 function renderModalVideoChapters(videoChapters) {
   // Appends video chapters to the video modal.
   const modal = getModalVideo();
-  const chapterContainer = modal.querySelector(`#${app.modal.id.chaptersContainer}`);
+  const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
 
   if (!modal || !videoChapters || videoChapters.length === 0 || videoChapters === null) {
     if (chapterContainer) chapterContainer.remove();
     return;
   }
   if (!chapterContainer) return;
-
-  // TODO: Set active chapter on video based on current time.
-  const chapterActiveTime = chapterContainer.querySelector('.yl-video-chapter-active__time');
-  const chapterActiveLabel = chapterContainer.querySelector('.yl-video-chapter-active__label');
 
   // List all chapters
   const chapterList = document.createElement('div');
@@ -313,6 +308,80 @@ function setupModalVideoControlsEventListeners() {
     item.addEventListener('click', chapterClickHandler);
     modal._videoModalListeners.push({ el: item, type: 'click', handler: chapterClickHandler });
   });
+
+  // Update current chapter display based on playback time
+  let lastChapterIndex = -1;
+  let chapterUpdateInterval = modal._chapterUpdateInterval;
+  if (chapterUpdateInterval) clearInterval(chapterUpdateInterval);
+
+  const chapterActive = modal.querySelector(`#${app.modal.id.chapterActive}`);
+  const chapterActiveTime = chapterActive?.querySelector('.yl-video-chapter-active__time');
+  const chapterActiveLabel = chapterActive?.querySelector('.yl-video-chapter-active__label');
+  const chapters = Array.from(chapterItems).map(item => ({
+    seconds: parseInt(item.getAttribute('data-seconds'), 10),
+    label: item.querySelector('.yl-video-chapter-list-item__label')?.textContent || '',
+    timestamp: item.querySelector('.yl-video-chapter-list-item__time')?.textContent || ''
+  }));
+
+  function updateActiveChapterDisplay(currentTime) {
+    if (!chapterActiveTime || !chapterActiveLabel || chapters.length === 0) {
+      return;
+    }
+    let activeIndex = chapters.length - 1;
+    for (let i = 0; i < chapters.length; i++) {
+      if (currentTime < chapters[i].seconds) {
+        activeIndex = i - 1;
+        break;
+      }
+    }
+    if (activeIndex < 0) activeIndex = 0;
+    if (activeIndex !== lastChapterIndex) {
+      chapterActiveTime.textContent = chapters[activeIndex].timestamp;
+      chapterActiveLabel.textContent = chapters[activeIndex].label;
+      lastChapterIndex = activeIndex;
+    }
+  }
+
+  // Only set up polling and listener if chapterActive elements exist
+  if (chapterActive && chapterActiveTime && chapterActiveLabel) {
+    const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
+    if (iframe) {
+      // Wait for iframe to load before sending 'listening' event, otherwise it won't be able to retrieve playback time.
+      const onIframeLoad = function() {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
+        }
+        catch (e) {
+          console.warn("Youlag: Video chapter failed to send 'listening' event after load", e);
+        }
+        modal._chapterUpdateInterval = setInterval(() => {
+          iframe.contentWindow.postMessage(
+            '{"event":"command","func":"getCurrentTime","args":[]}', '*'
+          );
+        }, 1000);
+      };
+      iframe.addEventListener('load', onIframeLoad);
+
+      if (iframe.readyState === 'complete' || iframe.readyState === 'interactive') {
+        onIframeLoad();
+      }
+      modal._videoModalListeners.push({ el: iframe, type: 'load', handler: onIframeLoad });
+    }
+
+    // Listen for YouTube iframe responses
+    function onYouTubeMessage(event) {
+      if (!event.data) return;
+      let data;
+      try {
+        data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+      } catch (e) { return; }
+      if (data.event === 'infoDelivery' && typeof data.info?.currentTime === 'number') {
+        updateActiveChapterDisplay(data.info.currentTime);
+      }
+    }
+    window.addEventListener('message', onYouTubeMessage);
+    modal._videoModalListeners.push({ el: window, type: 'message', handler: onYouTubeMessage });
+  }
 }
 
 function videoControlSeekTo(seconds, allowSeekAhead = true) {
@@ -341,7 +410,6 @@ function getModalVideoPlaybackTime() {
     '{"event":"listening","id":"ylVideoIframe","channel":"widget"}', '*'
   );
 
-  console.log('Playback time:', playbackTime);
   return playbackTime;
 }
 
@@ -684,7 +752,7 @@ function clearVideoQueue() {
 
 function restoreVideoQueue() {
   // Restore video queue from localStorage on page load, only if miniplayer mode was active.
-  if (app.state.youlag.restoreVideoInit) return;
+  if (app.state.youlag.restoreVideoInit || !isFeedPage()) return;
 
   const stored = localStorage.getItem(app.modal.queue.localStorageKey);
   let queueObj = null;
@@ -697,9 +765,6 @@ function restoreVideoQueue() {
     }
   }
   if (!queueObj || queueObj.isMiniplayer !== true) return;
-
-  // Only restore video queue on pages that don't get blocked by Content-Security-Policy. 
-  if (!isFeedPage()) return;
 
   if (queueObj && Array.isArray(queueObj.queue) && typeof queueObj.queue_active_index === 'number' && queueObj.queue.length > 0) {
     setModeMiniplayer(true); // Restored video queue always opens in miniplayer mode.

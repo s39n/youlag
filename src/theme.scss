@@ -4358,12 +4358,20 @@ body {
 
 
 #ylVideoChaptersContainer {
-  padding-top: var(--yl-p-xs);
-  padding-left: calc(var(--yl-p-md) - var(--yl-space-2xs));
-  padding-right: calc(var(--yl-p-md) - var(--yl-space-2xs));
+
+  .yl-video-chapter-active {
+    display: flex;
+    align-items: center;
+    padding-top: var(--yl-p-2xs);
+    padding-bottom: var(--yl-p-2xs);
+    padding-left: var(--yl-p-md);
+    padding-right: var(--yl-p-md);
+  }
 
   .yl-video-chapter-list-item {
     padding: var(--yl-space-2xs);
+    margin-left: calc(var(--yl-p-md) - var(--yl-space-2xs));
+    margin-right: calc(var(--yl-p-md) - var(--yl-space-2xs));
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -4371,6 +4379,11 @@ body {
     &:hover {
       background-color: hsla(0, 0%, 100%, .08);
       cursor: pointer;
+    }
+
+    &.is-active {
+      background: var(--yl-color-gradient-active);
+      color: var(--yl-color-text-default);
     }
 
     &__time {

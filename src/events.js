@@ -12,6 +12,7 @@ function init() {
   clearPathHash();
   setBodyClass();
   if (isFeedPage()) {
+
     setupClickListener();
     setupVisibilityEventListeners();
     setupTagsDropdownOverride();
@@ -46,6 +47,7 @@ function setupVisibilityEventListeners() {
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       restoreModalEventListeners();
+        setupModalVideoControlsEventListeners();
     }
   });
 }
