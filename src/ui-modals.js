@@ -292,7 +292,8 @@ function renderModalVideoChapters(videoChapters) {
   const modal = getModalVideo();
   const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
 
-  if (!modal || !videoChapters || videoChapters.length === 0 || videoChapters === null) {
+  if (!modal || !videoChapters || videoChapters.length === 0) {
+    console.log('Youlag: No video chapters to render or modal not found.');
     if (chapterContainer) chapterContainer.remove();
     return;
   }

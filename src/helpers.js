@@ -98,8 +98,9 @@ function extractFeedItemData(feedItem) {
   const invidiousRedirectPrefixUrl = 'https://redirect.invidious.io/watch?v=';
 
   // Get video chapters
-  let videoChapters = [{...app.types.videoChapter}];
-  videoChapters = extractVideoDescriptionChapters(videoDescription);
+  let videoChapters = extractVideoDescriptionChapters(videoDescription);
+  console.debug('[extractFeedItemData] videoChapters after extraction:', videoChapters);
+
 
   // If video description is found, use it, otherwise fallback to generic description element.
   let video_description = isVideoFeedItem && videoDescriptionExists ?
@@ -142,19 +143,25 @@ function extractFeedItemData(feedItem) {
 function extractVideoDescriptionChapters(videoDescription) {
   // Parse video description timestamps based on YouTube's rules.
   
-  if (!videoDescription || typeof videoDescription !== 'string') return null;
+  if (!videoDescription || typeof videoDescription !== 'string') return [];
 
-  // Match for HH:MM:SS or MM:SS.
+  // Sanitize and split on <br>, <br/>, <br />, and newlines.
+  let lines = videoDescription
+    .replace(/<br\s*\/?>(?:\s*)?/gi, '\n')
+    .split(/\n/)
+    .map(line => line.replace(/<[^>]+>/g, '').trim());
+
   let order = 1;
   let lastSeconds = -1;
   let foundTimestamps = [];
 
-  let lines = videoDescription.split(/<br\s*\/?>(?:\s*)?|\n/);
-  for (let line of lines) {
-    let match = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(.+)/);
+  for (let cleanLine of lines) {
+    if (!cleanLine) continue;
+    // Match HH:MM:SS or MM:SS at the start of the line.
+    let match = cleanLine.match(/^(\d{1,2}:\d{2}:\d{2}|\d{1,2}:\d{2})\s*(.+)?$/);
     if (match) {
       let ts = match[1];
-      let label = match[2].trim();
+      let label = (match[2] || '').trim();
       // Remove leading ' - ' if present, as many creators tend to format it this way.
       if (label.startsWith('- ')) {
         label = label.slice(2).trim();
@@ -165,7 +172,7 @@ function extractVideoDescriptionChapters(videoDescription) {
           label = formatTextToSentenceCase(label);
         }
       }
-      // Pad timestamp to always have two digits for minutes and seconds, for more unified look across different creators.
+      // Pad timestamp to always have two digits for hours, minutes, and seconds.
       let parts = ts.split(':').map(Number);
       let paddedTs = '';
       if (parts.length === 3) {
@@ -186,7 +193,7 @@ function extractVideoDescriptionChapters(videoDescription) {
       else if (parts.length === 2) {
         seconds = parts[0] * 60 + parts[1];
       }
-      // Ensures chronological order of chapters
+      // Ensures chronological order of chapters.
       if (seconds <= lastSeconds) continue;
       lastSeconds = seconds;
       foundTimestamps.push({
@@ -198,10 +205,10 @@ function extractVideoDescriptionChapters(videoDescription) {
     }
   }
 
+  // Accept 0:00, 00:00, 0:00:00, or 00:00:00 as valid first chapters.
   if (
-    // YouTube rules: first timestamp must be 0:00 or 00:00, at least 3 timestamps
     foundTimestamps.length >= 3 &&
-    (foundTimestamps[0].timestamp === '0:00' || foundTimestamps[0].timestamp === '00:00')
+    (/^0{1,2}:0{2}(?::0{2})?$/.test(foundTimestamps[0].timestamp))
   ) {
     return foundTimestamps;
   }
