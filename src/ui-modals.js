@@ -138,7 +138,7 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
           <img src="${videoObject.thumbnail}" class="youlag-video-thumbnail" loading="lazy" />
         </div>
         <div class="youlag-iframe-container">
-          <iframe class="youlag-iframe"
+          <iframe id="yl-iframe" class="youlag-iframe"
                   src="${defaultEmbedUrl}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
       </div>

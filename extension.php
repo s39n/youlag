@@ -295,7 +295,7 @@ class YoulagExtension extends Minz_Extension
        * NOTE: The attribute naming scheme follows what is used in FreshRSS for lazyload:
        * https://github.com/FreshRSS/FreshRSS/blob/131f4f8e636fd2d0b7652c3afeb54eaaa48b283a/lib/lib_rss.php#L279
        */
-      $iframeSrc = htmlspecialchars(string: "https://www.youtube.com/embed/{$videoId}", flags: ENT_QUOTES);
+      $iframeSrc = htmlspecialchars(string: "https://www.youtube.com/embed/{$videoId}?enablejsapi=1", flags: ENT_QUOTES);
       $iframe = <<<HTML
         <iframe
           class="aspect-ratio-16-9 rounded-md"

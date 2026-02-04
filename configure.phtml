@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 <div class="yl-extension-settings-container" id="yl-settings-root">
 
-  <form class="yl-extension-settings-form" action="<?php echo _url('extension', 'configure', 'e', urlencode($this->getName())); ?>" method="post" data-auto-leave-validation="1">
+  <form class="yl-extension-settings-form" action="<?php echo _url('extension', 'configure', 'e', urlencode(string: $this->getName())); ?>" method="post" data-auto-leave-validation="1">
     <input type="hidden" name="_csrf" value="<?php echo FreshRSS_Auth::csrfToken(); ?>" />
 
     <h2>Youlag settings</h2>
@@ -28,7 +28,7 @@ declare(strict_types=1);
           <?php $whitelist = $this->getCategoryWhitelist(); ?>
           <!-- Place checkbox outside of label to utilize the checked="checked" state for visual statemanagement via css. -->
           <input id="yl_category_all" type="checkbox" name="yl_category_whitelist[]" value="all"
-            <?php echo ((empty($whitelist) || in_array('all', $whitelist)) && !in_array('none', $whitelist)) ? ' checked="checked"' : ''; ?>>
+            <?php echo ((empty($whitelist) || in_array(needle: 'all', haystack: $whitelist)) && !in_array(needle: 'none', haystack: $whitelist)) ? ' checked="checked"' : ''; ?>>
           <label for="yl_category_all" class="inline-block">
             All pages and categories
           </label>
@@ -36,29 +36,29 @@ declare(strict_types=1);
             <hr>
             <label>
               <input type="checkbox" name="yl_category_whitelist[]" value="home"
-                 <?php echo in_array('home', $whitelist) ? ' checked="checked"' : ''; ?>>
+                 <?php echo in_array(needle: 'home', haystack: $whitelist) ? ' checked="checked"' : ''; ?>>
               Subscriptions
             </label>
             <label>
               <input type="checkbox" name="yl_category_whitelist[]" value="important"
-                 <?php echo in_array('important', $whitelist) ? ' checked="checked"' : ''; ?>>
+                 <?php echo in_array(needle: 'important', haystack: $whitelist) ? ' checked="checked"' : ''; ?>>
               Important
             </label>
             <label>
               <input type="checkbox" name="yl_category_whitelist[]" value="watch_later"
-                 <?php echo in_array('watch_later', $whitelist) ? ' checked="checked"' : ''; ?>>
+                 <?php echo in_array(needle: 'watch_later', haystack: $whitelist) ? ' checked="checked"' : ''; ?>>
                 <span class="yl-form-category__original-label">Favorites</span>
                 <span class="yl-form-category__video-label">Watch later</span>
             </label>
             <label>
               <input type="checkbox" name="yl_category_whitelist[]" value="playlists"
-                 <?php echo in_array('playlists', $whitelist) ? ' checked="checked"' : ''; ?>>
+                 <?php echo in_array(needle: 'playlists', haystack: $whitelist) ? ' checked="checked"' : ''; ?>>
                 <span class="yl-form-category__original-label">My Labels</span>
                 <span class="yl-form-category__video-label">Playlists</span>
             </label>
             <label>
               <input type="checkbox" name="yl_category_whitelist[]" value="search_results"
-                 <?php echo in_array('search_results', $whitelist) ? ' checked="checked"' : ''; ?>>
+                 <?php echo in_array(needle: 'search_results', haystack: $whitelist) ? ' checked="checked"' : ''; ?>>
               Search results
             </label>
             <label>
@@ -68,9 +68,9 @@ declare(strict_types=1);
                 <input
                   type="checkbox"
                   name="yl_category_whitelist[]"
-                  value="<?php echo 'c_' . htmlspecialchars($catId); ?>"
-                    <?php echo in_array('c_' . $catId, $whitelist) ? ' checked="checked"' : ''; ?>>
-                <?php echo htmlspecialchars((string)$cat->name()); ?>
+                  value="<?php echo 'c_' . htmlspecialchars(string: $catId); ?>"
+                    <?php echo in_array(needle: 'c_' . $catId, haystack: $whitelist) ? ' checked="checked"' : ''; ?>>
+                <?php echo htmlspecialchars(string: (string)$cat->name()); ?>
               </label>
             <?php endforeach; ?>
           </div>

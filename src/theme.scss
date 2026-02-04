@@ -4470,7 +4470,7 @@ body {
   }  
 }
 
-a.yl-video-action-button {
+.yl-video-action-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4483,6 +4483,7 @@ a.yl-video-action-button {
   text-decoration: none;
   transition: background-color 0.2s;
   min-width: 45px;
+  cursor: pointer;
 
   &:hover {
     text-decoration: none;
