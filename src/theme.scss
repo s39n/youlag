@@ -4345,7 +4345,6 @@ body {
     overflow: hidden;
     animation: pulse 4s infinite ease-in-out;
   
-  
     .youlag-video-thumbnail {
       position: absolute;
       top: 50%;
@@ -4377,6 +4376,7 @@ body {
 #ylVideoChaptersContainer {
 
   #ylVideoChapterCurrentProgress {
+    /* Chapter progress indicator. */
     position: absolute;
     top: 0;
     left: 0;
@@ -4385,8 +4385,10 @@ body {
     z-index: -1;
     transition: 0.5s linear;
     background-color: rgba(255, 255, 255, 0.05);
+    will-change: width;
 
     &:after {
+      /* Chapter progress indicator effect at the far end. */
       content: "";
       position: absolute;
       top: 0;
@@ -4416,6 +4418,7 @@ body {
     padding-right: var(--yl-p-md);
     font-size: var(--yl-text-xs);
     border-bottom: 1px solid hsl(0deg 0% 100% / 9%);
+    transition: 0.1s;
     opacity: 0.9;
 
     &__order {
@@ -4465,6 +4468,7 @@ body {
       border-radius: 8px;
       display: flex;
       align-items: center;
+      transition: 0.1s;
   
       &:hover {
         background-color: hsla(0, 0%, 100%, .08);
