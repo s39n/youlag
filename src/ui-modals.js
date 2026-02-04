@@ -63,7 +63,10 @@ function renderModalVideo(videoObject) {
   setPageTitle(videoObject.title);
 
   setModalType(videoObject);
-  
+
+  renderModalVideoChapters(videoObject.video_chapters);
+  setupModalVideoControlsEventListeners();
+
   setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
 
   renderRelatedVideos(videoObject);
@@ -138,11 +141,18 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
           <img src="${videoObject.thumbnail}" class="youlag-video-thumbnail" loading="lazy" />
         </div>
         <div class="youlag-iframe-container">
-          <iframe id="yl-iframe" class="youlag-iframe"
+          <iframe id="${app.modal.id.videoIframe}" class="youlag-iframe"
                   src="${defaultEmbedUrl}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
       </div>
 
+      <div id="${app.modal.id.chaptersContainer}" class="${videoObject.video_chapters !== null && videoObject.video_chapters.length > 0 ? '' : 'display-none'}">
+        <div class="yl-video-chapter-active">
+          Current chapter: (todo)
+          <span class="yl-video-chapter-active__time"></span>
+          <span class="yl-video-chapter-active__label"></span>
+        </div>
+      </div>
 
       <div class="youlag-video-details">
 
@@ -241,6 +251,98 @@ function handleModalDescription(videoObject) {
     shouldCollapseDescription && isModeMiniplayer()) {
     setupModalDescriptionEventListeners();
   }
+}
+
+function renderModalVideoChapters(videoChapters) {
+  // Appends video chapters to the video modal.
+  const modal = getModalVideo();
+  const chapterContainer = modal.querySelector(`#${app.modal.id.chaptersContainer}`);
+
+  if (!modal || !videoChapters || videoChapters.length === 0 || videoChapters === null) {
+    if (chapterContainer) chapterContainer.remove();
+    return;
+  }
+  if (!chapterContainer) return;
+
+  // TODO: Set active chapter on video based on current time.
+  const chapterActiveTime = chapterContainer.querySelector('.yl-video-chapter-active__time');
+  const chapterActiveLabel = chapterContainer.querySelector('.yl-video-chapter-active__label');
+
+  // List all chapters
+  const chapterList = document.createElement('div');
+  chapterList.classList.add('yl-video-chapter-list');
+
+  videoChapters.forEach(chapter => {
+    const item = document.createElement('div');
+    item.classList.add('yl-video-chapter-list-item');
+    item.setAttribute('data-seconds', chapter.seconds);
+    item.innerHTML = `
+      <span class="yl-video-chapter-list-item__time">${chapter.timestamp}</span>
+      <span class="yl-video-chapter-list-item__label">${chapter.label}</span>
+    `;
+    chapterList.appendChild(item);
+  });
+
+  chapterContainer.appendChild(chapterList);
+}
+
+function setupModalVideoControlsEventListeners() {
+  // Attach click event listeners to chapter items for seeking
+  const modal = getModalVideo();
+  if (!modal) return;
+
+  if (!modal._videoModalListeners) modal._videoModalListeners = [];
+  
+  // Reset existing chapter item listeners
+  modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
+    if (listener.type === 'click' && listener.el.classList) {
+      listener.el.removeEventListener(listener.type, listener.handler);
+      return false;
+    }
+    return true;
+  });
+
+  // Attach new chapter click listeners
+  const chapterItems = modal.querySelectorAll('.yl-video-chapter-list-item');
+  chapterItems.forEach(item => {
+    const seconds = parseInt(item.getAttribute('data-seconds'), 10);
+    const chapterClickHandler = function(e) {
+      e.preventDefault();
+      videoControlSeekTo(seconds, true);
+    };
+    item.addEventListener('click', chapterClickHandler);
+    modal._videoModalListeners.push({ el: item, type: 'click', handler: chapterClickHandler });
+  });
+}
+
+function videoControlSeekTo(seconds, allowSeekAhead = true) {
+  const modal = getModalVideo();
+  if (!modal) return;
+
+  const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
+  if (!iframe) return;
+
+  iframe.contentWindow.postMessage(
+    '{"event":"command","func":"seekTo","args":["' + seconds + '", ' + allowSeekAhead + ']}', '*'
+  );
+}
+
+function getModalVideoPlaybackTime() {
+  // Returns the current playback time (in seconds) of the video in the modal.
+
+  const modal = getModalVideo();
+  if (!modal) return;
+
+  const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
+  if (!iframe) return;
+
+  // Request current time from YouTube iframe
+  const playbackTime = iframe.contentWindow.postMessage(
+    '{"event":"listening","id":"ylVideoIframe","channel":"widget"}', '*'
+  );
+
+  console.log('Playback time:', playbackTime);
+  return playbackTime;
 }
 
 function setupModalDescriptionEventListeners() {
@@ -402,6 +504,7 @@ function restoreModalEventListeners() {
   if (!videoObject) return;
 
   setupModalVideoEventListeners(videoObject);
+  setupModalVideoControlsEventListeners();
 }
 
 function forceFrssEntryToCollapse(target) {

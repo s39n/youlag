@@ -82,6 +82,7 @@ function extractFeedItemData(feedItem) {
   }
   const isVideoFeedItem = extractedVideoUrl !== '';
   const videoDescriptionExists = feedItem.querySelector('.enclosure-description') !== null;
+  const videoDescription = videoDescriptionExists ? feedItem.querySelector('.enclosure-description')?.innerHTML.trim() : '';
   const videoBaseUrl = isVideoFeedItem ? getBaseUrl(extractedVideoUrl) : '';
   app.state.modal.youtubeId = extractedVideoUrl ? getVideoIdFromUrl(extractedVideoUrl) : '';
   const youtubeUrl = app.state.modal.youtubeId ? `https://www.youtube.com/watch?v=${app.state.modal.youtubeId}` : '';
@@ -96,11 +97,14 @@ function extractFeedItemData(feedItem) {
 
   const invidiousRedirectPrefixUrl = 'https://redirect.invidious.io/watch?v=';
 
+  // Get video chapters
+  let videoChapters = [{...app.types.videoChapter}];
+  videoChapters = extractVideoDescriptionChapters(videoDescription);
+
   // If video description is found, use it, otherwise fallback to generic description element.
   let video_description = isVideoFeedItem && videoDescriptionExists ?
-    appendUrl(feedItem.querySelector('.enclosure-description')?.innerHTML.trim()) :
-    feedItem.querySelector('article div.text')?.innerHTML.trim() ||
-    '';
+    appendUrl(videoDescription) : 
+    feedItem.querySelector('article div.text')?.innerHTML.trim() || '';
   video_description = appendOriginalSrc(video_description);
   
 
@@ -127,12 +131,65 @@ function extractFeedItemData(feedItem) {
       `<div class="youlag-video-description-content">
         ${video_description}
       </div>`,
+    video_chapters: videoChapters || null,
     video_youtube_url: youtubeUrl,
     video_invidious_redirect_url: `${app.state.modal.youtubeId ? invidiousRedirectPrefixUrl + app.state.modal.youtubeId : ''}`
   };
 
   return videoObject;
 }
+
+function extractVideoDescriptionChapters(videoDescription) {
+  // Parse video description timestamps based on YouTube's rules.
+  
+  if (!videoDescription || typeof videoDescription !== 'string') return null;
+
+  // Match for HH:MM:SS or MM:SS.
+  let order = 1;
+  let lastSeconds = -1;
+  let foundTimestamps = [];
+
+  let lines = videoDescription.split(/<br\s*\/?>(?:\s*)?|\n/);
+  for (let line of lines) {
+    let match = line.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s+(.+)/);
+    if (match) {
+      let ts = match[1];
+      let label = match[2].trim();
+      // Convert timestamp to seconds
+      let parts = ts.split(':').map(Number);
+      let seconds = 0;
+      if (parts.length === 3) {
+        seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+      }
+      else if (parts.length === 2) {
+        seconds = parts[0] * 60 + parts[1];
+      }
+      else {
+        // Invalid format
+        continue;
+      }
+      // Check for ascending order
+      if (seconds <= lastSeconds) continue;
+      lastSeconds = seconds;
+      foundTimestamps.push({
+        timestamp: ts,
+        seconds: seconds,
+        label: label,
+        order: order++
+      });
+    }
+  }
+
+  if (
+    // YouTube rules: first timestamp must be 0:00 or 00:00, at least 3 timestamps
+    foundTimestamps.length >= 3 &&
+    (foundTimestamps[0].timestamp === '0:00' || foundTimestamps[0].timestamp === '00:00')
+  ) {
+    return foundTimestamps;
+  }
+  return [];
+}
+
 
 function getSubpageParentId(getParam) {
   /**

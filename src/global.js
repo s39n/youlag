@@ -56,12 +56,14 @@ app.modal = {
     root: 'youlagTheaterModal',
     close: 'youlagCloseModal',
     minimize: 'youlagMinimizeModal',
+    videoIframe: 'ylVideoIframe',
     source: 'youlagVideoSource',
     sourceDefault: 'youlagVideoSourceDefault',
     favorite: 'youlagToggleFavorite',
     tags: 'youlagTagsManage',
     tagsContainer: 'youlagTagsModal',
     tagsClose: 'yl-tags-modal-close',
+    chaptersContainer: 'ylVideoChaptersContainer',
     moreContainer: 'youlagVideoMoreContentContainer',
     relatedContainer: 'youlagRelatedVideosContainer',
   },
@@ -143,11 +145,19 @@ app.types = {
     video_invidious_instance_1: '',
     video_source_default: 'youtube',
     video_description: '<div class="youlag-video-description-content"></div>',
+    video_chapters: [{}],
     video_youtube_url: '',
     video_invidious_redirect_url: '',
     // Video queue
     queue: null,
     queue_active_index: -1
+  },
+
+  videoChapter: {
+    timestamp: "00:00",
+    seconds: 0,
+    label: "",
+    order: 1,
   },
 
   pageObject: {

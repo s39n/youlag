@@ -4357,6 +4357,30 @@ body {
 }
 
 
+#ylVideoChaptersContainer {
+  padding-top: var(--yl-p-xs);
+  padding-left: calc(var(--yl-p-md) - var(--yl-space-2xs));
+  padding-right: calc(var(--yl-p-md) - var(--yl-space-2xs));
+
+  .yl-video-chapter-list-item {
+    padding: var(--yl-space-2xs);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background-color: hsla(0, 0%, 100%, .08);
+      cursor: pointer;
+    }
+
+    &__time {
+      color: #aaaaaa;
+      font-weight: 600;
+      margin-right: var(--yl-m-3xs);
+    }
+  }  
+}
+
 .youlag-video-details {
   padding-top: var(--yl-p-xs);
   padding-left: var(--yl-p-md);
@@ -4387,7 +4411,6 @@ body {
     }
   }
 }
-
 
 .youlag-video-metadata-panel {
   display: flex;

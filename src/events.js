@@ -44,7 +44,6 @@ function init() {
 function setupVisibilityEventListeners() {
   // Handle visibility change events, e.g. when the user switches tabs and returns from a hidden state.
   document.addEventListener('visibilitychange', function () {
-
     if (document.visibilityState === 'visible') {
       restoreModalEventListeners();
     }
