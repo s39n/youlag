@@ -265,7 +265,6 @@ function renderModalVideoChapters(videoChapters) {
   const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
 
   if (!modal || !videoChapters || videoChapters.length === 0) {
-    console.log('Youlag: No video chapters to render or modal not found.');
     if (chapterContainer) chapterContainer.remove();
     return;
   }
@@ -667,9 +666,6 @@ function restoreModalEventListeners() {
   const hasVideoIframe = !!modal.querySelector(`#${app.modal.id.videoIframe}`);
   const hasChapterCurrent = !!modal.querySelector(`#${app.modal.id.chapterCurrent}`);
   if (!hasVideoIframe || !hasChapterCurrent) return;
-
-  // Rehydrate UI state if modal was removed and then restored
-  rehydrateModalUIState(modal, videoObject);
 
   setupModalVideoEventListeners(videoObject);
   setupModalVideoControlEventListeners();
