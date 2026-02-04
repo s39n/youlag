@@ -664,8 +664,7 @@ function restoreModalEventListeners() {
   if (!videoObject) return;
 
   const hasVideoIframe = !!modal.querySelector(`#${app.modal.id.videoIframe}`);
-  const hasChapterCurrent = !!modal.querySelector(`#${app.modal.id.chapterCurrent}`);
-  if (!hasVideoIframe || !hasChapterCurrent) return;
+  if (!hasVideoIframe) return;
 
   setupModalVideoEventListeners(videoObject);
   setupModalVideoControlEventListeners();
