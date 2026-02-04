@@ -792,7 +792,18 @@ function renderRelatedVideos(videoObject) {
       relatedVideosContainer.classList.remove('display-none');
     });
 
-    relatedVideosContainer.addEventListener('click', function (e) {
+    // Remove any previous relatedVideosContainer click listeners and attach new ones.
+    if (!modal._videoModalListeners) modal._videoModalListeners = [];
+    modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
+      if (listener.type === 'click' && listener.el === relatedVideosContainer) {
+        listener.el.removeEventListener(listener.type, listener.handler);
+        return false;
+      }
+      return true;
+    });
+
+    // Attach and track the new click handler
+    const relatedClickHandler = function (e) {
       const relatedItem = e.target.closest(`.${app.modal.class.relatedVideoEntry}`);
       if (!relatedItem) return;
       const feedItem = relatedItem.querySelector(`.${app.modal.class.relatedVideoEntryHTML} > ${app.frss.el.entry}`);
@@ -803,7 +814,9 @@ function renderRelatedVideos(videoObject) {
         }
         handleActiveVideo(feedItem);
       }
-    });
+    };
+    relatedVideosContainer.addEventListener('click', relatedClickHandler);
+    modal._videoModalListeners.push({ el: relatedVideosContainer, type: 'click', handler: relatedClickHandler });
 
   }
 
