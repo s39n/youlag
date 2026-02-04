@@ -4364,6 +4364,10 @@ body {
 
 .yl-video-blur-backdrop-effect {
   --yl-effect: 60px;
+@supports (-webkit-hyphens: auto) and ((-webkit-line-clamp: unset)) {
+    /* SAFARI HACK: Prevent premature clipping of blur caused by CJK character titles on `youlag-video-metadata-title` by increasing the blur effect size. */
+    --yl-effect: 100px;
+  } 
 
   position: absolute;
   left: 0;
@@ -4371,7 +4375,7 @@ body {
 
   &__image {
     width: 100vw;
-    height: var(--yl-effect);
+    max-height: var(--yl-effect);
     object-fit: cover;
     object-position: center;
     filter: blur(var(--yl-effect));
