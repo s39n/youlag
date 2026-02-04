@@ -414,7 +414,7 @@ function updateActiveChapterDisplay() {
       }
     });
     if (chapters.length > 0 && chapterActiveTime && chapterActiveLabel) {
-      chapterActiveTime.textContent = `1/${chapters.length}`;
+      chapterActiveTime.textContent = `1 / ${chapters.length}`;
       chapterActiveLabel.textContent = chapters[0].label;
     }
   }
@@ -456,7 +456,7 @@ function updateActiveChapterDisplay() {
       }
       if (activeIndex < 0) activeIndex = 0;
       if (activeIndex !== lastChapterIndex) {
-        chapterActiveTime.textContent = `${activeIndex + 1}/${chapters.length}`;
+        chapterActiveTime.textContent = `${activeIndex + 1} / ${chapters.length}`;
         chapterActiveLabel.textContent = chapters[activeIndex].label;
         lastChapterIndex = activeIndex;
       }
