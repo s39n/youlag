@@ -5298,6 +5298,11 @@ body.youlag-tags-modal-open {
     display: grid;
     gap: var(--yl-space-3xs);
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    max-width: 1500px;
+
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
+    }
 
     &__item[data-category="1"] {
       // Hide "Uncategorized" option.
