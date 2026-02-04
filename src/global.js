@@ -64,7 +64,9 @@ app.modal = {
     tagsContainer: 'youlagTagsModal',
     tagsClose: 'yl-tags-modal-close',
     chapterContainer: 'ylVideoChaptersContainer',
-    chapterActive: 'ylVideoChapterActive',
+    chapterList: 'ylVideoChapterList',
+    chapterCurrentProgress: 'ylVideoChapterCurrentProgress',
+    chapterCurrent: 'ylVideoChapterCurrent',
     moreContainer: 'youlagVideoMoreContentContainer',
     relatedContainer: 'youlagRelatedVideosContainer',
   },
@@ -82,6 +84,7 @@ app.modal = {
     tagsModalItem: 'yl-tags-list-item',
     tagsModalOpen: 'youlag-tags-modal-open',
     tagsModalContent: 'yl-tags-content',
+    chapterList: 'yl-video-chapter-list',
     iframe: 'youlag-iframe',
     iframeContainer: 'youlag-iframe-container',
     favorite: 'youlag-favorited',
@@ -116,6 +119,7 @@ app.frss = {
     spinner: '../themes/icons/spinner.svg',
     favoriteInactive: '../themes/Mapco/icons/non-starred.svg',
     favoriteActive: '../themes/Mapco/icons/starred.svg',
+    chevronDown: '../themes/Mapco/icons/down.svg',
   }
 }
 

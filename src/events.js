@@ -47,7 +47,7 @@ function setupVisibilityEventListeners() {
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       restoreModalEventListeners();
-        setupModalVideoControlsEventListeners();
+        setupModalVideoControlEventListeners();
     }
   });
 }
