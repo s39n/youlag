@@ -1,3 +1,31 @@
+// Utility: Rehydrate modal UI state if modal was removed and then restored
+function rehydrateModalUIState(modal, videoObject) {
+  // Defensive: Only run if modal and videoObject exist
+  if (!modal || !videoObject) return;
+
+  // Re-render chapters if missing
+  const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
+  const chapterList = chapterContainer?.querySelector(`#${app.modal.id.chapterList}`);
+  if (chapterContainer && !chapterList && Array.isArray(videoObject.video_chapters) && videoObject.video_chapters.length > 0) {
+    renderModalVideoChapters(videoObject.video_chapters);
+  }
+
+  // Re-render progress bar if missing
+  const chapterCurrent = modal.querySelector(`#${app.modal.id.chapterCurrent}`);
+  if (chapterCurrent && !chapterCurrent.querySelector(`#${app.modal.id.chapterCurrentProgress}`)) {
+    const progressBar = document.createElement('div');
+    progressBar.id = app.modal.id.chapterCurrentProgress;
+    chapterCurrent.insertBefore(progressBar, chapterCurrent.firstChild);
+  }
+
+  // Re-render related videos if missing
+  const relatedContainer = modal.querySelector(`#${app.modal.id.relatedContainer}`);
+  if (relatedContainer && relatedContainer.children.length === 0) {
+    renderRelatedVideos(videoObject);
+  }
+
+  // Re-render other dynamic UI as needed (add more as features grow)
+}
 /**
  * UI: Modals
  * 
@@ -654,6 +682,9 @@ function restoreModalEventListeners() {
   const hasVideoIframe = !!modal.querySelector(`#${app.modal.id.videoIframe}`);
   const hasChapterCurrent = !!modal.querySelector(`#${app.modal.id.chapterCurrent}`);
   if (!hasVideoIframe || !hasChapterCurrent) return;
+
+  // Rehydrate UI state if modal was removed and then restored
+  rehydrateModalUIState(modal, videoObject);
 
   setupModalVideoEventListeners(videoObject);
   setupModalVideoControlEventListeners();

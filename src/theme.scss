@@ -4950,6 +4950,7 @@ a.yl-video-action-button[href=""] {
   overflow: hidden;
   z-index: 50;
   transition: .2s; /* Time to minimize to mini player */
+  will-change: width, bottom, right, aspect-ratio, height, border-radius, background, box-shadow, transform;
 
   & {
     width: var(--yl-video-miniplayer-width);
