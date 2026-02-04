@@ -159,7 +159,13 @@ function extractVideoDescriptionChapters(videoDescription) {
       if (label.startsWith('- ')) {
         label = label.slice(2).trim();
       }
-      // Pad timestamp to always have two digits for minutes and seconds.
+      // If chapter label is all caps, convert to sentence case to remove alarmist behavior.
+      if (typeof isTextAllCaps === 'function' && typeof formatTextToSentenceCase === 'function') {
+        if (isTextAllCaps(label)) {
+          label = formatTextToSentenceCase(label);
+        }
+      }
+      // Pad timestamp to always have two digits for minutes and seconds, for more unified look across different creators.
       let parts = ts.split(':').map(Number);
       let paddedTs = '';
       if (parts.length === 3) {

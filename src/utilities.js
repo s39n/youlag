@@ -21,6 +21,26 @@
 
 
 /*****************************************
+ * BEGIN "GENERAL UTILITIES"
+ * General utility functions.
+ ****************************************/
+
+function isTextAllCaps(text) {
+  // Check if a given text is all uppercase, ignoring non-letter characters.
+  return /^[^a-z]*[A-Z][^a-z]*$/.test(text);
+}
+
+function formatTextToSentenceCase(text) {
+  if (!text || typeof text !== 'string') return text;
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+/*****************************************
+ * END "GENERAL UTILITIES"
+ ****************************************/
+
+
+/*****************************************
  * BEGIN "MODAL UTILITIES"
  * For handling video modal state and modes.
  ****************************************/
