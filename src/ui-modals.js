@@ -140,7 +140,7 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
           <img src="${videoObject.thumbnail}" class="youlag-video-thumbnail" loading="lazy" />
         </div>
         <div class="youlag-iframe-container">
-          <iframe id="${app.modal.id.videoIframe}" class="youlag-iframe"
+          <iframe id="${app.modal.id.videoIframe}" class="youlag-iframe" data-yl-video-source="${videoSourceDefaultNormalized}" src
                   src="${defaultEmbedUrl}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
       </div>
@@ -263,12 +263,17 @@ function renderModalVideoChapters(videoChapters) {
   // Appends video chapters to the video modal.
   const modal = getModalVideo();
   const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
+  const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
+  const videoSource = iframe?.getAttribute('data-yl-video-source');
 
   if (!modal || !videoChapters || videoChapters.length === 0) {
     if (chapterContainer) chapterContainer.remove();
     return;
   }
   if (!chapterContainer) return;
+
+  // Chapter only supported for YouTube as playback source.
+  if (videoSource !== 'youtube') chapterContainer.classList.add('display-none');
 
   // List all chapters
   const chapterList = document.createElement('div');
@@ -613,6 +618,17 @@ function setupModalVideoEventListeners(videoObject) {
   if (videoSourceSelect && iframe) {
     const sourceHandler = function () {
       iframe.src = getEmbedUrl(videoSourceSelect.value);
+      iframe.setAttribute('data-yl-video-source', videoSourceSelect.value);
+      const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
+      if (chapterContainer) {
+        // Chapter only supported for YouTube as playback source.
+        if (videoSourceSelect.value !== 'youtube') {
+          chapterContainer.classList.add('display-none');
+        }
+        else {
+          chapterContainer.classList.remove('display-none');
+        }
+      }
     };
     videoSourceSelect.addEventListener('change', sourceHandler);
     modal._videoModalListeners.push({ el: videoSourceSelect, type: 'change', handler: sourceHandler });

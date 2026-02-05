@@ -99,7 +99,6 @@ function extractFeedItemData(feedItem) {
 
   // Get video chapters
   let videoChapters = extractVideoDescriptionChapters(videoDescription);
-  console.debug('[extractFeedItemData] videoChapters after extraction:', videoChapters);
 
 
   // If video description is found, use it, otherwise fallback to generic description element.
