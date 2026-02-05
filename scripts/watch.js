@@ -23,6 +23,7 @@ const srcFiles = [
   '../src/helpers.js',
   '../src/ui.js',
   '../src/ui-modals.js',
+  '../src/ui-video-control.js',
   '../src/ui-modes.js',
    '../src/forms.js',
    '../src/events.js',

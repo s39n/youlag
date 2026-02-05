@@ -27,7 +27,8 @@ app.state = {
     activeType: null,           // {'video' || 'article' || null}
     mode: null,                 // {'fullscreen' || 'miniplayer' || null}
     miniplayerScrollTop: 0,     // Store scroll position of miniplayer before collapsing.
-    youtubeId: null
+    youtubeId: null,
+    chapterLastActiveIndex: -1, // Current modal's video chapter last active index.
   },
   page: {
     layout: null,               // {'video' || 'article'}. Previously boolean "youlagActive" and "!youlagActive" (youlag inactive = article layout).
