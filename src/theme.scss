@@ -4190,10 +4190,12 @@ body {
   }
 
 
-  & > header.header {
-    /* Desktop: Place header above loading overlay, to not block access to the settings menu while youlag is in a blocking/loading state. */
-    position: relative;
-    z-index: 45; 
+  @media (min-width: 841px) {
+    & > header.header {
+      /* Desktop: Place header above loading overlay, to not block access to the settings menu while youlag is in a blocking/loading state. */
+      position: relative;
+      z-index: 45; 
+    }
   }
 
   &.profile,
