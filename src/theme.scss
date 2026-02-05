@@ -5529,6 +5529,8 @@ body.youlag-tags-modal-open {
     gap: var(--yl-space-3xs);
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     max-width: 1500px;
+    max-height: min(30vh, 240px);
+    overflow: auto;
 
     @media (min-width: 1200px) {
       grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
