@@ -155,11 +155,27 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
       <div id="${app.modal.id.chapterContainer}" class="${Array.isArray(videoObject?.video_chapters) && videoObject?.video_chapters.length > 0 ? '' : 'display-none'}">
         <div id="${app.modal.id.chapterCurrent}" class="yl-video-chapter-current">
           <div id="${app.modal.id.chapterCurrentProgress}"></div>
-          <div id="ylVideoChapterToggle">
-            <img src="${app.frss.img.chevronDown}" class="yl-video-chapter-toggle-icon" loading="lazy" />
+
+          <div id="${app.modal.id.chapterPanel}">          
+            <div id="ylVideoChapterToggle">
+              <img src="${app.frss.img.chevronDown}" class="yl-video-chapter-toggle-icon" loading="lazy" />
+            </div>
+            <span class="yl-video-chapter-current__order yl-badge"></span>
+            <span class="yl-video-chapter-current__label"></span>
           </div>
-          <span class="yl-video-chapter-current__order yl-badge"></span>
-          <span class="yl-video-chapter-current__label"></span>
+
+          <div id="${app.modal.id.chapterActionContainer}" class="yl-video-chapter-action-container">
+            <div id="${app.modal.id.chapterActionPrevious}"
+                    class="yl-video-chapter-action is-disabled"
+                    role="button">
+              <span class="yl-video-chapter-action__icon yl-video-chapter-action__icon--previous"></span>
+            </div>
+            <div id="${app.modal.id.chapterActionNext}"
+                    class="yl-video-chapter-action"
+                    role="button">
+              <span class="yl-video-chapter-action__icon yl-video-chapter-action__icon--next"></span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -287,6 +303,7 @@ function renderModalVideoChapters(videoChapters) {
     const item = document.createElement('div');
     item.classList.add('yl-video-chapter-list-item');
     item.setAttribute('data-seconds', chapter.seconds);
+    item.setAttribute('data-order', chapter.order);
     item.innerHTML = `
       <span class="yl-video-chapter-list-item__time yl-badge">${chapter.timestamp}</span>
       <span class="yl-video-chapter-list-item__label">${chapter.label}</span>
@@ -304,7 +321,7 @@ function setupModalVideoControlEventListeners() {
 
   if (!modal._videoModalListeners) modal._videoModalListeners = [];
   
-  // Remove existing listeners for chapter items
+  // Remove existing listeners for chapter list items
   if (modal._videoModalListeners && Array.isArray(modal._videoModalListeners)) {
     modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
       if (
@@ -320,19 +337,8 @@ function setupModalVideoControlEventListeners() {
     });
   }
 
-  // Attach new chapter click listeners.
-  const chapterItems = modal.querySelectorAll('.yl-video-chapter-list-item');
-  chapterItems.forEach(item => {
-    const seconds = parseInt(item.getAttribute('data-seconds'), 10);
-    const chapterClickHandler = function(e) {
-      e.preventDefault();
-      videoControlSeekTo(seconds, true);
-    };
-    item.addEventListener('click', chapterClickHandler);
-    modal._videoModalListeners.push({ el: item, type: 'click', handler: chapterClickHandler });
-  });
 
-  // Remove existing click listener for chapterCurrent
+  // Remove existing click listener for chapters current panel.
   const chapterCurrent = modal.querySelector(`#${app.modal.id.chapterCurrent}`);
   if (modal._videoModalListeners && Array.isArray(modal._videoModalListeners)) {
     modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
@@ -346,8 +352,64 @@ function setupModalVideoControlEventListeners() {
       return true;
     });
   }
-  
+
+  // Attach new chapter click listeners.
+  const chapterItems = modal.querySelectorAll('.yl-video-chapter-list-item');
+  chapterItems.forEach(item => {
+    const seconds = parseInt(item.getAttribute('data-seconds'), 10);
+    const chapterClickHandler = function(e) {
+      e.preventDefault();
+      chapterItems.forEach(i => i.classList.remove('is-active')); // Clear previous active state
+      item.classList.add('is-active');
+      updateChapterActionButtons();
+      videoControlSeekTo(seconds, true);
+    };
+    item.addEventListener('click', chapterClickHandler);
+    modal._videoModalListeners.push({ el: item, type: 'click', handler: chapterClickHandler });
+  });
+
+  const chapterActionPrevious = modal.querySelector(`#${app.modal.id.chapterActionPrevious}`);
+  const chapterActionNext = modal.querySelector(`#${app.modal.id.chapterActionNext}`);
+  const chapterItemsArr = Array.from(modal.querySelectorAll('.yl-video-chapter-list-item'));
+
+  function updateChapterActionButtons() {
+    // Set chapter skip button states
+    let activeIndex = chapterItemsArr.findIndex(item => item.classList.contains('is-active'));
+    if (activeIndex === -1) activeIndex = 0;
+    if (chapterActionPrevious) chapterActionPrevious.classList.toggle('is-disabled', activeIndex === 0);
+    if (chapterActionNext) chapterActionNext.classList.toggle('is-disabled', activeIndex === chapterItemsArr.length - 1);
+  }
+
+  // Chapter skip button initial state
+  updateChapterActionButtons();
+
+  // Chapter skip handlers for previous/next buttons
+  function handleChapterSkip(direction) {
+    const activeIndex = chapterItemsArr.findIndex(item => item.classList.contains('is-active'));
+    const targetIndex = activeIndex + direction;
+    if (targetIndex < 0 || targetIndex >= chapterItemsArr.length) return;
+    const targetItem = chapterItemsArr[targetIndex];
+    if (targetItem) {
+      const seconds = parseInt(targetItem.getAttribute('data-seconds'), 10);
+      videoControlSeekTo(seconds, true);
+      chapterItemsArr.forEach((item, idx) => item.classList.toggle('is-active', idx === targetIndex));
+      updateChapterActionButtons();
+    }
+  }
+
+  if (chapterActionPrevious) {
+    const prevHandler = e => { e.preventDefault(); handleChapterSkip(-1); };
+    chapterActionPrevious.addEventListener('click', prevHandler);
+    modal._videoModalListeners.push({ el: chapterActionPrevious, type: 'click', handler: prevHandler });
+  }
+  if (chapterActionNext) {
+    const nextHandler = e => { e.preventDefault(); handleChapterSkip(1); };
+    chapterActionNext.addEventListener('click', nextHandler);
+    modal._videoModalListeners.push({ el: chapterActionNext, type: 'click', handler: nextHandler });
+  }
+
   // Toggle chapter list visibility by clicking the current chapter.
+  const chapterCurrentPanel = modal.querySelector(`#${app.modal.id.chapterPanel}`);
   const chapterList = modal.querySelector(`#${app.modal.id.chapterList}`);
   const chapterCurrentClickHandler = function(e) {
     e.preventDefault();
@@ -371,9 +433,9 @@ function setupModalVideoControlEventListeners() {
       }
     }
   };
-  if (chapterCurrent) {
-    chapterCurrent.addEventListener('click', chapterCurrentClickHandler);
-    modal._videoModalListeners.push({ el: chapterCurrent, type: 'click', handler: chapterCurrentClickHandler });
+  if (chapterCurrentPanel) {
+    chapterCurrentPanel.addEventListener('click', chapterCurrentClickHandler);
+    modal._videoModalListeners.push({ el: chapterCurrentPanel, type: 'click', handler: chapterCurrentClickHandler });
   }
 
   // Display the current chapter

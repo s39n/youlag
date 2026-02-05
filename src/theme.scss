@@ -4399,6 +4399,7 @@ body {
     transition: 0.5s linear;
     background-color: rgba(255, 255, 255, 0.05);
     will-change: width;
+    pointer-events: none;
 
     &:after {
       /* Chapter progress indicator effect at the far end. */
@@ -4424,15 +4425,31 @@ body {
   .yl-video-chapter-current {
     position: relative;
     display: flex;
-    align-items: center;
-    padding-top: var(--yl-p-xs);
-    padding-bottom: var(--yl-p-xs);
-    padding-left: var(--yl-p-xs);
-    padding-right: var(--yl-p-md);
     font-size: var(--yl-text-xs);
     border-bottom: 1px solid hsl(0deg 0% 100% / 9%);
-    transition: 0.1s;
-    opacity: 0.9;
+
+    #ylVideoChaptersPanel {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding-top: var(--yl-p-xs);
+      padding-bottom: var(--yl-p-xs);
+      padding-left: var(--yl-p-xs);
+      padding-right: var(--yl-p-md);
+      flex: 1;
+      transition: 0.1s;
+      opacity: 0.9;
+
+      &:hover {
+          background-color: hsla(0, 0%, 100%, .04);
+          cursor: pointer;
+          opacity: 1;
+
+        #ylVideoChapterToggle .yl-video-chapter-toggle-icon {
+          opacity: 1;
+        }
+      }
+    }
 
     &__order {
       margin-right: var(--yl-m-2xs);
@@ -4464,16 +4481,50 @@ body {
         margin-right: var(--yl-m-2xs);
       }
     }
+  }
 
-    &:hover {
-      background-color: hsla(0, 0%, 100%, .04);
-      cursor: pointer;
-      opacity: 1;
+  #ylVideoChaptersActionContainer {
+    display: flex;
 
-      #ylVideoChapterToggle .yl-video-chapter-toggle-icon {
-        opacity: 1;
+    .yl-video-chapter-action {
+      display: flex;
+      align-items: center;
+      padding: var(--yl-p-xs) var(--yl-p-sm);
+      border-left: 1px solid hsl(0deg 0% 100% / 9%);
+      transition: 0.1s;
+
+      &:hover {
+        background-color: hsla(0, 0%, 100%, .04);
+        cursor: pointer;
+      }
+
+      &__icon {
+        opacity: 0.8;
+        width: 20px;
+        height: 20px;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="%23fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 5v14M6 10.571v2.858c0 1.827 0 2.74.384 3.267a2 2 0 0 0 1.413.811c.648.066 1.437-.394 3.016-1.315l2.449-1.428.008-.005c1.552-.905 2.328-1.358 2.59-1.949a2 2 0 0 0 0-1.62c-.263-.591-1.041-1.045-2.598-1.954l-2.45-1.428c-1.578-.921-2.367-1.381-3.015-1.315a2 2 0 0 0-1.413.812C6 7.83 6 8.745 6 10.57Z"/></svg>');
+      
+        &--next {
+          /* .yl-video-chapter-action__icon .yl-video-chapter-action__icon--next */
+          transform: rotate(0);
+        }
+
+        &--previous {
+          /* .yl-video-chapter-action__icon .yl-video-chapter-action__icon--previous */
+          transform: rotate(180deg);
+        }
+      }
+
+      &.is-disabled {
+        pointer-events: none;
+
+        .yl-video-chapter-action__icon {
+          /* Only faint icon and not the entire button to preserve borders. */
+          opacity: 0.3;
+        }
       }
     }
+
   }
 
   .yl-video-chapter-list {
