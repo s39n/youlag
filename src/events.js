@@ -26,6 +26,11 @@ function init() {
     }
     onNewFeedItems();
     restoreVideoQueue();
+
+    if (shouldUseScreencapThumbnail()) {
+      console.log('Using screencap thumbnails for video feed entries.');
+      setFeedVideoThumbnails();
+    }
   }
   updateSidenavLinks();
   settingsPageEventListeners();

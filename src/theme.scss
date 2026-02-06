@@ -2125,29 +2125,33 @@ body.youlag-active:not(.reader).youlag-mobile-layout--grid {
 }
 
 /* Video, article: If setting to use screencap thumbnail is enabled */
-body.yl-feed-thumbnail--screencap {
-
-  /* Hide the original thumbnail */
-  div.flux .flux_header {
-    &:before {
-      /* Hide fallback title on thumbnail */
-      display: none;
-    }
-        
-    .item.thumbnail {
-      opacity: 0;
-    }
+body {
+  &.yl-feed-thumbnail--screencap {
+    /* Hide the original thumbnail */
+    div.flux .flux_header {
+      &:before {
+        /* Hide fallback title on thumbnail */
+        display: none;
+      }
+          
+      .item.thumbnail {
+        opacity: 0;
+      }
+    }  
   }
 
-  /* Once Youlag is ready, display the screencap thumbnail. Affects only video feed entries. */
-  div.flux[data-yl-video-source="true"] .flux_header {
-    .item.thumbnail {
-      opacity: 1;
-      transition: opacity 0.05s; /* Allow slight delay to avoid flash of original thumbnail before switching to screencap thumbnail. */
+  &.yl-feed-thumbnail--screencap.youlag-loaded {
+    /* Once Youlag is ready, display the screencap thumbnail. Affects only video feed entries. */
+    div.flux .flux_header {
+      .item.thumbnail {
+        opacity: 1;
+        /* Allow slight delay to avoid flash of original thumbnail before switching to screencap thumbnail. */
+        transition-delay: 0.1s;
+      }
     }
   }
-
 }
+
 
 /*****************************************
  * END "CARD"

@@ -439,7 +439,12 @@ function setFeedVideoThumbnails() {
   // TODO: Can be done more efficiently via SSR instead, to not require any DOM manipulation and flash of content when replacing the image.
   
   markVideoFeedItems(); // Adds `data-yl-video-source="true"` for video feed entries.
-  const feedEntries = document.querySelectorAll(`${app.frss.el.feedRoot} ${app.frss.el.entry}[data-yl-video-source="true"] .item.thumbnail img`);
+
+  const feedRootSelector = app.frss.el.feedRoot;
+  const entrySelector = `${app.frss.el.entry}[data-yl-video-source="true"]:not([data-yl-dirty="true"])`;
+  const thumbnailSelector = ".item.thumbnail img";
+  const feedEntriesSelector = `${feedRootSelector} ${entrySelector} ${thumbnailSelector}`;
+  const feedEntries = document.querySelectorAll(feedEntriesSelector);
   
   feedEntries.forEach(entry => {
     const videoId = getVideoIdFromUrl(entry.src);

@@ -103,7 +103,7 @@ function updateSidenavLinks() {
 
   if (isWatchLaterSortModified) {
     updateAnchorLink(
-      '/i/?a=normal&get=s&sort=lastUserModified&order=DESC', 
+      '/i/?a=normal&get=s&sort=lastUserModified&order=DESC',
       document.querySelector('#aside_feed #sidebar .category.favorites > a')
     );
   }
@@ -112,7 +112,7 @@ function updateSidenavLinks() {
 function updateAddFeedLink() {
   // Add a custom query param to the 'Add new feed' with the current category id, 
   // allowing auto-selection of the category in the 'add new feed' dropdown.
-  
+
   const page = getCurrentPage();
   if (page.name === 'category') {
     // Use parentId if present, otherwise use id
@@ -128,7 +128,7 @@ function updateAddFeedLink() {
 
 function getVideoIdFromUrl(url) {
   // Match video ID from various sources, including YouTube, Invidious, Piped, and thumbnail URLs like ytimg.com/vi/[VIDEO_ID]/[quality].jpg
-  
+
   // Standard video URL patterns
   const regex = /(?:\/|^)(?:shorts\/|v\/|e(?:mbed)?\/|\S*?[?&]v=|\S*?[?&]id=|v=)([a-zA-Z0-9_-]{11})(?:[\/\?]|$)/;
   let match = url.match(regex);
@@ -251,6 +251,7 @@ function markVideoFeedItems() {
     const videoUrl = entry.getAttribute('data-link');
     if (videoUrl && (youtubeRegex.test(videoUrl) || (invidiousInstanceUrl && videoUrl.startsWith(invidiousInstanceUrl)))) {
       entry.setAttribute('data-yl-video-source', 'true');
+      entry.setAttribute('data-yl-dirty', 'true');
       isVideo = true;
     }
   }
@@ -504,7 +505,12 @@ function getRelativeDate(date) {
 }
 
 function shouldUseScreencapThumbnail() {
-  return document.querySelector('#yl_feed_thumbnail_screencap_enabled')?.getAttribute('data-yl-feed-thumbnail-screencap-enabled') === 'true';
+  console.log('Checking if should use screencap thumbnail');
+  const setting = document.querySelector('#yl_feed_thumbnail_screencap_enabled');
+  console.log(setting?.getAttribute('data-yl-feed-thumbnail-screencap-enabled'), 'screencap setting'); // DEBUG
+  if (!setting) return false;
+  const shouldUseScreencapThumbnail = setting.getAttribute('data-yl-feed-thumbnail-screencap-enabled');
+  return shouldUseScreencapThumbnail === 'true';
 }
 
 /*****************************************
@@ -561,7 +567,7 @@ async function fetchRelatedItems(category = 'watch_later', order = 'rand', limit
       return {
         ...app.types.videoObject, // Sets default values for the other non-assigned properties in videoObject
         feedItem: item, // Original DOM element reference, utilized later by `extractFeedItemData()` when clicked.
-        
+
         // The minimal data is used for displaying related videos.
         entryId,
         website_name: item.querySelector('.website .websiteName')?.textContent?.trim() || '',
