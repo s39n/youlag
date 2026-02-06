@@ -121,6 +121,10 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
   const relatedVideosSource = getRelatedVideosSetting();
   const shouldCollapseDescription = isMobile && !isArticle && relatedVideosSource !== 'none';
 
+  // Thumbnail priority
+  let thumbnail = videoObject.thumbnail_video || videoObject.thumbnail || videoObject.thumbnail_video_screencap || '';
+
+
   // Modal content
   container.innerHTML = `
     <div class="${app.modal.class.content}">
@@ -137,19 +141,19 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
 
       <div class="youlag-video-container">
         <div class="youlag-thumbnail-container">
-          <img src="${videoObject.thumbnail_by_author}" class="youlag-video-thumbnail" loading="lazy" />
+          <img src="${thumbnail}" class="youlag-video-thumbnail" loading="lazy" />
         </div>
         <div class="youlag-iframe-container">
           <iframe id="${app.modal.id.videoIframe}"
                   class="youlag-iframe"
-                  data-yl-video-source="${videoSourceDefaultNormalized}"
+                  data-yl-is-video="${videoSourceDefaultNormalized}"
                   src="${defaultEmbedUrl}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
           </iframe>
         </div>
       </div>
 
       <div class="yl-video-blur-backdrop-effect">
-        <img src="${videoObject.thumbnail_by_author}" class="yl-video-blur-backdrop-effect__image" loading="lazy" />
+        <img src="${thumbnail}" class="yl-video-blur-backdrop-effect__image" loading="lazy" />
       </div>
 
       <div id="${app.modal.id.chapterContainer}" class="${Array.isArray(videoObject?.video_chapters) && videoObject?.video_chapters.length > 0 ? '' : 'display-none'}">
@@ -388,7 +392,7 @@ function setupModalVideoEventListeners(videoObject) {
   if (videoSourceSelect && iframe) {
     const sourceHandler = function () {
       iframe.src = getEmbedUrl(videoSourceSelect.value);
-      iframe.setAttribute('data-yl-video-source', videoSourceSelect.value);
+      iframe.setAttribute('data-yl-is-video', videoSourceSelect.value);
       const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
       if (chapterContainer) {
         // Chapter only supported for YouTube as playback source.

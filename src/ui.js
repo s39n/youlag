@@ -437,21 +437,21 @@ function setFeedVideoThumbnails() {
   // Video, article: Replace the thumbnail of a feed entry in the stream, and also in related videos, but not the video modal.
  
   // TODO: Can be done more efficiently via SSR instead, to not require any DOM manipulation and flash of content when replacing the image.
-  
-  markVideoFeedItems(); // Adds `data-yl-video-source="true"` for video feed entries.
+
+  markVideoFeedItems(); // Adds `data-yl-is-video="true"` for video feed entries.
 
   const feedRootSelector = app.frss.el.feedRoot;
-  const entrySelector = `${app.frss.el.entry}[data-yl-video-source="true"]:not([data-yl-dirty="true"])`;
+  const entrySelector = `${app.frss.el.entry}[data-yl-is-video="true"]:not([data-yl-video-screencap="true"])`;
   const thumbnailSelector = ".item.thumbnail img";
   const feedEntriesSelector = `${feedRootSelector} ${entrySelector} ${thumbnailSelector}`;
   const feedEntries = document.querySelectorAll(feedEntriesSelector);
-  
+
   feedEntries.forEach(entry => {
     const videoId = getVideoIdFromUrl(entry.src);
     if (!videoId) return;
     entry.setAttribute('data-yl-original-src', entry.src);
     entry.src = getVideoScreencapSrc(videoId);
-    entry.setAttribute('data-yl-video-screencap', 'true');
+    entry.setAttribute('data-yl-video-screencap', 'true');  // Mark as dirty to avoid reprocessing when called repeatedly in `onNewFeedItems()`.
   });
 }
 

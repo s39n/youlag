@@ -382,7 +382,7 @@ class YoulagExtension extends Minz_Extension
     $content = $entry->content();
     $spanInvidiousUrl = '<span data-yl-invidious-instance="' . htmlspecialchars(string: $invidious, flags: ENT_QUOTES) . '"></span>';
     $videoSource = $this->yl_invidious_enabled ? 'invidious_1' : 'youtube';
-    $spanVideoSource = '<span data-yl-video-source-default="' . htmlspecialchars(string: $videoSource, flags: ENT_QUOTES) . '"></span>';
+    $spanVideoSource = '<span data-yl-is-video-default="' . htmlspecialchars(string: $videoSource, flags: ENT_QUOTES) . '"></span>';
     if (strpos(haystack: $content, needle: 'yl-invidious-instance') === false && strpos(haystack: $content, needle: 'yl-video-source-default') === false) {
       $entry->_content($spanInvidiousUrl . $spanVideoSource . $content);
     }

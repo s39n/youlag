@@ -2146,7 +2146,7 @@ body {
       .item.thumbnail {
         opacity: 1;
         /* Allow slight delay to avoid flash of original thumbnail before switching to screencap thumbnail. */
-        transition-delay: 0.1s;
+        transition-delay: 0.15s;
       }
     }
   }
@@ -5627,7 +5627,7 @@ body.youlag-active:not(.reader) {
 
 
 [data-yl-invidious-instance],
-[data-yl-video-source-default],
+[data-yl-is-video-default],
 [data-yl-category-whitelist],
 [data-yl-video-labels],
 [data-yl-video-unread-badge],

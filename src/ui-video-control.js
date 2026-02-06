@@ -9,7 +9,7 @@ function renderModalVideoChapters(videoChapters) {
   const modal = getModalVideo();
   const chapterContainer = modal.querySelector(`#${app.modal.id.chapterContainer}`);
   const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
-  const videoSource = iframe?.getAttribute('data-yl-video-source');
+  const videoSource = iframe?.getAttribute('data-yl-is-video');
 
   if (!modal || !videoChapters || videoChapters.length === 0) {
     if (chapterContainer) chapterContainer.remove();

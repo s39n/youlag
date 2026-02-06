@@ -92,8 +92,8 @@ function extractFeedItemData(feedItem) {
   const authorFilterElement = authorElement?.querySelector('.website a.item-element[href*="get=f_"]');
   const invidiousInstanceElemenet = feedItem.querySelector('.content div.text span[data-yl-invidious-instance]');
   const invidiousInstance1 = invidiousInstanceElemenet ? invidiousInstanceElemenet.getAttribute('data-yl-invidious-instance') : '';
-  const videoSourceDefaultElement = feedItem.querySelector('.content div.text span[data-yl-video-source-default]');
-  const videoSourceDefault = videoSourceDefaultElement ? videoSourceDefaultElement.getAttribute('data-yl-video-source-default') : '';
+  const videoSourceDefaultElement = feedItem.querySelector('.content div.text span[data-yl-is-video-default]');
+  const videoSourceDefault = videoSourceDefaultElement ? videoSourceDefaultElement.getAttribute('data-yl-is-video-default') : '';
 
   const invidiousRedirectPrefixUrl = 'https://redirect.invidious.io/watch?v=';
 
@@ -106,6 +106,15 @@ function extractFeedItemData(feedItem) {
     feedItem.querySelector('article div.text')?.innerHTML.trim() || '';
   video_description = appendOriginalSrc(video_description);
 
+  // Video thumbnail, and fallback for article thumbnail
+  let thumbnail = feedItem.querySelector('.thumbnail img')?.src || ''; // Default thumbnail rendered in DOM
+  let thumbnail_video = '';
+  let thumbnail_video_screencap = '';
+  if (isVideoFeedItem) {
+    thumbnail_video = `https://img.youtube.com/vi/${app.state.modal.youtubeId}/sddefault.jpg`;
+    thumbnail_video_screencap = getVideoScreencapSrc(app.state.modal.youtubeId);
+  }
+
   const videoObject = {
     entryId: entryId ? entryId[1] : null,
     authorId: authorId ? authorId[1] : null,
@@ -115,9 +124,9 @@ function extractFeedItemData(feedItem) {
     website_name: feedItem.querySelector('.website .websiteName')?.textContent.trim() || '',
     favorite_toggle_url: feedItem.querySelector('a.item-element.bookmark')?.href || '',
     favorited: !feedItem.querySelector('.bookmark img[src*="non-starred"]'),
-    thumbnail: feedItem.querySelector('.thumbnail img')?.src || '', // Default thumbnail rendered in DOM
-    thumbnail_by_author: videoBaseUrl ? `${videoBaseUrl}/${app.state.modal.youtubeId}/sddefault.jpg` : '',
-    thumbnail_screencap: getVideoScreencapSrc(app.state.modal.youtubeId) || '',
+    thumbnail,
+    thumbnail_video: thumbnail_video || '',
+    thumbnail_video_screencap: thumbnail_video_screencap || '',
     title: feedItem.querySelector('.item-element.title')?.childNodes[0].textContent.trim() || '',
     external_link: feedItem.querySelector('.item-element.title')?.href || '',
     date: feedItem.querySelector('.flux_content .date')?.textContent.trim() || '',

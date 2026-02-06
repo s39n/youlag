@@ -28,7 +28,7 @@ function init() {
     restoreVideoQueue();
 
     if (shouldUseScreencapThumbnail()) {
-      console.log('Using screencap thumbnails for video feed entries.');
+      console.log('Using screencap thumbnails based on user setting');
       setFeedVideoThumbnails();
     }
   }

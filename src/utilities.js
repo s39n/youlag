@@ -250,8 +250,7 @@ function markVideoFeedItems() {
   for (const entry of feedEntries) {
     const videoUrl = entry.getAttribute('data-link');
     if (videoUrl && (youtubeRegex.test(videoUrl) || (invidiousInstanceUrl && videoUrl.startsWith(invidiousInstanceUrl)))) {
-      entry.setAttribute('data-yl-video-source', 'true');
-      entry.setAttribute('data-yl-dirty', 'true');
+      entry.setAttribute('data-yl-is-video', 'true');
       isVideo = true;
     }
   }
@@ -505,9 +504,7 @@ function getRelativeDate(date) {
 }
 
 function shouldUseScreencapThumbnail() {
-  console.log('Checking if should use screencap thumbnail');
   const setting = document.querySelector('#yl_feed_thumbnail_screencap_enabled');
-  console.log(setting?.getAttribute('data-yl-feed-thumbnail-screencap-enabled'), 'screencap setting'); // DEBUG
   if (!setting) return false;
   const shouldUseScreencapThumbnail = setting.getAttribute('data-yl-feed-thumbnail-screencap-enabled');
   return shouldUseScreencapThumbnail === 'true';
