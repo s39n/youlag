@@ -127,10 +127,19 @@ function updateAddFeedLink() {
 }
 
 function getVideoIdFromUrl(url) {
-  // Match video ID without relying on base domain being "youtube"-specific, in order to support invidious and piped links.
+  // Match video ID from various sources, including YouTube, Invidious, Piped, and thumbnail URLs like ytimg.com/vi/[VIDEO_ID]/[quality].jpg
+  
+  // Standard video URL patterns
   const regex = /(?:\/|^)(?:shorts\/|v\/|e(?:mbed)?\/|\S*?[?&]v=|\S*?[?&]id=|v=)([a-zA-Z0-9_-]{11})(?:[\/\?]|$)/;
-  const match = url.match(regex);
-  return match ? match[1] : '';
+  let match = url.match(regex);
+  if (match) return match[1];
+
+  // YouTube thumbnail URL pattern: ytimg.com/vi/[VIDEO_ID]/[quality].jpg
+  const thumbRegex = /ytimg\.com\/vi\/([a-zA-Z0-9_-]{11})\//;
+  match = url.match(thumbRegex);
+  if (match) return match[1];
+
+  return '';
 }
 
 function getBaseUrl(url) {
@@ -218,6 +227,34 @@ function appendOriginalSrc(element) {
     return root.innerHTML;
   }
   return root;
+}
+
+function getVideoScreencapSrc(videoId, thumbnailType = 1) {
+  // Get the low-res screencap from YouTube's public endpoint, to replace clickbait thumbnails.
+  // thumbnailType can be `0 | 1 | 2 | 3 | hqdefault | mqdefault | sddefault | maxresdefault`, 
+  // but `1` is more reliable to get an actual screencap opposed to a downsized thumbnail.
+  return `https://img.youtube.com/vi/${videoId}/${thumbnailType}.jpg`;
+}
+
+function markVideoFeedItems() {
+  // Determine if it's a video source and then mark it as such.
+  // Checks if the feed entry consist of links: YouTube, custom Invidious instance.
+  const feedEntries = document.querySelectorAll(`${app.frss.el.feedRoot} ${app.frss.el.entry}`);
+  if (!feedEntries || feedEntries.length === 0) return false;
+  const invidiousSetting = document.querySelector(`${app.frss.el.feedRoot} ${app.frss.el.entry}[data-yl-invidious-instance]`);
+  const invidiousInstanceUrl = invidiousSetting ? invidiousSetting.getAttribute('data-yl-invidious-instance') : null;
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//;
+
+  // For every feed entry that has attr [data-link="videoUrl"] matching either YouTube or the custom Invidious instance, mark as video source.
+  let isVideo = false;
+  for (const entry of feedEntries) {
+    const videoUrl = entry.getAttribute('data-link');
+    if (videoUrl && (youtubeRegex.test(videoUrl) || (invidiousInstanceUrl && videoUrl.startsWith(invidiousInstanceUrl)))) {
+      entry.setAttribute('data-yl-video-source', 'true');
+      isVideo = true;
+    }
+  }
+  return isVideo;
 }
 
 /*****************************************
@@ -466,6 +503,10 @@ function getRelativeDate(date) {
   return 'Just now';
 }
 
+function shouldUseScreencapThumbnail() {
+  return document.querySelector('#yl_feed_thumbnail_screencap_enabled')?.getAttribute('data-yl-feed-thumbnail-screencap-enabled') === 'true';
+}
+
 /*****************************************
  * END "STATE UTILITIES"
  ****************************************/
@@ -544,6 +585,8 @@ async function fetchRelatedItems(category = 'watch_later', order = 'rand', limit
 }
 
 async function fetchManageFeedOptions(feedId, categoryId) {
+  // DEPRECATED 2026-02-06: Replaced with `setupManageFeedButton()` under `renderToolbar()`.
+
   // Fetch feed management options HTML for the "Manage feed" modal.
   // Returns the HTML string for the modal form, or null on error.
   if (!feedId || !categoryId) return null;

@@ -145,6 +145,8 @@ app.types = {
     favorite_toggle_url: '',
     favorited: false,
     thumbnail: '',
+    thumbnail_by_author: '',
+    thumbnail_screencap: '',
     title: '',
     external_link: '',
     date: '',

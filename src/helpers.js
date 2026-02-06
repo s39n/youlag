@@ -100,13 +100,11 @@ function extractFeedItemData(feedItem) {
   // Get video chapters
   let videoChapters = extractVideoDescriptionChapters(videoDescription);
 
-
   // If video description is found, use it, otherwise fallback to generic description element.
   let video_description = isVideoFeedItem && videoDescriptionExists ?
     appendUrl(videoDescription) : 
     feedItem.querySelector('article div.text')?.innerHTML.trim() || '';
   video_description = appendOriginalSrc(video_description);
-  
 
   const videoObject = {
     entryId: entryId ? entryId[1] : null,
@@ -117,7 +115,9 @@ function extractFeedItemData(feedItem) {
     website_name: feedItem.querySelector('.website .websiteName')?.textContent.trim() || '',
     favorite_toggle_url: feedItem.querySelector('a.item-element.bookmark')?.href || '',
     favorited: !feedItem.querySelector('.bookmark img[src*="non-starred"]'),
-    thumbnail: feedItem.querySelector('.thumbnail img')?.src || '',
+    thumbnail: feedItem.querySelector('.thumbnail img')?.src || '', // Default thumbnail rendered in DOM
+    thumbnail_by_author: videoBaseUrl ? `${videoBaseUrl}/${app.state.modal.youtubeId}/sddefault.jpg` : '',
+    thumbnail_screencap: getVideoScreencapSrc(app.state.modal.youtubeId) || '',
     title: feedItem.querySelector('.item-element.title')?.childNodes[0].textContent.trim() || '',
     external_link: feedItem.querySelector('.item-element.title')?.href || '',
     date: feedItem.querySelector('.flux_content .date')?.textContent.trim() || '',

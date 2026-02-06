@@ -2124,6 +2124,31 @@ body.youlag-active:not(.reader).youlag-mobile-layout--grid {
   }
 }
 
+/* Video, article: If setting to use screencap thumbnail is enabled */
+body.yl-feed-thumbnail--screencap {
+
+  /* Hide the original thumbnail */
+  div.flux .flux_header {
+    &:before {
+      /* Hide fallback title on thumbnail */
+      display: none;
+    }
+        
+    .item.thumbnail {
+      opacity: 0;
+    }
+  }
+
+  /* Once Youlag is ready, display the screencap thumbnail. Affects only video feed entries. */
+  div.flux[data-yl-video-source="true"] .flux_header {
+    .item.thumbnail {
+      opacity: 1;
+      transition: opacity 0.05s; /* Allow slight delay to avoid flash of original thumbnail before switching to screencap thumbnail. */
+    }
+  }
+
+}
+
 /*****************************************
  * END "CARD"
  ****************************************/
@@ -4058,6 +4083,15 @@ body:has(.tree-folder.category.favorites.active) {
  *
  ****************************************/
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -5288,6 +5322,7 @@ body.youlag-tags-modal-open {
     color: #b3b3b3;
     margin-bottom: 0.25rem;
     font-weight: normal;
+    max-width: 450px;
   }
 
   .form-group {

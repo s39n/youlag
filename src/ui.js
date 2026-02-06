@@ -300,6 +300,7 @@ function setBodyClass() {
   setUnreadBadgeClass();
   setPageSortingClass();
   document.body.setAttribute('data-youlag-version', app.metadata.version);
+  shouldUseScreencapThumbnail() && document.body.classList.add('yl-feed-thumbnail--screencap');
 }
 
 function setCategoryWhitelistClass() {
@@ -430,6 +431,23 @@ function setSidenavState() {
   const expanded = sidenav.classList.contains('visible');
   document.body.classList.toggle('youlag-sidenav--expanded', expanded);
   document.body.classList.toggle('youlag-sidenav--collapsed', !expanded);
+}
+
+function setFeedVideoThumbnails() {
+  // Video, article: Replace the thumbnail of a feed entry in the stream, and also in related videos, but not the video modal.
+ 
+  // TODO: Can be done more efficiently via SSR instead, to not require any DOM manipulation and flash of content when replacing the image.
+  
+  markVideoFeedItems(); // Adds `data-yl-video-source="true"` for video feed entries.
+  const feedEntries = document.querySelectorAll(`${app.frss.el.feedRoot} ${app.frss.el.entry}[data-yl-video-source="true"] .item.thumbnail img`);
+  
+  feedEntries.forEach(entry => {
+    const videoId = getVideoIdFromUrl(entry.src);
+    if (!videoId) return;
+    entry.setAttribute('data-yl-original-src', entry.src);
+    entry.src = getVideoScreencapSrc(videoId);
+    entry.setAttribute('data-yl-video-screencap', 'true');
+  });
 }
 
 /*****************************************
@@ -1002,7 +1020,6 @@ function updateVideoDateFormat() {
 
 function onNewFeedItems() {
   // Run actions based on if there's new items added to the feed stream.
-
   document.addEventListener('freshrss:load-more', function () {
     if (isLayoutVideo()) {
       updateVideoAuthor();
@@ -1012,6 +1029,11 @@ function onNewFeedItems() {
         updateCategoryEntryCounts();
       }
     }
+
+    if (shouldUseScreencapThumbnail()) {
+      setFeedVideoThumbnails();
+    }
+
   }, false);
 }
 

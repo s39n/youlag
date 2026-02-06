@@ -137,7 +137,7 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
 
       <div class="youlag-video-container">
         <div class="youlag-thumbnail-container">
-          <img src="${videoObject.thumbnail}" class="youlag-video-thumbnail" loading="lazy" />
+          <img src="${videoObject.thumbnail_by_author}" class="youlag-video-thumbnail" loading="lazy" />
         </div>
         <div class="youlag-iframe-container">
           <iframe id="${app.modal.id.videoIframe}"
@@ -149,7 +149,7 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
       </div>
 
       <div class="yl-video-blur-backdrop-effect">
-        <img src="${videoObject.thumbnail}" class="yl-video-blur-backdrop-effect__image" loading="lazy" />
+        <img src="${videoObject.thumbnail_by_author}" class="yl-video-blur-backdrop-effect__image" loading="lazy" />
       </div>
 
       <div id="${app.modal.id.chapterContainer}" class="${Array.isArray(videoObject?.video_chapters) && videoObject?.video_chapters.length > 0 ? '' : 'display-none'}">

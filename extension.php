@@ -18,6 +18,11 @@ class YoulagExtension extends Minz_Extension
    */
   protected $yl_feed_view_mobile_grid_enabled = false;
   /**
+   * Set feed thumbnails to be screencaps of the video instead of the default thumbnail provided by the rss feed.
+   * @var bool
+   */
+  protected $yl_feed_thumbnail_screencap_enabled = false;
+  /**
    * Experimental feature: Enable filtering entries by category on Watch later page.
    * @var bool
    */
@@ -75,10 +80,11 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 15);
     $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 16);
     $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 17);
-    $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 18);
+    $this->registerHook('nav_entries', array($this, 'setFeedThumbnailScreencapEnabled'), 18);
+    $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 19);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
-      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 19);
+      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 20);
     }
 
     // Add Youlag theme and script to all extension pages
@@ -144,6 +150,9 @@ class YoulagExtension extends Minz_Extension
     $feedViewMobileGridEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_view_mobile_grid_enabled');
     $this->yl_feed_view_mobile_grid_enabled = ($feedViewMobileGridEnabled === null) ? false : $feedViewMobileGridEnabled;
 
+    $feedThumbnailScreencapEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_thumbnail_screencap_enabled');
+    $this->yl_feed_thumbnail_screencap_enabled = ($feedThumbnailScreencapEnabled === null) ? false : $feedThumbnailScreencapEnabled;
+
     $watchLaterCategoryFilterEnabled = FreshRSS_Context::userConf()->attributeBool('yl_watch_later_category_filter_enabled');
     $this->yl_watch_later_category_filter_enabled = ($watchLaterCategoryFilterEnabled === null) ? false : $watchLaterCategoryFilterEnabled;
 
@@ -197,6 +206,7 @@ class YoulagExtension extends Minz_Extension
   /**
    * Pass the mobile grid layout setting to be read in the DOM via nav_entries hook.
    * The frontend js handles the behavior based on this the value in `data-yl-feed-view-mobile-grid-enabled`.
+   * @return string
    */
   public function setFeedViewLayoutMobileGrid(): string
   {
@@ -205,8 +215,20 @@ class YoulagExtension extends Minz_Extension
   }
 
   /**
+   * Pass the feed thumbnail screencap setting to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-feed-thumbnail-screencap-enabled`.
+   * @return string
+   */
+  public function setFeedThumbnailScreencapEnabled(): string
+  {
+    $enabled = $this->yl_feed_thumbnail_screencap_enabled ? 'true' : 'false';
+    return '<div id="yl_feed_thumbnail_screencap_enabled" data-yl-feed-thumbnail-screencap-enabled="' . $enabled . '"></div>';
+  }
+
+  /**
    * Pass the Watch later category filter setting to be read in the DOM via nav_entries hook.
    * The frontend js handles the behavior based on this the value in `data-yl-watch-later-category-filter-enabled`.
+   * @return string
    */
   public function setWatchLaterCategoryFilterEnabled(): string
   {
@@ -217,6 +239,7 @@ class YoulagExtension extends Minz_Extension
   /**
    * Pass the mini player swipe setting to be read in the DOM via nav_entries hook.
    * The frontend js handles the behavior based on this the value in `data-yl-mini-player-swipe-enabled`.
+   * @return string
    */
   public function setMiniplayerSwipeEnabled(): string
   {
@@ -661,6 +684,10 @@ class YoulagExtension extends Minz_Extension
       // Feed view mobile grid layout
       $feedViewMobileGridEnabled = Minz_Request::paramBoolean('yl_feed_view_mobile_grid_enabled', false);
       FreshRSS_Context::userConf()->_attribute('yl_feed_view_mobile_grid_enabled', $feedViewMobileGridEnabled);
+
+      // Feed thumbnail screencap
+      $feedThumbnailScreencapEnabled = Minz_Request::paramBoolean('yl_feed_thumbnail_screencap_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_feed_thumbnail_screencap_enabled', $feedThumbnailScreencapEnabled);
 
       // Watch later category filter
       $watchLaterCategoryFilterEnabled = Minz_Request::paramBoolean('yl_watch_later_category_filter_enabled', false);
