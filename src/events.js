@@ -28,7 +28,6 @@ function init() {
     restoreVideoQueue();
 
     if (shouldUseScreencapThumbnail()) {
-      console.log('Using screencap thumbnails based on user setting');
       setFeedVideoThumbnails();
     }
   }
@@ -68,7 +67,6 @@ function handleExperimentalFeature() {
   const isWatchLaterCategoryFilterEnabled = watchLaterCategoryFilterEnabledSetting === 'true';
   if (isWatchLaterCategoryFilterEnabled && categoryFilterToggle) {
     app.state.youlag.experimentalFeatureEnabled = true;
-    console.info('%cYoulag: Experimental feature "Category filter" for Watch later (Favorite) page is enabled.', 'color: #b6deff; background: #003f6cac; padding: 4px 8px; border-radius: 4px;');
     categoryFilterToggle.style.setProperty('display', 'flex', 'important');
   }
 }

@@ -529,21 +529,25 @@ function renderRelatedVideos(videoObject) {
 
   // The `app.modal.class.relatedVideoEntryHTML` contains the original feed entry HTML and is not displayed 
   // as its purpose is to be parsed when opening a the related video.
-  let template = (videoObject) =>  `
-    <div class="${app.modal.class.relatedVideoEntry}" data-yl-feed="${videoObject.entryId}">
-      <div class="${app.modal.class.relatedVideoEntryHTML} display-none">
-        ${videoObject.feedItem.outerHTML}
-      </div>
-      <div class="youlag-related-video-item__thumbnail"><img src="${videoObject.thumbnail}" loading="lazy" ></div>
-      <div class="youlag-related-video-item__metadata">
-        <div class="youlag-related-video-item__title">${videoObject.title}</div>
-        <div class="youlag-related-video-item__author">${videoObject.website_name}</div>
-        <div class="youlag-related-video-item__date">
-          ${getRelativeDate(videoObject.date)}
+  function template(videoObject, customThumbnail) {    
+    let thumbnail = customThumbnail || videoObject.thumbnail || '';
+
+    return `
+      <div class="${app.modal.class.relatedVideoEntry}" data-yl-feed="${videoObject.entryId}">
+        <div class="${app.modal.class.relatedVideoEntryHTML} display-none">
+          ${videoObject.feedItem.outerHTML}
+        </div>
+        <div class="youlag-related-video-item__thumbnail"><img src="${thumbnail}" loading="lazy" ></div>
+        <div class="youlag-related-video-item__metadata">
+          <div class="youlag-related-video-item__title">${videoObject.title}</div>
+          <div class="youlag-related-video-item__author">${videoObject.website_name}</div>
+          <div class="youlag-related-video-item__date">
+            ${getRelativeDate(videoObject.date)}
+          </div>
         </div>
       </div>
-    </div>
-  `
+    `;
+  }
 
   function appendRelatedVideos(currentEntryId, currentAuthorId) {
     // Append related videos to the video modal.
@@ -572,8 +576,21 @@ function renderRelatedVideos(videoObject) {
 
     relatedVideos.then(videos => {
       if (!Array.isArray(videos) || videos.length === 0) return;
+
       videos.forEach(videoObject => {
-        const videoHtml = template(videoObject);
+        let thumbnail;
+        const isVideoFeedItem = getVideoIdFromUrl(videoObject.external_link) ? true : false;
+        const youtubeId = isVideoFeedItem ? getVideoIdFromUrl(videoObject.external_link) : '';
+
+        if (shouldUseScreencapThumbnail() && youtubeId) {
+          // If screencap thumbnail setting is enabled, replace default thumbnail.
+          thumbnail = getVideoScreencapSrc(youtubeId);
+        }
+        if (!thumbnail) {
+          thumbnail = videoObject.thumbnail;
+        }
+
+        const videoHtml = template(videoObject, thumbnail);
         if (videoObject.entryId === currentlyViewing) return; // Skip currently viewing video.
         relatedVideosContainer.insertAdjacentHTML('beforeend', videoHtml);
       });
@@ -606,7 +623,6 @@ function renderRelatedVideos(videoObject) {
     };
     relatedVideosContainer.addEventListener('click', relatedClickHandler);
     modal._videoModalListeners.push({ el: relatedVideosContainer, type: 'click', handler: relatedClickHandler });
-
   }
 
   appendRelatedVideos(videoObject.entryId, videoObject.authorId);
