@@ -451,22 +451,31 @@ async function handleFeedDearrowFeatures() {
     return entryImg.closest(`${app.frss.el.entry}[data-entry]`);
   }
 
-  // Update thumbnail image and add video duration badge.
+  // Update thumbnail image and add video duration badge in batch.
+  const videoIdEntryMap = [];
   for (const entryImg of feedEntriesThumbnail) {
-    let thumbnail = entryImg.src; // Default
-    
     const videoId = getVideoIdFromUrl(entryImg.src);
-    if (!videoId) continue;
+    if (videoId) {
+      videoIdEntryMap.push({ entryImg, videoId });
+    }
+    else {
+      console.warn('Youlag: No videoId found for entryImg:', entryImg);
+    }
+  }
 
-    const dearrowData = await getDearrowData(videoId);
+  const dearrowResults = await Promise.all(videoIdEntryMap.map(({ videoId }) => getDearrowData(videoId)));
 
+  for (let i = 0; i < videoIdEntryMap.length; i++) {
+    const { entryImg, videoId } = videoIdEntryMap[i];
+    const dearrowData = dearrowResults[i];
+    let thumbnail = entryImg.src;
     if (dearrowData && typeof dearrowData === 'object') {
       // Thumbnail priority: DeArrow thumbnail -> YouTube screencap -> original thumbnail.
       if (shouldUseScreencap && dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
         thumbnail = dearrowData.thumbnails[0].url;
-        entryImg.src = thumbnail;
         entryImg.setAttribute('data-yl-video-screencap', 'true'); 
         entryImg.setAttribute('data-yl-original-src', entryImg.src);
+        entryImg.src = thumbnail; // Ensure DOM image is actually updated
       }
 
       // Video duration on top of thumbnail
@@ -478,6 +487,9 @@ async function handleFeedDearrowFeatures() {
         entryImg.parentElement.appendChild(durationEl);
         getEntryRootElement(entryImg)?.setAttribute('data-yl-video-duration', videoDurationText);
       }
+    }
+    else {
+      console.warn('Youlag: No dearrowData for videoId:', videoId);
     }
   }
 }
