@@ -63,6 +63,11 @@ class YoulagExtension extends Minz_Extension
    */
   protected $yl_video_sort_modified_enabled = false;
 
+
+  protected array $csp_policies = [
+    'connect-src' => "'self' https://sponsor.ajay.app/", 
+  ];
+
   /**
    * Initialize this extension
    */

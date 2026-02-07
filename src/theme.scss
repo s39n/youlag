@@ -1493,7 +1493,23 @@ body.youlag-active:not(.reader) main#stream div.flux {
     background: linear-gradient(209deg, #5c3c1a 0%, #181009 40%, #3d260a 100%) !important;
   }
 
-
+  .yl-video-duration {
+    // If Dearrow provides a video duration, display it on the thumbnail. 
+    position: absolute;
+    bottom: calc(var(--yl-p-3xs) * 1.5);
+    right: calc(var(--yl-p-3xs) * 1.5);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--yl-p-3xs);
+    border-radius: 8px;
+    background-color: hsla(0, 0%, 0%, 0.7);
+    font-size: var(--yl-text-xs);
+    font-weight: 600;
+    color: var(--yl-color-text-default);
+    line-height: 1;
+  }
 
   &:not(.current):not(.active) .flux_header {
     &:before {

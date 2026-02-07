@@ -20,16 +20,13 @@ function init() {
     if (isLayoutVideo()) {
       updateVideoAuthor();
       updateVideoDateFormat();
+      handleFeedDearrowFeatures();
       if (isWatchLaterPage()) {
         setWatchLaterCategoryFilter();
       }
     }
     onNewFeedItems();
     restoreVideoQueue();
-
-    if (shouldUseScreencapThumbnail()) {
-      setFeedVideoThumbnails();
-    }
   }
   updateSidenavLinks();
   settingsPageEventListeners();

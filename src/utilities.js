@@ -230,7 +230,7 @@ function appendOriginalSrc(element) {
 }
 
 
-function getVideoScreencap(youtubeId) {
+function getDearrowScreencap(youtubeId) {
   // Returns the Dearrow thumbnail URL synchronously (no fallback check).
   if (!youtubeId) return '';
   return `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${youtubeId}`;
@@ -243,7 +243,7 @@ async function getVideoScreencapWithFallback(youtubeId) {
   // 3. Fallback to hqdefault.jpg.
 
   if (!youtubeId) return '';
-  const dearrowUrl = getVideoScreencap(youtubeId);
+  const dearrowUrl = getDearrowScreencap(youtubeId);
   const youtubeScreencapUrl = `https://img.youtube.com/vi/${youtubeId}/1.jpg`;
   const youtubeThumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
   
@@ -266,7 +266,7 @@ async function getVideoScreencapWithFallback(youtubeId) {
       const idx = (y * w + x) * 4;
       return data[idx] + data[idx+1] + data[idx+2] + data[idx+3];
     }
-    
+
     let hash = 0;
     hash += pixelSum(0, 0); // top-left
     hash += pixelSum(w-1, 0); // top-right
@@ -576,6 +576,19 @@ function getRelativeDate(date) {
     }
   }
   return 'Just now';
+}
+
+function formatTime(seconds) {
+  // Format seconds into HH:MM:SS or MM:SS.
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  if (hrs > 0) {
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  else {
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
 }
 
 function shouldUseScreencapThumbnail() {

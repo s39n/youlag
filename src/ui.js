@@ -25,8 +25,7 @@ function setupClickListener() {
 
   if (isLayoutVideo()) {
     setupVideoClickListener();
-  }
-  else if (isLayoutArticle()) {
+  } else if (isLayoutArticle()) {
     setupArticleClickListener();
   }
 
@@ -433,27 +432,51 @@ function setSidenavState() {
   document.body.classList.toggle('youlag-sidenav--collapsed', !expanded);
 }
 
-function setFeedVideoThumbnails() {
+async function handleFeedDearrowFeatures() {
   // Video, article: Replace the thumbnail of a feed entry in the stream, and also in related videos, but not the video modal.
- 
+
   markVideoFeedItems(); // Adds `data-yl-is-video="true"` for video feed entries.
 
   const feedRootSelector = app.frss.el.feedRoot;
-  const entrySelector = `${app.frss.el.entry}[data-yl-is-video="true"]:not([data-yl-video-screencap="true"])`;
+  // Only target entries that are videos, and haven't been processed for thumbnail or duration badge yet.
+  const entrySelector = `${app.frss.el.entry}[data-yl-is-video="true"]:not([data-yl-video-screencap="true"]):not([data-yl-video-duration])`;
   const thumbnailSelector = ".item.thumbnail img";
   const feedEntriesSelector = `${feedRootSelector} ${entrySelector} ${thumbnailSelector}`;
   const feedEntries = document.querySelectorAll(feedEntriesSelector);
+  const entryRoot = document.querySelector(feedRootSelector);
 
-  feedEntries.forEach(entryImg => {
+  function getEntryRootElement(entryImg) {
+    // The root element of a feed entry, which contains the data-yl-is-video attribute. Used for setting attributes like data-yl-video-duration.
+    return entryImg.closest(`${app.frss.el.entry}[data-entry]`);
+  }
+
+  // Update thumbnail image and add video duration badge.
+  for (const entryImg of feedEntries) {
     const videoId = getVideoIdFromUrl(entryImg.src);
-    if (!videoId) return;
+    if (!videoId) continue;
 
-    entryImg.setAttribute('data-yl-original-src', entryImg.src);
-    getVideoScreencapWithFallback(videoId).then(thumbnail => {
-      entryImg.src = thumbnail;
-      entryImg.setAttribute('data-yl-video-screencap', 'true');  // Mark as dirty to avoid reprocessing when called repeatedly in `onNewFeedItems()`.
-    });
-  });
+    let thumbnail = entryImg.src; // Default
+    const dearrowData = await getDearrowData(videoId);
+
+    if (dearrowData && typeof dearrowData === 'object') {
+      // Thumbnail priority: DeArrow thumbnail -> YouTube screencap -> original thumbnail.
+      if (shouldUseScreencapThumbnail() && dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
+        thumbnail = dearrowData.thumbnails[0].url;
+        entryImg.setAttribute('data-yl-video-screencap', 'true'); 
+        entryImg.setAttribute('data-yl-original-src', entryImg.src);
+      }
+
+      // Video duration on top of thumbnail
+      if (dearrowData.videoDuration) {
+        const durationEl = document.createElement('div');
+        const videoDurationText = formatTime(dearrowData.videoDuration);
+        durationEl.className = 'yl-video-duration';
+        durationEl.textContent = videoDurationText;
+        entryImg.parentElement.appendChild(durationEl);
+        getEntryRootElement(entryImg)?.setAttribute('data-yl-video-duration', videoDurationText);
+      }
+    }
+  }
 }
 
 /*****************************************
@@ -1036,9 +1059,7 @@ function onNewFeedItems() {
       }
     }
 
-    if (shouldUseScreencapThumbnail()) {
-      setFeedVideoThumbnails();
-    }
+    handleFeedDearrowFeatures();
 
   }, false);
 }

@@ -112,7 +112,7 @@ function extractFeedItemData(feedItem) {
   let thumbnail_video_screencap = '';
   if (isVideoFeedItem) {
     thumbnail_video = `https://img.youtube.com/vi/${app.state.modal.youtubeId}/sddefault.jpg`;
-    thumbnail_video_screencap = getVideoScreencap(app.state.modal.youtubeId);
+    thumbnail_video_screencap = getDearrowScreencap(app.state.modal.youtubeId);
   }
 
   const videoObject = {
@@ -223,6 +223,45 @@ function extractVideoDescriptionChapters(videoDescription) {
   return [];
 }
 
+async function getDearrowData(youtubeId) {
+  if (!youtubeId) return null;
+
+  const apiUrl = `https://sponsor.ajay.app/api/branding?videoID=${encodeURIComponent(youtubeId)}`;
+  let randomTime = null;
+  let videoDuration = null;
+  try {
+    const response = await fetch(apiUrl);
+    if (response.ok) {
+      const data = await response.json();
+      // Essential log for debugging
+      console.log('[Youlag] DeArrow API response:', youtubeId, data);
+      randomTime = data.randomTime;
+      videoDuration = data.videoDuration;
+    }
+  } catch (e) {
+    // API failed, fallback to nulls
+  }
+
+  // Always use getVideoScreencapWithFallback for thumbnail URL
+  const fallbackUrl = await getVideoScreencapWithFallback(youtubeId);
+  const fallbackObj = {
+    thumbnails: [{
+      timestamp: null,
+      original: true,
+      votes: 0,
+      locked: false,
+      UUID: '',
+      userID: '',
+      url: fallbackUrl
+    }],
+    randomTime,
+    videoDuration
+  };
+  console.log('Fallback:', fallbackObj);
+  console.log('time:', formatTime(videoDuration), 'randomTime:', formatTime(randomTime));
+  return fallbackObj;
+
+}
 
 function getSubpageParentId(getParam) {
   /**
