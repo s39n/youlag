@@ -33,7 +33,7 @@ Optimized for both watching videos and reading articles.
   - Browse YouTube subscriptions through a video-tailored inferface
   - Mini player: keep video in corner while reading articles
   - Video chapters navigation
-  - Replace clickbait thumbnails with screen captures (experimental feature)
+  - Replace clickbait thumbnails with screen captures
   - Modernized article viewing experience
 - ⚙️ **Customization**
   - Block YouTube shorts
@@ -82,7 +82,7 @@ Before installing Youlag, please make sure to update FreshRSS to `1.28.0` or hig
 
 ## Attributions
 
-- **Integration**: [Korbak/freshrss-invidious](https://github.com/Korbak/freshrss-invidious)
+- **Integration**: [Korbak/freshrss-invidious](https://github.com/Korbak/freshrss-invidious), [DeArrow](https://github.com/ajayyy/DeArrow) (partial)
 - **Icons used/remixed**: [SVG Repo](https://www.svgrepo.com/collection/design-and-development-elements/), [krystonschwarze](https://www.svgrepo.com/author/krystonschwarze/), [phosphor](https://www.svgrepo.com/author/phosphor/), [Solar Icons](https://www.svgrepo.com/svg/529779/playlist), [Dazzle UI](https://www.svgrepo.com/author/Dazzle%20UI/), [n3r4zzurr0/svg-spinners](https://github.com/n3r4zzurr0/svg-spinners).
 - **Tools**: [SVGOptimizer](https://jakearchibald.github.io/svgomg/).
 
