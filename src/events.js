@@ -12,7 +12,6 @@ function init() {
   clearPathHash();
   setBodyClass();
   if (isFeedPage()) {
-
     setupClickListener();
     setupVisibilityEventListeners();
     setupTagsDropdownOverride();
@@ -20,11 +19,11 @@ function init() {
     if (isLayoutVideo()) {
       updateVideoAuthor();
       updateVideoDateFormat();
-      handleFeedDearrowFeatures();
       if (isWatchLaterPage()) {
         setWatchLaterCategoryFilter();
       }
     }
+    handleFeedDearrowFeatures();
     onNewFeedItems();
     restoreVideoQueue();
   }

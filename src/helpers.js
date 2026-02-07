@@ -234,7 +234,6 @@ async function getDearrowData(youtubeId) {
     if (response.ok) {
       const data = await response.json();
       // Essential log for debugging
-      console.log('[Youlag] DeArrow API response:', youtubeId, data);
       randomTime = data.randomTime;
       videoDuration = data.videoDuration;
     }
@@ -257,10 +256,7 @@ async function getDearrowData(youtubeId) {
     randomTime,
     videoDuration
   };
-  console.log('Fallback:', fallbackObj);
-  console.log('time:', formatTime(videoDuration), 'randomTime:', formatTime(randomTime));
   return fallbackObj;
-
 }
 
 function getSubpageParentId(getParam) {
