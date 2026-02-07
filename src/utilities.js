@@ -239,19 +239,45 @@ function getVideoScreencap(youtubeId) {
 async function getVideoScreencapWithFallback(youtubeId) {
   // Resolves to the best available thumbnail URL, 
   // Prioritizes DeArrow, falls back to YouTube's low-res screencap.
+  
   if (!youtubeId) return Promise.resolve('');
   const dearrowUrl = getVideoScreencap(youtubeId);
-  const youtubeUrl = `https://img.youtube.com/vi/${youtubeId}/1.jpg`;
+  const youtubeScreencapUrl = `https://img.youtube.com/vi/${youtubeId}/1.jpg`;
+  const youtubeThumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
   return new Promise((resolve) => {
     const img = new window.Image();
     img.onload = () => resolve(dearrowUrl);
-    img.onerror = () => {
-      const fallbackImg = new window.Image();
-      fallbackImg.onload = () => resolve(youtubeUrl);
-      fallbackImg.onerror = () => resolve(youtubeUrl);
-      fallbackImg.src = youtubeUrl;
-    };
+    img.onerror = tryFallback;
     img.src = dearrowUrl;
+
+    function tryFallback() {
+      const fallbackImg = new window.Image();
+      fallbackImg.onload = () => {
+        if (fallbackImg.naturalWidth === 120 && fallbackImg.naturalHeight === 90) {
+          // Consider YouTube placeholder image as thumbnail missing.
+          tryThirdFallback();
+        }
+        else {
+          resolve(youtubeScreencapUrl);
+        }
+      };
+      fallbackImg.onerror = tryThirdFallback;
+      fallbackImg.src = youtubeScreencapUrl;
+    }
+
+    function tryThirdFallback() {
+      const thirdImg = new window.Image();
+      thirdImg.onload = () => {
+        if (thirdImg.naturalWidth === 120 && thirdImg.naturalHeight === 90) {
+          resolve(''); // All failed
+        }
+        else {
+          resolve(youtubeThumbnailUrl);
+        }
+      };
+      thirdImg.onerror = () => resolve('');
+      thirdImg.src = youtubeThumbnailUrl;
+    }
   });
 }
 
