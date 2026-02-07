@@ -299,7 +299,7 @@ function setBodyClass() {
   setUnreadBadgeClass();
   setPageSortingClass();
   document.body.setAttribute('data-youlag-version', app.metadata.version);
-  shouldUseScreencapThumbnail() && document.body.classList.add('yl-feed-thumbnail--screencap');
+  shouldCustomThumbnailTitle() && document.body.classList.add('yl-feed-custom-thumbnail-title');
 }
 
 function setCategoryWhitelistClass() {
@@ -445,7 +445,7 @@ async function handleFeedDearrowFeatures() {
   const feedEntriesThumbnail = document.querySelectorAll(feedEntriesSelector);
   const feedEntriesTitle = document.querySelectorAll(`${feedRootSelector} ${entrySelector} .flux_header .titleAuthorSummaryDate a.title`);
   const pageLayoutVideo = isLayoutVideo();
-  const shouldUseScreencap = shouldUseScreencapThumbnail();
+  const useCustomThumbTitle = shouldCustomThumbnailTitle();
 
   function getEntryRootElement(entryImg) {
     // The root element of a feed entry, which contains the data-yl-is-video attribute. Used for setting attributes like data-yl-video-duration.
@@ -457,7 +457,7 @@ async function handleFeedDearrowFeatures() {
   const videoIdTitleMap = [];
   const videoIdSet = new Set();
 
-  if (shouldUseScreencap) {
+  if (useCustomThumbTitle) {
     // Store thumbnail data
     for (const entryImg of feedEntriesThumbnail) {
       const videoId = getVideoIdFromUrl(entryImg.src);
@@ -484,7 +484,7 @@ async function handleFeedDearrowFeatures() {
     dearrowDataMap[videoIdList[i]] = dearrowResults[i];
   }
 
-  if (shouldUseScreencap) {
+  if (useCustomThumbTitle) {
     // Update video titles
     for (const { entryTitle, videoId } of videoIdTitleMap) {
       const dearrowData = dearrowDataMap[videoId];
@@ -501,7 +501,7 @@ async function handleFeedDearrowFeatures() {
     let thumbnail = entryImg.src;
     if (dearrowData && typeof dearrowData === 'object') {
       // Thumbnail priority: DeArrow thumbnail -> YouTube screencap -> original thumbnail.
-      if (shouldUseScreencap && dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
+      if (useCustomThumbTitle && dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
         thumbnail = dearrowData.thumbnails[0].url;
         entryImg.setAttribute('data-yl-video-screencap', 'true');
         entryImg.setAttribute('data-yl-original-src', entryImg.src);

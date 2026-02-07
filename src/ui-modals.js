@@ -581,7 +581,7 @@ function renderRelatedVideos(videoObject) {
         const isVideoFeedItem = getVideoIdFromUrl(videoObject.external_link) ? true : false;
         const youtubeId = isVideoFeedItem ? getVideoIdFromUrl(videoObject.external_link) : '';
 
-        if (shouldUseScreencapThumbnail() && youtubeId) {
+        if (shouldCustomThumbnailTitle() && youtubeId) {
           // If screencap thumbnail setting is enabled, replace default thumbnail.
           thumbnail = await getVideoScreencapWithFallback(youtubeId);
         }

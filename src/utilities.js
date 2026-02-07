@@ -591,11 +591,10 @@ function formatTime(seconds) {
   }
 }
 
-function shouldUseScreencapThumbnail() {
-  // TODO 2026-02-07: This is the check for both usage of dearrow screencap and title.   
-  const setting = document.querySelector('#yl_feed_thumbnail_screencap_enabled');
+function shouldCustomThumbnailTitle() {
+  const setting = document.querySelector('#yl_custom_thumbnail_title_enabled');
   if (!setting) return false;
-  const shouldUseScreencapThumbnail = setting.getAttribute('data-yl-feed-thumbnail-screencap-enabled');
+  const shouldUseScreencapThumbnail = setting.getAttribute('data-yl-custom-thumbnail-title-enabled');
   return shouldUseScreencapThumbnail === 'true';
 }
 

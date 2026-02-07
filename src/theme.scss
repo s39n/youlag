@@ -2142,7 +2142,7 @@ body.youlag-active:not(.reader).youlag-mobile-layout--grid {
 
 /* Video, article: If setting to use screencap thumbnail is enabled */
 body {
-  &.yl-feed-thumbnail--screencap {
+  &.yl-feed-custom-thumbnail-title {
     /* Hide the original thumbnail */
     div.flux .flux_header {
       &:before {
@@ -2150,18 +2150,21 @@ body {
         display: none;
       }
           
+      .item.titleAuthorSummaryDate,
       .item.thumbnail {
         opacity: 0;
       }
     }  
   }
 
-  &.yl-feed-thumbnail--screencap.youlag-loaded {
+  &.yl-feed-custom-thumbnail-title.youlag-loaded {
     /* Once Youlag is ready, display the screencap thumbnail. Affects only video feed entries. */
     div.flux .flux_header {
+
+      .item.titleAuthorSummaryDate,
       .item.thumbnail {
         /* Add an artificial loading delay on page init,
-         * reduces chance of content flash when switching from thumbnail to screencap. */
+         * reduces chance of content flash when switching to custom thumbnail and title. */
          animation: fade-in 0s forwards;
          animation-delay: 0.25s;
       }

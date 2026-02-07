@@ -21,7 +21,7 @@ class YoulagExtension extends Minz_Extension
    * Set feed thumbnails to be screencaps of the video instead of the default thumbnail provided by the rss feed.
    * @var bool
    */
-  protected $yl_feed_thumbnail_screencap_enabled = false;
+  protected $yl_custom_thumbnail_title_enabled = false;
   /**
    * Experimental feature: Enable filtering entries by category on Watch later page.
    * @var bool
@@ -155,8 +155,8 @@ class YoulagExtension extends Minz_Extension
     $feedViewMobileGridEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_view_mobile_grid_enabled');
     $this->yl_feed_view_mobile_grid_enabled = ($feedViewMobileGridEnabled === null) ? false : $feedViewMobileGridEnabled;
 
-    $feedThumbnailScreencapEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_thumbnail_screencap_enabled');
-    $this->yl_feed_thumbnail_screencap_enabled = ($feedThumbnailScreencapEnabled === null) ? false : $feedThumbnailScreencapEnabled;
+    $feedThumbnailScreencapEnabled = FreshRSS_Context::userConf()->attributeBool('yl_custom_thumbnail_title_enabled');
+    $this->yl_custom_thumbnail_title_enabled = ($feedThumbnailScreencapEnabled === null) ? false : $feedThumbnailScreencapEnabled;
 
     $watchLaterCategoryFilterEnabled = FreshRSS_Context::userConf()->attributeBool('yl_watch_later_category_filter_enabled');
     $this->yl_watch_later_category_filter_enabled = ($watchLaterCategoryFilterEnabled === null) ? false : $watchLaterCategoryFilterEnabled;
@@ -219,18 +219,18 @@ class YoulagExtension extends Minz_Extension
 
   public function isFeedThumbnailScreencapEnabled(): bool
   {
-    return $this->yl_feed_thumbnail_screencap_enabled;
+    return $this->yl_custom_thumbnail_title_enabled;
   }
 
   /**
    * Pass the feed thumbnail screencap setting to be read in the DOM via nav_entries hook.
-   * The frontend js handles the behavior based on this the value in `data-yl-feed-thumbnail-screencap-enabled`.
+   * The frontend js handles the behavior based on this the value in `data-yl-custom-thumbnail-title-enabled`.
    * @return string
    */
   public function setFeedThumbnailScreencapEnabled(): string
   {
-    $enabled = $this->yl_feed_thumbnail_screencap_enabled ? 'true' : 'false';
-    return '<div id="yl_feed_thumbnail_screencap_enabled" data-yl-feed-thumbnail-screencap-enabled="' . $enabled . '"></div>';
+    $enabled = $this->yl_custom_thumbnail_title_enabled ? 'true' : 'false';
+    return '<div id="yl_custom_thumbnail_title_enabled" data-yl-custom-thumbnail-title-enabled="' . $enabled . '"></div>';
   }
 
   /**
@@ -694,8 +694,8 @@ class YoulagExtension extends Minz_Extension
       FreshRSS_Context::userConf()->_attribute('yl_feed_view_mobile_grid_enabled', $feedViewMobileGridEnabled);
 
       // Feed thumbnail screencap
-      $feedThumbnailScreencapEnabled = Minz_Request::paramBoolean('yl_feed_thumbnail_screencap_enabled', false);
-      FreshRSS_Context::userConf()->_attribute('yl_feed_thumbnail_screencap_enabled', $feedThumbnailScreencapEnabled);
+      $feedThumbnailScreencapEnabled = Minz_Request::paramBoolean('yl_custom_thumbnail_title_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_custom_thumbnail_title_enabled', $feedThumbnailScreencapEnabled);
 
       // Watch later category filter
       $watchLaterCategoryFilterEnabled = Minz_Request::paramBoolean('yl_watch_later_category_filter_enabled', false);
