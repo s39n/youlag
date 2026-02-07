@@ -436,8 +436,6 @@ function setSidenavState() {
 function setFeedVideoThumbnails() {
   // Video, article: Replace the thumbnail of a feed entry in the stream, and also in related videos, but not the video modal.
  
-  // TODO: Can be done more efficiently via SSR instead, to not require any DOM manipulation and flash of content when replacing the image.
-
   markVideoFeedItems(); // Adds `data-yl-is-video="true"` for video feed entries.
 
   function getDearrowData(entryImg) {
@@ -459,7 +457,6 @@ function setFeedVideoThumbnails() {
     return dearrowData;
   }
 
-
   const feedRootSelector = app.frss.el.feedRoot;
   const entrySelector = `${app.frss.el.entry}[data-yl-is-video="true"]:not([data-yl-video-screencap="true"])`;
   const thumbnailSelector = ".item.thumbnail img";
@@ -471,18 +468,18 @@ function setFeedVideoThumbnails() {
     if (!videoId) return;
 
     let thumbnail = entryImg.src; // Default
-    const dearrowData = getDearrowData(entryImg);
+    // const dearrowData = getDearrowData(entryImg);
 
-    console.log('Dearrow', dearrowData);
+    // if (dearrowData && typeof dearrowData === 'object') {
+    //   if (dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
+    //     thumbnail = dearrowData.thumbnails[0].url;
+    //   }
+    // }
+    // else {
+    //   thumbnail = getVideoScreencapSrc(videoId);
+    // }
 
-    if (dearrowData && typeof dearrowData === 'object') {
-      if (dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
-        thumbnail = dearrowData.thumbnails[0].url;
-      }
-    }
-    else {
-      thumbnail = getVideoScreencapSrc(videoId);
-    }
+    thumbnail = getVideoScreencapSrc(videoId);
 
     entryImg.setAttribute('data-yl-original-src', entryImg.src);
     entryImg.src = thumbnail;

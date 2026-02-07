@@ -69,7 +69,12 @@ class YoulagExtension extends Minz_Extension
   public function init(): void
   {
     // TODO: Refactor to pass data with `Minz_HookType::JsVars` instead.
-    $this->registerHook('entry_before_display', array($this, 'setDearrowBranding'));
+    
+    /**
+     * NOTE 2026-02-07: Currently not in use, due to slow loading performance caused by the additional API call for each video entry.
+     * $this->registerHook('entry_before_display', array($this, 'setDearrowBranding'));
+     */
+    
     $this->registerHook('entry_before_display', array($this, 'setInvidiousURL'));
     $this->registerHook('nav_entries', array($this, 'createFreshRssLogo'), 6);
     $this->registerHook('nav_entries', array($this, 'createCategoryTitle'), 7);
