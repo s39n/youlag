@@ -32,8 +32,9 @@ Optimized for both watching videos and reading articles.
 - 📺 **Videos & Articles**
   - Browse YouTube subscriptions through a video-tailored inferface
   - Mini player: keep video in corner while reading articles
+  - Video chapters navigation
+  - Replace clickbait thumbnails with screen captures (experimental feature)
   - Modernized article viewing experience
-  - Video chapters support for timestamp navigation
 - ⚙️ **Customization**
   - Block YouTube shorts
   - Apply video mode layout to chosen categories
