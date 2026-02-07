@@ -69,12 +69,6 @@ class YoulagExtension extends Minz_Extension
   public function init(): void
   {
     // TODO: Refactor to pass data with `Minz_HookType::JsVars` instead.
-    
-    /**
-     * NOTE 2026-02-07: Currently not in use, due to slow loading performance caused by the additional API call for each video entry.
-     * $this->registerHook('entry_before_display', array($this, 'setDearrowBranding'));
-     */
-    
     $this->registerHook('entry_before_display', array($this, 'setInvidiousURL'));
     $this->registerHook('nav_entries', array($this, 'createFreshRssLogo'), 6);
     $this->registerHook('nav_entries', array($this, 'createCategoryTitle'), 7);
@@ -171,117 +165,6 @@ class YoulagExtension extends Minz_Extension
     $sortModifiedEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_sort_modified_enabled');
     $this->yl_video_sort_modified_enabled = ($sortModifiedEnabled === null) ? false : $sortModifiedEnabled;
   }
-
-
-  /**
-   * Fetches Dearrow branding for a YouTube video and injects it as a DOM element in the entry content.
-   * @param FreshRSS_Entry $entry
-   * @return FreshRSS_Entry
-   */
-  public function setDearrowBranding($entry): FreshRSS_Entry
-  {
-    
-    $this->loadConfigValues();
-    if (!$this->isFeedThumbnailScreencapEnabled()) {
-      return $entry;
-    }
-
-    $content = $entry->content();
-    $link = $entry->link();
-    $youtubeId = '';
-    if (preg_match(pattern: '#https?://(?:www\\.)?youtube\\.com/watch\\?v=([\w-]{11})#i', subject: $link, matches: $m) ||
-        preg_match(pattern: '#https?://youtu\\.be/([\w-]{11})#i', subject: $link, matches: $m)) {
-      $youtubeId = $m[1];
-    }
-    if ($youtubeId) {
-      $apiUrl = 'https://sponsor.ajay.app/api/branding?videoID=' . urlencode(string: $youtubeId) . '&service=YouTube';
-      $opts = [
-        'http' => [
-          'method' => 'GET',
-          'timeout' => 2,
-          'header' => [
-            'Accept: application/json',
-            'User-Agent: Youlag-FreshRSS-Extension'
-          ]
-        ]
-      ];
-      $context = stream_context_create(options: $opts);
-      $json = @file_get_contents(filename: $apiUrl, use_include_path: false, context: $context);
-      $branding = null;
-      if ($json !== false) {
-        $branding = @json_decode(json: $json, associative: true);
-      }
-
-      // Fallback for unavailable response
-      if (!is_array($branding)) {
-        $branding = [
-          'titles' => [],
-          'thumbnails' => [],
-        ];
-      }
-
-      // Replace entry title if trusted title exists
-      $trustedTitle = null;
-      if (is_array($branding['titles']) && count($branding['titles']) > 0) {
-        $firstTitle = $branding['titles'][0];
-        if ((isset($firstTitle['locked']) && $firstTitle['locked'] === true) || (isset($firstTitle['votes']) && $firstTitle['votes'] >= 0)) {
-          $trustedTitle = str_replace('>', '', $firstTitle['title']);
-        }
-      }
-      if (!empty($trustedTitle)) {
-        if (method_exists($entry, '_title')) {
-          $entry->_title($trustedTitle);
-        }
-      }
-
-      // Find trusted thumbnail (locked=true or votes>=0)
-      $trustedThumb = null;
-      if (is_array($branding['thumbnails']) && count($branding['thumbnails']) > 0) {
-        $firstThumb = $branding['thumbnails'][0];
-        if ((isset($firstThumb['locked']) && $firstThumb['locked'] === true) || (isset($firstThumb['votes']) && $firstThumb['votes'] >= 0)) {
-          $trustedThumb = $firstThumb;
-        }
-      }
-      // Fallback: if all thumbnails have votes <= 0, or thumbnails array is empty/null
-      $useFallback = false;
-      if (!is_array($branding['thumbnails']) || count($branding['thumbnails']) === 0) {
-        $useFallback = true;
-      } else {
-        $allVotesNonPositive = true;
-        foreach ($branding['thumbnails'] as $thumb) {
-          if (isset($thumb['votes']) && $thumb['votes'] > 0) {
-            $allVotesNonPositive = false;
-            break;
-          }
-        }
-        if ($allVotesNonPositive) {
-          $useFallback = true;
-        }
-      }
-      if ($useFallback) {
-        $fallbackThumbUrl = 'https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=' . urlencode($youtubeId);
-        $branding['thumbnails'] = [
-          [
-            'url' => $fallbackThumbUrl,
-            'timestamp' => null,
-            'original' => false,
-            'votes' => 0,
-            'locked' => false,
-            'UUID' => '',
-          ]
-        ];
-      }
-
-      // Output full Dearrow data for easier debugging in the frontend.
-      $jsonStr = json_encode($branding, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-      $preDearrow = '<pre class="yl-dearrow-data display-none">' . htmlspecialchars($jsonStr, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>';
-      if (strpos($content, 'yl-dearrow-data') === false) {
-        $entry->_content($preDearrow . $content);
-      }
-    }
-    return $entry;
-  }
-
 
   /**
    * Returns the stored category whitelist for UI (after loadConfigValues()).
