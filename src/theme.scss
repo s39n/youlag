@@ -2144,9 +2144,10 @@ body {
     /* Once Youlag is ready, display the screencap thumbnail. Affects only video feed entries. */
     div.flux .flux_header {
       .item.thumbnail {
-        opacity: 1;
-        /* Allow slight delay to avoid flash of original thumbnail before switching to screencap thumbnail. */
-        transition-delay: 0.15s;
+        /* Add an artificial loading delay on page init,
+         * reduces chance of content flash when switching from thumbnail to screencap. */
+         animation: fade-in 0s forwards;
+         animation-delay: 0.4s;
       }
     }
   }
