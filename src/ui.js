@@ -433,7 +433,7 @@ function setSidenavState() {
 }
 
 async function handleFeedDearrowFeatures() {
-  // Video, article: Replace the thumbnail of a feed entry in the stream, and also in related videos, but not the video modal.
+  // Video, article: Replace the thumbnails in stream and related videos (but not the video modal).
 
   markVideoFeedItems(); // Adds `data-yl-is-video="true"` for video feed entries.
 
@@ -443,6 +443,7 @@ async function handleFeedDearrowFeatures() {
   const thumbnailSelector = ".item.thumbnail img";
   const feedEntriesSelector = `${feedRootSelector} ${entrySelector} ${thumbnailSelector}`;
   const feedEntriesThumbnail = document.querySelectorAll(feedEntriesSelector);
+  const feedEntriesTitle = document.querySelectorAll(`${feedRootSelector} ${entrySelector} .flux_header .titleAuthorSummaryDate a.title`);
   const pageLayoutVideo = isLayoutVideo();
   const shouldUseScreencap = shouldUseScreencapThumbnail();
 
@@ -451,26 +452,58 @@ async function handleFeedDearrowFeatures() {
     return entryImg.closest(`${app.frss.el.entry}[data-entry]`);
   }
 
-  // Update thumbnail image and add video duration badge in batch.
+  // Store dearrow for batch processing.
   const videoIdEntryMap = [];
-  for (const entryImg of feedEntriesThumbnail) {
-    const videoId = getVideoIdFromUrl(entryImg.src);
-    if (videoId) {
-      videoIdEntryMap.push({ entryImg, videoId });
+  const videoIdTitleMap = [];
+  const videoIdSet = new Set();
+
+  if (shouldUseScreencap) {
+    // Store thumbnail data
+    for (const entryImg of feedEntriesThumbnail) {
+      const videoId = getVideoIdFromUrl(entryImg.src);
+      if (videoId) {
+        videoIdEntryMap.push({ entryImg, videoId });
+        videoIdSet.add(videoId);
+      }
+    }
+    // Store title data
+    for (const entryTitle of feedEntriesTitle) {
+      const videoId = getVideoIdFromUrl(entryTitle.href);
+      if (videoId) {
+        videoIdTitleMap.push({ entryTitle, videoId });
+        videoIdSet.add(videoId);
+      }
     }
   }
 
-  const dearrowResults = await Promise.all(videoIdEntryMap.map(({ videoId }) => getDearrowData(videoId)));
+  // Batch fetch DeArrow data for all unique videoIds
+  const videoIdList = Array.from(videoIdSet);
+  const dearrowResults = await Promise.all(videoIdList.map(videoId => getDearrowData(videoId)));
+  const dearrowDataMap = {};
+  for (let i = 0; i < videoIdList.length; i++) {
+    dearrowDataMap[videoIdList[i]] = dearrowResults[i];
+  }
 
-  for (let i = 0; i < videoIdEntryMap.length; i++) {
-    const { entryImg, videoId } = videoIdEntryMap[i];
-    const dearrowData = dearrowResults[i];
+  if (shouldUseScreencap) {
+    // Update video titles
+    for (const { entryTitle, videoId } of videoIdTitleMap) {
+      const dearrowData = dearrowDataMap[videoId];
+      if (dearrowData && typeof dearrowData === 'object' && Array.isArray(dearrowData.titles) && dearrowData.titles.length > 0) {
+        // Use the first title as default
+        entryTitle.textContent = dearrowData.titles[0].title;
+      }
+    }
+  }
+
+  // Update thumbnails and duration badges
+  for (const { entryImg, videoId } of videoIdEntryMap) {
+    const dearrowData = dearrowDataMap[videoId];
     let thumbnail = entryImg.src;
     if (dearrowData && typeof dearrowData === 'object') {
       // Thumbnail priority: DeArrow thumbnail -> YouTube screencap -> original thumbnail.
       if (shouldUseScreencap && dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
         thumbnail = dearrowData.thumbnails[0].url;
-        entryImg.setAttribute('data-yl-video-screencap', 'true'); 
+        entryImg.setAttribute('data-yl-video-screencap', 'true');
         entryImg.setAttribute('data-yl-original-src', entryImg.src);
         entryImg.src = thumbnail; // Ensure DOM image is actually updated
       }

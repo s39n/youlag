@@ -241,6 +241,7 @@ async function getDearrowData(youtubeId) {
   let randomTime = null;
   let videoDuration = null;
   let thumbnails = [];
+  let titles = [];
   try {
     const response = await fetch(apiUrl);
     if (response.ok) {
@@ -249,6 +250,9 @@ async function getDearrowData(youtubeId) {
       videoDuration = data.videoDuration;
       if (Array.isArray(data.thumbnails)) {
         thumbnails = data.thumbnails;
+      }
+      if (Array.isArray(data.titles)) {
+        titles = data.titles;
       }
     }
   } catch (e) {
@@ -267,6 +271,7 @@ async function getDearrowData(youtubeId) {
   }];
   const resultObj = {
     thumbnails,
+    titles,
     randomTime,
     videoDuration
   };
@@ -274,6 +279,8 @@ async function getDearrowData(youtubeId) {
     await dbSet('dearrow', youtubeId, resultObj);
   } catch (e) {
   }
+
+  console.log('Dearrow data for video ID', youtubeId, ':', resultObj);
   return resultObj;
 }
 

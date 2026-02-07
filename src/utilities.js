@@ -592,6 +592,7 @@ function formatTime(seconds) {
 }
 
 function shouldUseScreencapThumbnail() {
+  // TODO 2026-02-07: This is the check for both usage of dearrow screencap and title.   
   const setting = document.querySelector('#yl_feed_thumbnail_screencap_enabled');
   if (!setting) return false;
   const shouldUseScreencapThumbnail = setting.getAttribute('data-yl-feed-thumbnail-screencap-enabled');
