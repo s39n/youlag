@@ -440,18 +440,53 @@ function setFeedVideoThumbnails() {
 
   markVideoFeedItems(); // Adds `data-yl-is-video="true"` for video feed entries.
 
+  function getDearrowData(entryImg) {
+    // Traverse up from the image to the entry root, then down to .yl-dearrow-data
+    if (!entryImg) return null;
+    // Find the closest entry container
+    const entryRoot = entryImg.closest(app.frss.el.entry);
+    if (!entryRoot) return null;
+    // Find the .yl-dearrow-data element inside the entry
+    const dearrowPre = entryRoot.querySelector('.yl-dearrow-data');
+    if (!dearrowPre) return null;
+    let dearrowData = null;
+    try {
+      dearrowData = JSON.parse(dearrowPre.textContent || dearrowPre.innerText || dearrowPre.innerHTML);
+    } catch (e) {
+      console.warn('Failed to parse Dearrow data:', e);
+      return null;
+    }
+    return dearrowData;
+  }
+
+
   const feedRootSelector = app.frss.el.feedRoot;
   const entrySelector = `${app.frss.el.entry}[data-yl-is-video="true"]:not([data-yl-video-screencap="true"])`;
   const thumbnailSelector = ".item.thumbnail img";
   const feedEntriesSelector = `${feedRootSelector} ${entrySelector} ${thumbnailSelector}`;
   const feedEntries = document.querySelectorAll(feedEntriesSelector);
 
-  feedEntries.forEach(entry => {
-    const videoId = getVideoIdFromUrl(entry.src);
+  feedEntries.forEach(entryImg => {
+    const videoId = getVideoIdFromUrl(entryImg.src);
     if (!videoId) return;
-    entry.setAttribute('data-yl-original-src', entry.src);
-    entry.src = getVideoScreencapSrc(videoId);
-    entry.setAttribute('data-yl-video-screencap', 'true');  // Mark as dirty to avoid reprocessing when called repeatedly in `onNewFeedItems()`.
+
+    let thumbnail = entryImg.src; // Default
+    const dearrowData = getDearrowData(entryImg);
+
+    console.log('Dearrow', dearrowData);
+
+    if (dearrowData && typeof dearrowData === 'object') {
+      if (dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
+        thumbnail = dearrowData.thumbnails[0].url;
+      }
+    }
+    else {
+      thumbnail = getVideoScreencapSrc(videoId);
+    }
+
+    entryImg.setAttribute('data-yl-original-src', entryImg.src);
+    entryImg.src = thumbnail;
+    entryImg.setAttribute('data-yl-video-screencap', 'true');  // Mark as dirty to avoid reprocessing when called repeatedly in `onNewFeedItems()`.
   });
 }
 

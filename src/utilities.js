@@ -229,11 +229,11 @@ function appendOriginalSrc(element) {
   return root;
 }
 
-function getVideoScreencapSrc(videoId, thumbnailType = 1) {
+function getVideoScreencapSrc(youtubeId, thumbnailType = 1) {
   // Get the low-res screencap from YouTube's public endpoint, to replace clickbait thumbnails.
   // thumbnailType can be `0 | 1 | 2 | 3 | hqdefault | mqdefault | sddefault | maxresdefault`, 
   // but `1` is more reliable to get an actual screencap opposed to a downsized thumbnail.
-  return `https://img.youtube.com/vi/${videoId}/${thumbnailType}.jpg`;
+  return `https://img.youtube.com/vi/${youtubeId}/${thumbnailType}.jpg`;
 }
 
 function markVideoFeedItems() {

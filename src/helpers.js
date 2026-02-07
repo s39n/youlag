@@ -113,6 +113,16 @@ function extractFeedItemData(feedItem) {
   if (isVideoFeedItem) {
     thumbnail_video = `https://img.youtube.com/vi/${app.state.modal.youtubeId}/sddefault.jpg`;
     thumbnail_video_screencap = getVideoScreencapSrc(app.state.modal.youtubeId);
+    getDearrowObject(app.state.modal.youtubeId).then(dearrowData => {
+      if (dearrowData && typeof dearrowData === 'object') {
+        if (dearrowData.screencap) {
+          thumbnail_video_screencap = dearrowData.screencap;
+        }
+        if (dearrowData.thumbnail) {
+          thumbnail_video = dearrowData.thumbnail;
+        }
+      }
+    });
   }
 
   const videoObject = {
