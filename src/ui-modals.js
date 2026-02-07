@@ -124,7 +124,6 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
   // Thumbnail priority
   let thumbnail = videoObject.thumbnail_video || videoObject.thumbnail || videoObject.thumbnail_video_screencap || '';
 
-
   // Modal content
   container.innerHTML = `
     <div class="${app.modal.class.content}">
@@ -577,14 +576,14 @@ function renderRelatedVideos(videoObject) {
     relatedVideos.then(videos => {
       if (!Array.isArray(videos) || videos.length === 0) return;
 
-      videos.forEach(videoObject => {
+      videos.forEach(async videoObject => {
         let thumbnail;
         const isVideoFeedItem = getVideoIdFromUrl(videoObject.external_link) ? true : false;
         const youtubeId = isVideoFeedItem ? getVideoIdFromUrl(videoObject.external_link) : '';
 
         if (shouldUseScreencapThumbnail() && youtubeId) {
           // If screencap thumbnail setting is enabled, replace default thumbnail.
-          thumbnail = getVideoScreencapSrc(youtubeId);
+          thumbnail = await getVideoScreencapWithFallback(youtubeId);
         }
         if (!thumbnail) {
           thumbnail = videoObject.thumbnail;

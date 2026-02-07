@@ -448,13 +448,11 @@ function setFeedVideoThumbnails() {
     const videoId = getVideoIdFromUrl(entryImg.src);
     if (!videoId) return;
 
-    let thumbnail = entryImg.src; // Default
-
-    thumbnail = getVideoScreencapSrc(videoId);
-
     entryImg.setAttribute('data-yl-original-src', entryImg.src);
-    entryImg.src = thumbnail;
-    entryImg.setAttribute('data-yl-video-screencap', 'true');  // Mark as dirty to avoid reprocessing when called repeatedly in `onNewFeedItems()`.
+    getVideoScreencapWithFallback(videoId).then(thumbnail => {
+      entryImg.src = thumbnail;
+      entryImg.setAttribute('data-yl-video-screencap', 'true');  // Mark as dirty to avoid reprocessing when called repeatedly in `onNewFeedItems()`.
+    });
   });
 }
 

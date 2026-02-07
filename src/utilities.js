@@ -229,11 +229,30 @@ function appendOriginalSrc(element) {
   return root;
 }
 
-function getVideoScreencapSrc(youtubeId, thumbnailType = 1) {
-  // Get the low-res screencap from YouTube's public endpoint, to replace clickbait thumbnails.
-  // thumbnailType can be `0 | 1 | 2 | 3 | hqdefault | mqdefault | sddefault | maxresdefault`, 
-  // but `1` is more reliable to get an actual screencap opposed to a downsized thumbnail.
-  return `https://img.youtube.com/vi/${youtubeId}/${thumbnailType}.jpg`;
+
+function getVideoScreencap(youtubeId) {
+  // Returns the Dearrow thumbnail URL synchronously (no fallback check).
+  if (!youtubeId) return '';
+  return `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${youtubeId}`;
+}
+
+async function getVideoScreencapWithFallback(youtubeId) {
+  // Resolves to the best available thumbnail URL, 
+  // Prioritizes DeArrow, falls back to YouTube's low-res screencap.
+  if (!youtubeId) return Promise.resolve('');
+  const dearrowUrl = getVideoScreencap(youtubeId);
+  const youtubeUrl = `https://img.youtube.com/vi/${youtubeId}/1.jpg`;
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => resolve(dearrowUrl);
+    img.onerror = () => {
+      const fallbackImg = new window.Image();
+      fallbackImg.onload = () => resolve(youtubeUrl);
+      fallbackImg.onerror = () => resolve(youtubeUrl);
+      fallbackImg.src = youtubeUrl;
+    };
+    img.src = dearrowUrl;
+  });
 }
 
 function markVideoFeedItems() {

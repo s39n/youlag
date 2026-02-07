@@ -112,7 +112,7 @@ function extractFeedItemData(feedItem) {
   let thumbnail_video_screencap = '';
   if (isVideoFeedItem) {
     thumbnail_video = `https://img.youtube.com/vi/${app.state.modal.youtubeId}/sddefault.jpg`;
-    thumbnail_video_screencap = getVideoScreencapSrc(app.state.modal.youtubeId);
+    thumbnail_video_screencap = getVideoScreencap(app.state.modal.youtubeId);
   }
 
   const videoObject = {
