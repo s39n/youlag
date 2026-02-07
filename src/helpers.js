@@ -8,6 +8,7 @@
  * - Examples: extracting entry data, getting/setting tags, category whitelist checks, etc.
  */
 
+
 async function getItemTags(itemId) {
   // Fetch tags for a given feed item ID.
 
@@ -225,38 +226,55 @@ function extractVideoDescriptionChapters(videoDescription) {
 
 async function getDearrowData(youtubeId) {
   if (!youtubeId) return null;
+  // Check if data is cached in indexdb before making API call.
+  let cached = null;
+  try {
+    cached = await dbGet('dearrow', youtubeId);
+    if (cached) {
+      // Loaded from cache
+      return cached;
+    }
+  } catch (e) {
+  }
 
   const apiUrl = `https://sponsor.ajay.app/api/branding?videoID=${encodeURIComponent(youtubeId)}`;
   let randomTime = null;
   let videoDuration = null;
+  let thumbnails = [];
   try {
     const response = await fetch(apiUrl);
     if (response.ok) {
       const data = await response.json();
-      // Essential log for debugging
       randomTime = data.randomTime;
       videoDuration = data.videoDuration;
+      if (Array.isArray(data.thumbnails)) {
+        thumbnails = data.thumbnails;
+      }
     }
   } catch (e) {
-    // API failed, fallback to nulls
   }
 
-  // Always use getVideoScreencapWithFallback for thumbnail URL
-  const fallbackUrl = await getVideoScreencapWithFallback(youtubeId);
-  const fallbackObj = {
-    thumbnails: [{
-      timestamp: null,
-      original: true,
-      votes: 0,
-      locked: false,
-      UUID: '',
-      userID: '',
-      url: fallbackUrl
-    }],
+  // Ignore Dearrow thumbnail data and rely on `getVideoScreencapWithFallback()`.
+  const thumbnailWithFallback = await getVideoScreencapWithFallback(youtubeId);
+  thumbnails = [{
+    timestamp: null,
+    original: true,
+    votes: 0,
+    locked: false,
+    UUID: '',
+    userID: '',
+    url: thumbnailWithFallback
+  }];
+  const resultObj = {
+    thumbnails,
     randomTime,
     videoDuration
   };
-  return fallbackObj;
+  try {
+    await dbSet('dearrow', youtubeId, resultObj);
+  } catch (e) {
+  }
+  return resultObj;
 }
 
 function getSubpageParentId(getParam) {

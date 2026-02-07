@@ -458,9 +458,6 @@ async function handleFeedDearrowFeatures() {
     if (videoId) {
       videoIdEntryMap.push({ entryImg, videoId });
     }
-    else {
-      console.warn('Youlag: No videoId found for entryImg:', entryImg);
-    }
   }
 
   const dearrowResults = await Promise.all(videoIdEntryMap.map(({ videoId }) => getDearrowData(videoId)));
@@ -487,9 +484,6 @@ async function handleFeedDearrowFeatures() {
         entryImg.parentElement.appendChild(durationEl);
         getEntryRootElement(entryImg)?.setAttribute('data-yl-video-duration', videoDurationText);
       }
-    }
-    else {
-      console.warn('Youlag: No dearrowData for videoId:', videoId);
     }
   }
 }

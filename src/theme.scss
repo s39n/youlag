@@ -2163,7 +2163,7 @@ body {
         /* Add an artificial loading delay on page init,
          * reduces chance of content flash when switching from thumbnail to screencap. */
          animation: fade-in 0s forwards;
-         animation-delay: 0.4s;
+         animation-delay: 0.25s;
       }
     }
   }
