@@ -312,7 +312,7 @@ declare(strict_types=1);
       </h4>
       <label for="yl_update_check_enabled" class="flex">
           <input type="checkbox" id="yl_update_check_enabled" name="yl_update_check_enabled" value="1" class="mb-auto"
-          <?php echo (FreshRSS_Context::$user_conf->yl_update_check_enabled) ? ' checked="checked"' : ''; ?>>
+          <?php echo ($this->yl_update_check_enabled) ? ' checked="checked"' : ''; ?>>
         <div class="inline-block">
           Check for new updates periodically
           <div class="yl-form-group-help">

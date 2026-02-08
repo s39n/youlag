@@ -177,7 +177,7 @@ class YoulagExtension extends Minz_Extension
     $this->yl_video_sort_modified_enabled = ($sortModifiedEnabled === null) ? false : $sortModifiedEnabled;
 
     $updateCheckEnabled = FreshRSS_Context::userConf()->attributeBool('yl_update_check_enabled');
-    $this->yl_video_update_check_enabled = ($updateCheckEnabled === null) ? true : $updateCheckEnabled;
+    $this->yl_update_check_enabled = ($updateCheckEnabled === null) ? true : $updateCheckEnabled;
   }
 
   /**

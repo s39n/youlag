@@ -546,6 +546,7 @@ function isVideoLabelsEnabled() {
 }
 
 function isUpdateCheckEnabled() {
+  console.log(document.getElementById('yl_update_check_enabled')?.getAttribute('data-yl-update-check-enabled') === 'true');
   return document.getElementById('yl_update_check_enabled')?.getAttribute('data-yl-update-check-enabled') === 'true';
 }
 
