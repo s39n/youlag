@@ -280,7 +280,6 @@ async function getDearrowData(youtubeId) {
   } catch (e) {
   }
 
-  console.log('Dearrow data for video ID', youtubeId, ':', resultObj);
   return resultObj;
 }
 
