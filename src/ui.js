@@ -457,16 +457,18 @@ async function handleFeedDearrowFeatures() {
   const videoIdTitleMap = [];
   const videoIdSet = new Set();
 
-  if (useCustomThumbTitle) {
-    // Store thumbnail data
-    for (const entryImg of feedEntriesThumbnail) {
-      const videoId = getVideoIdFromUrl(entryImg.src);
-      if (videoId) {
-        videoIdEntryMap.push({ entryImg, videoId });
-        videoIdSet.add(videoId);
-      }
+  // Build videoIdEntryMap for thumbnails, needed for custom thumbnail and video length badge.
+  for (const entryImg of feedEntriesThumbnail) {
+    const videoId = getVideoIdFromUrl(entryImg.src);
+    if (videoId) {
+      videoIdEntryMap.push({ entryImg, videoId });
+      videoIdSet.add(videoId);
     }
-    // Store title data
+  }
+
+  // Also build videoIdTitleMap to address custom title updates,
+  // if setting is enabled for `useCustomThumbTitle`. 
+  if (useCustomThumbTitle) {
     for (const entryTitle of feedEntriesTitle) {
       const videoId = getVideoIdFromUrl(entryTitle.href);
       if (videoId) {
@@ -495,11 +497,12 @@ async function handleFeedDearrowFeatures() {
     }
   }
 
-  // Update thumbnails and duration badges
+  // Set duration badges, and update thumbnails only if `useCustomThumbTitle`.
   for (const { entryImg, videoId } of videoIdEntryMap) {
     const dearrowData = dearrowDataMap[videoId];
     let thumbnail = entryImg.src;
     if (dearrowData && typeof dearrowData === 'object') {
+      
       // Thumbnail priority: DeArrow thumbnail -> YouTube screencap -> original thumbnail.
       if (useCustomThumbTitle && dearrowData.thumbnails && dearrowData.thumbnails.length > 0) {
         thumbnail = dearrowData.thumbnails[0].url;
