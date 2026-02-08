@@ -26,6 +26,7 @@ function init() {
     handleFeedDearrowFeatures();
     onNewFeedItems();
     restoreVideoQueue();
+    checkForUpdates();
   }
   updateSidenavLinks();
   settingsPageEventListeners();
@@ -34,10 +35,11 @@ function init() {
   updateAddFeedLink();
   setAddFeedCategoryValue();
   setMissingLogo();
-  showUpdateAvailableNotice();
+  showUpdateAvailableInSettings();
   handleSliderHashChange(); // TODO: Remove once `FreshRSS/FreshRSS/issues/8488` is addressed.
   handleExperimentalFeature(); // TODO: Temporary handler for experimental features, remove later.
   removeYoulagLoadingState();
+
 
   app.state.youlag.init = true;
 }

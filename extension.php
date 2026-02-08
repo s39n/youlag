@@ -65,7 +65,7 @@ class YoulagExtension extends Minz_Extension
 
 
   protected array $csp_policies = [
-    'connect-src' => "'self' https://sponsor.ajay.app/", 
+    'connect-src' => "'self' https://sponsor.ajay.app/ https://api.github.com/",
   ];
 
   /**

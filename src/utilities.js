@@ -702,6 +702,55 @@ async function fetchManageFeedOptions(feedId, categoryId) {
   }
 }
 
+async function checkForUpdates() {
+  // Check for updates 2 weeks
+  // Note: This communicates with Github (Microsoft). You can disable the update check in Youlag's settings page.
+  
+  const now = Date.now();
+  const lastChecked = localStorage.getItem('ylLastUpdateCheck');
+  // Only check for updates if 2 weeks have passed
+  if (!lastChecked || (now - parseInt(lastChecked, 10)) > 14 * 24 * 60 * 60 * 1000) {
+    const apiUrl = 'https://api.github.com/repos/civilblur/youlag/releases/latest';
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
+      const data = await response.json();
+      const latestVersion = data.tag_name.startsWith('v') ? data.tag_name.substring(1) : data.tag_name;
+      const currentVersion = app.metadata.version;
+
+      if (latestVersion !== currentVersion) {
+        showNotification({
+          title: 'New update available', 
+          message: `Version &nbsp;<span class="yl-badge">${latestVersion}</span>&nbsp; has been released. Head to the release page for more details.`, 
+          action: 'View update', 
+          link: data.html_url,
+          dismissRef: 'ylLastUpdateCheck'
+        });
+
+        return {
+          updateAvailable: true,
+          latestVersion,
+          releaseUrl: data.html_url,
+        };
+      }
+      return { updateAvailable: false };
+    }
+    catch (e) {
+      return { updateAvailable: false };
+    }
+  }
+  // If not time to check, do nothing
+  return { updateAvailable: false };
+}
+
+
 /*****************************************
  * END "DATA UTILITIES"
  ****************************************/

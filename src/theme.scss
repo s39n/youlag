@@ -5467,8 +5467,16 @@ body.youlag-tags-modal-open {
   flex-direction: column !important;
 }
 
+.flex-1 {
+  flex: 1 !important;
+}
+
 .justify-start {
   justify-content: flex-start !important;
+}
+
+.items-center {
+  align-items: center !important;
 }
 
 .mb-auto {
@@ -5644,6 +5652,76 @@ body.youlag-active:not(.reader) {
     /* Show only feeds matching the selected category filter id. */
     display: flex !important;
   }
+}
+
+#yl_notification {
+  @include yl-gradient-bg(#0058e6, #0b38c0);
+  position: fixed;
+  bottom: var(--yl-m-sm);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--yl-space-2xs);
+  width: min(50vw, 500px);
+  min-width: 320px;
+  color: var(--yl-color-text-default);
+  padding: var(--yl-p-sm) var(--yl-p-sm);
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+
+  .yl-notification {
+    &-title {
+      font-size: var(--yl-text-xs);
+      font-weight: 600;
+      margin-bottom: var(--yl-m-3xs);
+    }
+
+    &-message {
+      font-size: var(--yl-text-xs);
+      text-wrap: pretty;
+      margin-bottom: var(--yl-m-2xs);
+    }
+
+    &-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--yl-p-2xs) var(--yl-p-sm);
+      border: 1px solid hsla(0, 0%, 100%, .08);
+      border-radius: 12px;
+      background-color: hsla(0, 0%, 100%, .04);
+      cursor: pointer;
+      font-size: var(--yl-text-xs);
+      color: var(--yl-color-text-default);
+      line-height: 1.6;
+
+      &:hover {
+        background-color: hsla(0, 0%, 100%, .08);
+        text-decoration: none;
+      }
+    }
+  
+    &-close {
+      position: absolute;
+      top: var(--yl-space-3xs);
+      right: var(--yl-space-3xs);
+      display: flex;
+      align-items: center;
+      font-size: 1.6rem;
+      line-height: 1;
+      padding: var(--yl-p-2xs) var(--yl-p-xs);
+      font-size: var(--yl-text-md);
+      border-radius: 999px;
+  
+      &:hover {
+        background-color: hsla(0, 0%, 100%, .08);
+        cursor: pointer;
+      }
+    }
+  }
+
 }
 
 

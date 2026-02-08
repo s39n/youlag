@@ -814,7 +814,7 @@ function setMissingLogo() {
   pageContainer.appendChild(logo);
 }
 
-function showUpdateAvailableNotice() {
+function showUpdateAvailableInSettings() {
   // Adds a simple to that a new Youlag version is available by the extension area.
 
   const page = getCurrentPage();
@@ -867,6 +867,47 @@ function showUpdateAvailableNotice() {
     }
   });
 
+}
+
+function showNotification({title, message, action, link, dismissRef}) {
+  // Show a simple notification in the feed when a new Youlag version is available.
+
+  if (document.getElementById('yl_notification')) return;
+  const notification = document.createElement('div');
+  notification.id = 'yl_notification';
+  notification.innerHTML = `
+    <div class="flex flex-col flex-1">
+      <div class="yl-notification-title">${title}</div>
+      <div class="yl-notification-message">${message}</div>
+    </div>
+
+    ${link ? `<a href="${link}" class="yl-notification-action" target="_blank" rel="noopener noreferrer">${action || 'View'}</a>` : ''}
+
+    <div class="yl-notification-close" id="yl_update_notification_close">×</div>
+  `
+
+  // Remove notification
+  function removeNotification(e) {
+    notification.remove();
+    if (dismissRef) {
+      const now = Date.now();
+      try {
+        localStorage.setItem(`${dismissRef}`, now.toString());
+      } catch (e) { }
+    }
+  }
+
+  notification.addEventListener('click', function(e) {
+    if (e.target.id === 'yl_update_notification_close') {
+      removeNotification(e);
+    }
+    if (e.target.classList.contains('yl-notification-action')) {
+      e.preventDefault();
+      removeNotification(e);
+    }
+  });
+
+  document.body.appendChild(notification);
 }
 
 function setWatchLaterCategoryFilter() {
