@@ -26,7 +26,8 @@ function init() {
     handleFeedDearrowFeatures();
     onNewFeedItems();
     restoreVideoQueue();
-    checkForUpdates();
+
+    isUpdateCheckEnabled() && checkForUpdates();
   }
   updateSidenavLinks();
   settingsPageEventListeners();

@@ -63,6 +63,11 @@ class YoulagExtension extends Minz_Extension
    */
   protected $yl_video_sort_modified_enabled = false;
 
+  /**
+   * Enable Youlag update check
+   * @var bool
+   */
+  protected $yl_update_check_enabled = true;
 
   protected array $csp_policies = [
     'connect-src' => "'self' https://sponsor.ajay.app/ https://api.github.com/",
@@ -87,9 +92,10 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 17);
     $this->registerHook('nav_entries', array($this, 'setFeedThumbnailScreencapEnabled'), 18);
     $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 19);
+    $this->registerHook('nav_entries', array($this, 'setUpdateCheckEnabled'), 20);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
-      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 20);
+      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 21);
     }
 
     // Add Youlag theme and script to all extension pages
@@ -169,6 +175,9 @@ class YoulagExtension extends Minz_Extension
 
     $sortModifiedEnabled = FreshRSS_Context::userConf()->attributeBool('yl_video_sort_modified_enabled');
     $this->yl_video_sort_modified_enabled = ($sortModifiedEnabled === null) ? false : $sortModifiedEnabled;
+
+    $updateCheckEnabled = FreshRSS_Context::userConf()->attributeBool('yl_update_check_enabled');
+    $this->yl_video_update_check_enabled = ($updateCheckEnabled === null) ? true : $updateCheckEnabled;
   }
 
   /**
@@ -215,11 +224,6 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_feed_view_mobile_grid_enabled ? 'true' : 'false';
     return '<div id="yl_feed_view_mobile_grid_enabled" data-yl-feed-view-mobile-grid-enabled="' . $enabled . '"></div>';
-  }
-
-  public function isFeedThumbnailScreencapEnabled(): bool
-  {
-    return $this->yl_custom_thumbnail_title_enabled;
   }
 
   /**
@@ -300,6 +304,17 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_video_sort_modified_enabled ? 'true' : 'false';
     return '<div id="yl_video_sort_modified" data-yl-video-sort-modified="' . $enabled . '"></div>';
+  }
+
+  /**
+   * Pass the Youlag update check setting to be read in the DOM via nav_entries hook.
+   * The frontend js handles the behavior based on this the value in `data-yl-update-check-enabled`.
+   * @return string
+   */
+  public function setUpdateCheckEnabled(): string
+  {
+    $enabled = $this->yl_update_check_enabled ? 'true' : 'false';
+    return '<div id="yl_update_check_enabled" data-yl-update-check-enabled="' . $enabled . '"></div>';
   }
 
   /**
@@ -723,6 +738,10 @@ class YoulagExtension extends Minz_Extension
 
       // YouTube shorts blocking
       FreshRSS_Context::userConf()->_attribute('yl_block_youtube_shorts', Minz_Request::paramBoolean('yl_block_youtube_shorts', true));
+
+      // Youlag update check
+      $updateCheckEnabled = Minz_Request::paramBoolean('yl_update_check_enabled', true);
+      FreshRSS_Context::userConf()->_attribute('yl_update_check_enabled', $updateCheckEnabled);
 
       FreshRSS_Context::$user_conf->save();
 

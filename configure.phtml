@@ -304,6 +304,24 @@ declare(strict_types=1);
       </div>
 
     </section>
+    <section class="yl-form-section">
+      <h3>Youlag</h3>
+
+      <h4 class="mb-0">
+        Updates
+      </h4>
+      <label for="yl_update_check_enabled" class="flex">
+          <input type="checkbox" id="yl_update_check_enabled" name="yl_update_check_enabled" value="1" class="mb-auto"
+          <?php echo (FreshRSS_Context::$user_conf->yl_update_check_enabled) ? ' checked="checked"' : ''; ?>>
+        <div class="inline-block">
+          Check for new updates periodically
+          <div class="yl-form-group-help">
+            Updates are checked by contacting GitHub (Microsoft). A notification will appear if a new version is available.
+          </div>
+        </div>
+      </label>
+    </section>
+
 
     <div class="form-group form-actions">
       <div class="group-controls">

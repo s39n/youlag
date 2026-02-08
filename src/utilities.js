@@ -545,6 +545,10 @@ function isVideoLabelsEnabled() {
   return document.getElementById('yl_video_labels')?.getAttribute('data-yl-video-labels') === 'true';
 }
 
+function isUpdateCheckEnabled() {
+  return document.getElementById('yl_update_check_enabled')?.getAttribute('data-yl-update-check-enabled') === 'true';
+}
+
 function getToolbarStickyState() {
   return app.state.page.toolbarSticky;
 }
