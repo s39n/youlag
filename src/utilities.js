@@ -11,6 +11,7 @@
 /*****************************************
  *
  * INDEX
+ * - General utilities
  * - Modal utilities
  * - Link utilities
  * - State & settings utilities
@@ -33,6 +34,50 @@ function isTextAllCaps(text) {
 function formatTextToSentenceCase(text) {
   if (!text || typeof text !== 'string') return text;
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+function isYoutubePlaceholderImg(imgElement) {
+  // Check if image is YouTube's placeholder by color at corners and (60,60)
+  const canvas = document.createElement('canvas');
+  canvas.width = imgElement.naturalWidth;
+  canvas.height = imgElement.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(imgElement, 0, 0);
+  const w = canvas.width, h = canvas.height;
+  const data = ctx.getImageData(0, 0, w, h).data;
+
+  function colorAt(x, y) {
+    const idx = (y * w + x) * 4;
+    return [data[idx], data[idx+1], data[idx+2]]; // [R,G,B]
+  }
+
+  function isColorClose(actual, expected, threshold) {
+    const result = actual.every((v, i) => Math.abs(v - expected[i]) <= threshold);
+    return result;
+  }
+
+  const threshold = 15; // tolerance for color difference
+  const expectedCorner = [204, 204, 204]; // #CCCCCC
+  const expectedPoint = [134, 134, 134]; // #868686
+
+  // Check corners
+  const corners = [
+    colorAt(0, 0),
+    colorAt(w - 1, 0),
+    colorAt(0, h - 1),
+    colorAt(w - 1, h - 1)
+  ];
+  if (!corners.every(c => isColorClose(c, expectedCorner, threshold, 'corner'))) {
+    return false;
+  }
+
+  // Check point (60,60),the dark area in the middle of the placeholder.
+  const pointColor = colorAt(60, 60);
+  if (!isColorClose(pointColor, expectedPoint, threshold)) {
+    return false;
+  }
+
+  return true;
 }
 
 /*****************************************
@@ -238,43 +283,12 @@ function getDearrowScreencap(youtubeId) {
 
 async function getVideoScreencapWithFallback(youtubeId) {
   // Resolves to the best available thumbnail URL.
-  // 1. Try DeArrow. If it loads, return it.
-  // 2. Try YouTube 1.jpg. If it loads and is NOT the placeholder, return it.
-  // 3. Fallback to hqdefault.jpg.
+  // Priority: DeArrow screencap -> YouTube screencap -> YouTube thumbnail
 
   if (!youtubeId) return '';
   const dearrowUrl = getDearrowScreencap(youtubeId);
   const youtubeScreencapUrl = `https://img.youtube.com/vi/${youtubeId}/1.jpg`;
   const youtubeThumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-  
-  // For determining if `1.jpg` is YouTube's placeholder image or not.
-  // Hashes the pixels image corners and center only to cover most cases while being more performant.
-  const youtubeThumbnailPlaceholderHash = 4395;
-
-  function getImageHash(img) {
-    // determine if image is YouTube's placeholder image or actual thumbnail/screencap,
-    // YouTube always returns an image (even on 404). 
-    const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    const w = img.naturalWidth, h = img.naturalHeight;
-    const data = ctx.getImageData(0, 0, w, h).data;
-
-    function pixelSum(x, y) {
-      const idx = (y * w + x) * 4;
-      return data[idx] + data[idx+1] + data[idx+2] + data[idx+3];
-    }
-
-    let hash = 0;
-    hash += pixelSum(0, 0); // top-left
-    hash += pixelSum(w-1, 0); // top-right
-    hash += pixelSum(0, h-1); // bottom-left
-    hash += pixelSum(w-1, h-1); // bottom-right
-    hash += pixelSum(Math.floor(w/2), Math.floor(h/2)); // center
-    return hash;
-  }
 
   // Try DeArrow first
   try {
@@ -296,17 +310,17 @@ async function getVideoScreencapWithFallback(youtubeId) {
         i.onerror = reject;
         i.src = url;
       });
-      // If screencap endpoint return YouTube's placeholder thumbnail, fallback to original thumbnail.
-      if (img.naturalWidth === 120 && img.naturalHeight === 90) {
-        const hash = getImageHash(img);
-        if (hash !== youtubeThumbnailPlaceholderHash) {
-          return youtubeScreencapUrl;
-        }
+      // Determine if result is YouTube placeholder by checking the colors of specific points in the returned image.
+      const isPlaceholder = isYoutubePlaceholderImg(img);
+      if (!isPlaceholder) {
+        return youtubeScreencapUrl;
+      }
+      else {
+        return youtubeThumbnailUrl;
       }
     } catch (e2) {
-      // Fallback to hqdefault in return
+      // Fallback to hqdefault in final return
     }
-    
     return youtubeThumbnailUrl;
   }
 }
