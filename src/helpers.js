@@ -116,6 +116,17 @@ function extractFeedItemData(feedItem) {
     thumbnail_video_screencap = getDearrowScreencap(app.state.modal.youtubeId);
   }
 
+  // Article in video mode: Hide first image if it's the same as the thumbnail/top image.
+  if (!isVideoFeedItem && thumbnail && video_description) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = video_description;
+    const firstImage = tempDiv.querySelector('img');
+    if (firstImage && firstImage.src === thumbnail) {
+      firstImage.classList.add('display-none');
+      video_description = tempDiv.innerHTML;
+    }
+  }
+
   const videoObject = {
     entryId: entryId ? entryId[1] : null,
     authorId: authorId ? authorId[1] : null,
