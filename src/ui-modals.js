@@ -538,11 +538,9 @@ function renderRelatedVideos(videoObject) {
   const modal = getModalVideo();
   if (!videoObject || !modal) return;
 
-  const directLink = addVideoParamUrl(videoObject.entryId);
-
   // The `app.modal.class.relatedVideoEntryHTML` contains the original feed entry HTML and is not displayed 
   // as its purpose is to be parsed when opening a the related video.
-  function template(videoObject, customThumbnail) {    
+  function template(videoObject, customThumbnail, directLink) {    
     let thumbnail = customThumbnail || videoObject.thumbnail || '';
 
     return `
@@ -596,6 +594,7 @@ function renderRelatedVideos(videoObject) {
         let thumbnail;
         const isVideoFeedItem = getVideoIdFromUrl(videoObject.external_link) ? true : false;
         const youtubeId = isVideoFeedItem ? getVideoIdFromUrl(videoObject.external_link) : '';
+        const directLink = getVideoParamUrl(videoObject.entryId);
 
         if (shouldCustomThumbnailTitle() && youtubeId) {
           // If screencap thumbnail setting is enabled, replace default thumbnail.
@@ -605,7 +604,7 @@ function renderRelatedVideos(videoObject) {
           thumbnail = videoObject.thumbnail;
         }
 
-        const videoHtml = template(videoObject, thumbnail);
+        const videoHtml = template(videoObject, thumbnail, directLink);
         if (videoObject.entryId === currentlyViewing) return; // Skip currently viewing video.
         relatedVideosContainer.insertAdjacentHTML('beforeend', videoHtml);
       });

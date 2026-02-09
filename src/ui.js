@@ -1146,13 +1146,15 @@ function setVideoCardLink() {
   const feedCards = document.querySelectorAll(`${app.frss.el.feedRoot} ${app.frss.el.entry}:not(.yl-modified--link)`);
   feedCards.forEach(card => {
     const entryId = card.getAttribute('data-entry');
+    console.log('Setting video card link for entryId:', entryId);
     if (!entryId) return;
-    const link = document.createElement('a');
-    addVideoParamUrl(entryId, link);
-    link.className = 'yl-video-card__link';
+    const anchor = document.createElement('a');
+    const directLink = getVideoParamUrl(entryId);
+    anchor.href = directLink;
+    anchor.className = 'yl-video-card__link';
     const cardContainer = card.querySelector('ul.flux_header');
     if (cardContainer) {
-      cardContainer.insertBefore(link, cardContainer.firstChild);
+      cardContainer.insertBefore(anchor, cardContainer.firstChild);
     }
     card.classList.add('yl-modified--link');
   });
