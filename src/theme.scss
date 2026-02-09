@@ -1774,6 +1774,7 @@ body.youlag-active:not(.reader) main#stream div.flux.active.current {
 /* Card icons and button behavior */
 body.youlag-active:not(.reader) main#stream {
   div.flux {
+    position: relative;
 
     li.item.share,
     li.item.labels {
@@ -2108,6 +2109,16 @@ body.youlag-active:not(.reader) main#stream {
         overflow-x: hidden;
       }
 
+    }
+
+    /* Video: Custom link to allow right-click and open video card in new tab. */
+    .yl-video-card__link {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
     }
   }
 }
@@ -4912,6 +4923,7 @@ a.yl-video-action-button[href=""] {
 
     .youlag-video-related-title,
     .youlag-related-video-item {
+      position: relative;
       margin-top: 0;
       padding-left: var(--yl-p-2xs);
       padding-right: var(--yl-p-2xs);
@@ -4981,6 +4993,15 @@ a.yl-video-action-button[href=""] {
         flex: 1;
         min-width: 200px;
         max-width: 230px;
+      }
+
+      &__link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
       }
     }
 

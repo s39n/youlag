@@ -6,6 +6,7 @@
 
 function toggleModalMode() {
   if (isModeMiniplayer()) {
+    // Toggle from miniplayer -> fullscreen mode
     setModeMiniplayer(false, 'fullscreen');
     setModeFullscreen(true);
 
@@ -17,10 +18,17 @@ function toggleModalMode() {
        */
       pushHistoryState('modalOpen', true);
     }
+
+    const modal = getModalVideo();
+    if (!modal) return;
+    const entryId = modal.getAttribute('data-entry');
+    if (entryId) addVideoParamUrl(entryId);
   }
   else {
+    // Toggle from fullscreen -> miniplayer mode
     setModeMiniplayer(true);
     setModeFullscreen(false, 'miniplayer');
+    removeVideoParamUrl();
   }
 }
 

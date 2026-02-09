@@ -67,11 +67,18 @@ function renderModalVideo(videoObject) {
   renderModalVideoChapters(videoObject.video_chapters);
   setupModalVideoControlEventListeners();
 
-  setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
+  requestAnimationFrame(() => {
+    // Ensure DOM is updated after innerHTML in `templateModalVideo()`.
+    setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
+  });
 
   renderRelatedVideos(videoObject);
 
   pushHistoryState('modalOpen', true); // Allow modal close when navigating back by adding a new history state.
+
+  if (isModeFullscreen()) {
+    addVideoParamUrl(videoObject.entryId); // For direct linking to the video modal
+  }
 }
 
 function templateModalVideo(videoObject, elementToReturn = 'modal') {
@@ -499,6 +506,11 @@ function closeModalVideo() {
 
   setHistoryPopstate(false); // Signal that a new pop state can be pushed for the next video
 
+  // Remove param ylvideo from URL, which is used for direct linking to a video.
+  const url = new URL(window.location);
+  url.searchParams.delete('ylvideo');
+  window.history.replaceState({}, '', url);
+
   if (
     !app.state.popstate.allowBack && 
     history.state && 
@@ -526,6 +538,8 @@ function renderRelatedVideos(videoObject) {
   const modal = getModalVideo();
   if (!videoObject || !modal) return;
 
+  addVideoParamUrl(videoObject.entryId);
+
   // The `app.modal.class.relatedVideoEntryHTML` contains the original feed entry HTML and is not displayed 
   // as its purpose is to be parsed when opening a the related video.
   function template(videoObject, customThumbnail) {    
@@ -544,6 +558,8 @@ function renderRelatedVideos(videoObject) {
             ${getRelativeDate(videoObject.date)}
           </div>
         </div>
+
+        <a href="${currentUrl}" class="youlag-related-video-item__link"></a>
       </div>
     `;
   }
@@ -609,6 +625,10 @@ function renderRelatedVideos(videoObject) {
 
     // Attach and track the new click handler
     const relatedClickHandler = function (e) {
+      if (e.target.closest('.youlag-related-video-item__link')) {
+        // The anchor on the card is primarily to allow right click to open in new tab, so ignore clicks on the anchor itself.
+        e.preventDefault();
+      }
       const relatedItem = e.target.closest(`.${app.modal.class.relatedVideoEntry}`);
       if (!relatedItem) return;
       const feedItem = relatedItem.querySelector(`.${app.modal.class.relatedVideoEntryHTML} > ${app.frss.el.entry}`);
@@ -687,37 +707,33 @@ function restoreVideoQueue() {
   app.state.youlag.restoreVideoInit = true;
 }
 
-function HandleVideoDirectLink() {
+async function handleVideoDirectLink() {
   const urlParams = new URLSearchParams(window.location.search);
   const ylvideoEntryId = urlParams.get('ylvideo');
   if (!ylvideoEntryId) return;
 
-  fetch(`/i/?a=normal&search=e%3A${ylvideoEntryId}`)
-    .then(response => response.text())
-    .then(html => {
-      try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const entryElement = doc.querySelector(`[data-entry="${ylvideoEntryId}"]`);
-        if (entryElement) {
-          const videoObject = extractFeedItemData(entryElement);
-          // Set the direct link entry as active in video queue.
-          const queueObj = {
-            queue: [videoObject],
-            queue_active_index: 0
-          };
-          handleActiveVideo(queueObj, true);
-        }
-        else {
-          console.error('Could not find entry element for direct link:', ylvideoEntryId);
-        }
-      } catch (e) {
-        console.error('Error parsing response from direct link for ', ylvideoEntryId + ':', e);
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching video data for direct link:', error);
-    });
+  try {
+    const response = await fetch(`/i/?a=normal&search=e%3A${ylvideoEntryId}`);
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const entryElement = doc.querySelector(`[data-entry="${ylvideoEntryId}"]`);
+    if (entryElement) {
+      const videoObject = extractFeedItemData(entryElement);
+      // Set the direct link entry as active in video queue.
+      const queueObj = {
+        queue: [videoObject],
+        queue_active_index: 0
+      };
+      handleActiveVideo(queueObj, true);
+    }
+    else {
+      console.error('Could not find entry element for direct link:', ylvideoEntryId);
+    }
+  }
+  catch (e) {
+    console.error('Error fetching or parsing video data for direct link:', e);
+  }
 }
 
 function handleActiveArticle() {

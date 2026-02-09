@@ -351,6 +351,36 @@ function hasQueryParam(param) {
   return urlParams.has(param);
 }
 
+function addVideoParamUrl(entryId, element = null) {
+  // Adds or updates `ylvideo="{entryId}"` in the current URL, returns the new URL, and optionally sets it to an element's href.
+  const url = new URL(window.location.href);
+  url.searchParams.set('ylvideo', entryId);
+  const newUrl = url.toString();
+
+  if (element && element.tagName === 'A') {
+    // Update the link of an existing anchor.
+    element.setAttribute('href', newUrl);
+  }
+  else {
+    // Or update window url
+    window.history.replaceState({}, '', newUrl);
+  }
+}
+
+function removeVideoParamUrl(element = null) {
+  // Removes the `ylvideo` query parameter from the URL.
+  const url = new URL(window.location.href);
+  url.searchParams.delete('ylvideo');
+  const newUrl = url.toString();
+
+  if (element && element.tagName === 'A') {
+    element.setAttribute('href', newUrl);
+  }
+  else {
+    window.history.replaceState({}, '', newUrl);
+  }
+}
+
 /*****************************************
  * END "LINK UTILITIES"
  ****************************************/

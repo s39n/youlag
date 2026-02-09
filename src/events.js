@@ -26,13 +26,6 @@ function init() {
     handleFeedDearrowFeatures();
     onNewFeedItems();
     isUpdateCheckEnabled() && checkForUpdates();
-    
-    if (hasQueryParam('ylvideo')) {
-      HandleVideoDirectLink();
-    } 
-    else {
-      restoreVideoQueue();
-    }
   }
   updateSidenavLinks();
   settingsPageEventListeners();
@@ -46,8 +39,16 @@ function init() {
   handleExperimentalFeature(); // TODO: Temporary handler for experimental features, remove later.
   removeYoulagLoadingState();
 
-
   app.state.youlag.init = true;
+}
+
+async function initialVideoState() {
+  if (hasQueryParam('ylvideo')) {
+    await handleVideoDirectLink();
+  } 
+  else {
+    restoreVideoQueue();
+  }
 }
 
 function setupVisibilityEventListeners() {
@@ -102,3 +103,4 @@ const checkInitInterval = setInterval(() => {
 
 // Ensure init runs
 initFallback();
+(async () => { await initialVideoState(); })();

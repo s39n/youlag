@@ -25,7 +25,8 @@ function setupClickListener() {
 
   if (isLayoutVideo()) {
     setupVideoClickListener();
-  } else if (isLayoutArticle()) {
+  }
+  else if (isLayoutArticle()) {
     setupArticleClickListener();
   }
 
@@ -47,7 +48,6 @@ function setupClickListener() {
 
 function setupVideoClickListener() {
   const streamContainer = getFeedRoot();
-
   if (!streamContainer) return;
   streamContainer.addEventListener('click', (event) => {
     const target = event.target.closest(app.frss.el.entry);
@@ -74,6 +74,7 @@ function setupVideoClickListener() {
       observer.observe(target, { attributes: true, attributeFilter: ['class'] });
     }
   });
+
   window.addEventListener('popstate', function popstateHandler(e) {
     if (isHashUrl(app.state.popstate.pathPrev)) return;
     if (isModeFullscreen() && getModalVideo()) {
@@ -200,6 +201,9 @@ function setupTagsDropdownOverride() {
   if (!streamContainer) return;
 
   streamContainer.addEventListener('click', async function (event) {
+    const modal = getModalVideo();
+    if (modal && modal.contains(event.target)) return;
+
     const entryItem = event.target.closest(`${app.frss.el.entry} .flux_header li.labels`);
     const entryItemDropdown = entryItem ? entryItem.querySelector('a.dropdown-toggle') : null;
     const entryItemFooterDropdown = event.target.closest('.item.labels a.dropdown-toggle[href^="#dropdown-labels-"]');
@@ -1132,12 +1136,27 @@ function updateVideoDateFormat() {
   });
 }
 
+function setVideoCardLink() {
+  // Allow ability to right click and open a video card in new tab by adding a link with ylvideo param.
+  const feedCards = document.querySelectorAll(`${app.frss.el.feedRoot} ${app.frss.el.entry}:not(.yl-modified--link)`);
+  feedCards.forEach(card => {
+    const entryId = card.getAttribute('data-entry');
+    if (!entryId) return;
+    const link = document.createElement('a');
+    addVideoParamUrl(entryId, link);
+    link.className = 'yl-video-card__link';
+    card.appendChild(link);
+    card.classList.add('yl-modified--link');
+  });
+}
+
 function onNewFeedItems() {
   // Run actions based on if there's new items added to the feed stream.
   document.addEventListener('freshrss:load-more', function () {
     if (isLayoutVideo()) {
       updateVideoAuthor();
       updateVideoDateFormat();
+      setVideoCardLink();
 
       if (isWatchLaterPage() && app.state.youlag.experimentalFeatureEnabled === true) {
         updateCategoryEntryCounts();
