@@ -228,8 +228,18 @@ function updateActiveChapterDisplay() {
         catch (e) {
           console.warn("Youlag: Video chapter failed to send 'listening' event after load", e);
         }
+        if (modal._chapterUpdateInterval) {
+          // Clear any existing interval
+          clearInterval(modal._chapterUpdateInterval);
+          modal._chapterUpdateInterval = null;
+        }
         modal._chapterUpdateInterval = setInterval(() => {
           // Capture playback time from YouTube iframe
+          if (!document.body.contains(modal) || !modal.parentNode || !iframe.contentWindow) {
+            clearInterval(modal._chapterUpdateInterval);
+            modal._chapterUpdateInterval = null;
+            return;
+          }
           iframe.contentWindow.postMessage(
             '{"event":"command","func":"getCurrentTime","args":[]}', '*'
           );
@@ -305,6 +315,22 @@ function updateActiveChapterDisplay() {
     }
     window.addEventListener('message', onYouTubeMessage);
     modal._videoModalListeners.push({ el: window, type: 'message', handler: onYouTubeMessage });
+
+    // Add a listener to clean up the interval and event listener when the modal is removed
+    const observer = new MutationObserver(() => {
+      if (!document.body.contains(modal)) {
+        if (modal._chapterUpdateInterval) {
+          clearInterval(modal._chapterUpdateInterval);
+          modal._chapterUpdateInterval = null;
+        }
+        window.removeEventListener('message', onYouTubeMessage);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    // Track observer for cleanup if needed
+    if (!modal._videoModalObservers) modal._videoModalObservers = [];
+    modal._videoModalObservers.push(observer);
   }
 }
 

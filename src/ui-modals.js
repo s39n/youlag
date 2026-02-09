@@ -687,6 +687,39 @@ function restoreVideoQueue() {
   app.state.youlag.restoreVideoInit = true;
 }
 
+function HandleVideoDirectLink() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const ylvideoEntryId = urlParams.get('ylvideo');
+  if (!ylvideoEntryId) return;
+
+  fetch(`/i/?a=normal&search=e%3A${ylvideoEntryId}`)
+    .then(response => response.text())
+    .then(html => {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const entryElement = doc.querySelector(`[data-entry="${ylvideoEntryId}"]`);
+        if (entryElement) {
+          const videoObject = extractFeedItemData(entryElement);
+          // Set the direct link entry as active in video queue.
+          const queueObj = {
+            queue: [videoObject],
+            queue_active_index: 0
+          };
+          handleActiveVideo(queueObj, true);
+        }
+        else {
+          console.error('Could not find entry element for direct link:', ylvideoEntryId);
+        }
+      } catch (e) {
+        console.error('Error parsing response from direct link for ', ylvideoEntryId + ':', e);
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching video data for direct link:', error);
+    });
+}
+
 function handleActiveArticle() {
   pushHistoryState('articleOpen', true);
 }

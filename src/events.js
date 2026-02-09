@@ -25,9 +25,14 @@ function init() {
     }
     handleFeedDearrowFeatures();
     onNewFeedItems();
-    restoreVideoQueue();
-
     isUpdateCheckEnabled() && checkForUpdates();
+    
+    if (hasQueryParam('ylvideo')) {
+      HandleVideoDirectLink();
+    } 
+    else {
+      restoreVideoQueue();
+    }
   }
   updateSidenavLinks();
   settingsPageEventListeners();

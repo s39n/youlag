@@ -274,7 +274,6 @@ function appendOriginalSrc(element) {
   return root;
 }
 
-
 function getDearrowScreencap(youtubeId) {
   // Returns the Dearrow thumbnail URL synchronously (no fallback check).
   if (!youtubeId) return '';
@@ -344,6 +343,12 @@ function markVideoFeedItems() {
     }
   }
   return isVideo;
+}
+
+function hasQueryParam(param) {
+  // Check if the current URL has a specific query parameter.
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has(param);
 }
 
 /*****************************************
