@@ -538,7 +538,7 @@ function renderRelatedVideos(videoObject) {
   const modal = getModalVideo();
   if (!videoObject || !modal) return;
 
-  addVideoParamUrl(videoObject.entryId);
+  const directLink = addVideoParamUrl(videoObject.entryId);
 
   // The `app.modal.class.relatedVideoEntryHTML` contains the original feed entry HTML and is not displayed 
   // as its purpose is to be parsed when opening a the related video.
@@ -559,7 +559,7 @@ function renderRelatedVideos(videoObject) {
           </div>
         </div>
 
-        <a href="${currentUrl}" class="youlag-related-video-item__link"></a>
+        <a href="${directLink}" class="youlag-related-video-item__link"></a>
       </div>
     `;
   }

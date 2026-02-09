@@ -365,6 +365,7 @@ function addVideoParamUrl(entryId, element = null) {
     // Or update window url
     window.history.replaceState({}, '', newUrl);
   }
+  return newUrl;
 }
 
 function removeVideoParamUrl(element = null) {
