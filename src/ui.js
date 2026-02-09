@@ -1145,7 +1145,10 @@ function setVideoCardLink() {
     const link = document.createElement('a');
     addVideoParamUrl(entryId, link);
     link.className = 'yl-video-card__link';
-    card.appendChild(link);
+    const cardContainer = card.querySelector('ul.flux_header');
+    if (cardContainer) {
+      cardContainer.insertBefore(link, cardContainer.firstChild);
+    }
     card.classList.add('yl-modified--link');
   });
 }
