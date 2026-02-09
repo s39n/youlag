@@ -19,6 +19,7 @@ function init() {
     if (isLayoutVideo()) {
       updateVideoAuthor();
       updateVideoDateFormat();
+      setVideoCardLink();
       if (isWatchLaterPage()) {
         setWatchLaterCategoryFilter();
       }
