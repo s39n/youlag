@@ -69,7 +69,11 @@ function renderModalVideo(videoObject) {
 
   requestAnimationFrame(() => {
     // Ensure DOM is updated after innerHTML in `templateModalVideo()`.
-    setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
+
+    setTimeout(() => {
+      // Additional safe guard for awaiting innerHTML update completetion.
+      setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
+    }, 150);
   });
 
   renderRelatedVideos(videoObject);
