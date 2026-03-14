@@ -139,6 +139,7 @@ app.types = {
   videoObject: {
     entryId: null,
     author: '',
+    authorId: '',
     author_filter_url: '',
     website_name: '',
     favicon: '',
@@ -162,7 +163,8 @@ app.types = {
     video_invidious_redirect_url: '',
     // Video queue
     queue: null,
-    queue_active_index: -1
+    queue_active_index: -1,
+    playbackTime: 0, // In seconds
   },
 
   videoChapter: {

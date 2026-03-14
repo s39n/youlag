@@ -1,6 +1,6 @@
 /**
  * UI: Video control
- * 
+ *
  * Handles interaction with the video's playback state, e.g. seeking to a chapter/timestamp.
  */
 
@@ -48,7 +48,7 @@ function setupModalVideoControlEventListeners() {
   if (!modal._videoModalListeners) modal._videoModalListeners = [];
 
   if (app.state && app.state.modal) app.state.modal.chapterLastActiveIndex = -1;
-  
+
   // Remove existing listeners for chapter list items
   if (modal._videoModalListeners && Array.isArray(modal._videoModalListeners)) {
     modal._videoModalListeners = modal._videoModalListeners.filter(listener => {
@@ -165,8 +165,93 @@ function setupModalVideoControlEventListeners() {
     modal._videoModalListeners.push({ el: chapterCurrentPanel, type: 'click', handler: chapterCurrentClickHandler });
   }
 
-  // Display the current chapter
-  updateActiveChapterDisplay();
+  // Display the current chapter and wire playback tracking.
+  const { setActiveChapter } = updateActiveChapterDisplay();
+  setupVideoPlaybackPosition(modal, (currentTime, videoDuration) => {
+    setActiveChapter(currentTime, videoDuration);
+    // Store current playback time to resume miniplayer from the same position.
+    const entryId = modal.getAttribute('data-entry');
+    if (entryId) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(app.modal.queue.localStorageKey));
+        if (stored && Array.isArray(stored.queue)) {
+          const entry = stored.queue.find(v => v.entryId === entryId);
+          if (entry) {
+            entry.playbackTime = Math.floor(currentTime);
+            localStorage.setItem(app.modal.queue.localStorageKey, JSON.stringify(stored));
+          }
+        }
+      } catch(e) {}
+    }
+  });
+}
+
+function setupVideoPlaybackPosition(modal, onTimeUpdate) {
+  // Get YouTube iframe playback state.
+  const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
+  if (!iframe) return;
+
+  let videoDuration = null;
+
+  const onIframeLoad = function() {
+    try {
+      iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
+    }
+    catch (e) {
+      console.warn("Youlag: Video chapter failed to send 'listening' event after load", e);
+    }
+    if (modal._chapterUpdateInterval) {
+      clearInterval(modal._chapterUpdateInterval);
+      modal._chapterUpdateInterval = null;
+    }
+    modal._chapterUpdateInterval = setInterval(() => {
+      if (!document.body.contains(modal) || !modal.parentNode || !iframe.contentWindow) {
+        clearInterval(modal._chapterUpdateInterval);
+        modal._chapterUpdateInterval = null;
+        return;
+      }
+      iframe.contentWindow.postMessage(
+        '{"event":"command","func":"getCurrentTime","args":[]}', '*'
+      );
+    }, 1000);
+  };
+  iframe.addEventListener('load', onIframeLoad);
+  if (iframe.readyState === 'complete' || iframe.readyState === 'interactive') {
+    onIframeLoad();
+  }
+  modal._videoModalListeners.push({ el: iframe, type: 'load', handler: onIframeLoad });
+
+  const onYouTubeMessage = function(event) {
+    if (!event.data) return;
+    let data;
+    try {
+      data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+    } catch (e) { return; }
+    if (data.event === 'infoDelivery') {
+      if (typeof data.info?.duration === 'number') {
+        videoDuration = data.info.duration;
+      }
+      if (typeof data.info?.currentTime === 'number') {
+        onTimeUpdate(data.info.currentTime, videoDuration);
+      }
+    }
+  };
+  window.addEventListener('message', onYouTubeMessage);
+  modal._videoModalListeners.push({ el: window, type: 'message', handler: onYouTubeMessage });
+
+  const observer = new MutationObserver(() => {
+    if (!document.body.contains(modal)) {
+      if (modal._chapterUpdateInterval) {
+        clearInterval(modal._chapterUpdateInterval);
+        modal._chapterUpdateInterval = null;
+      }
+      window.removeEventListener('message', onYouTubeMessage);
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  if (!modal._videoModalObservers) modal._videoModalObservers = [];
+  modal._videoModalObservers.push(observer);
 }
 
 function updateActiveChapterDisplay() {
@@ -183,7 +268,6 @@ function updateActiveChapterDisplay() {
     timestamp: item.querySelector('.yl-video-chapter-list-item__time')?.textContent || ''
   }));
   let lastChapterIndex = -1;
-  let videoDuration = null;
 
   if (chapterItems.length > 0) {
     // Only set initial state if not dirty
@@ -217,121 +301,55 @@ function updateActiveChapterDisplay() {
     if (chapterActionNext) chapterActionNext.classList.toggle('is-disabled', activeIndex === chapterItems.length - 1);
   }
 
-  // Update active chapter based on video playback time
-  if (chapterActive && chapterActiveTime && chapterActiveLabel) {
-    const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
-    if (iframe) {
-      const onIframeLoad = function() {
-        try {
-          iframe.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
-        }
-        catch (e) {
-          console.warn("Youlag: Video chapter failed to send 'listening' event after load", e);
-        }
-        if (modal._chapterUpdateInterval) {
-          // Clear any existing interval
-          clearInterval(modal._chapterUpdateInterval);
-          modal._chapterUpdateInterval = null;
-        }
-        modal._chapterUpdateInterval = setInterval(() => {
-          // Capture playback time from YouTube iframe
-          if (!document.body.contains(modal) || !modal.parentNode || !iframe.contentWindow) {
-            clearInterval(modal._chapterUpdateInterval);
-            modal._chapterUpdateInterval = null;
-            return;
-          }
-          iframe.contentWindow.postMessage(
-            '{"event":"command","func":"getCurrentTime","args":[]}', '*'
-          );
-        }, 1000);
-      };
-      iframe.addEventListener('load', onIframeLoad);
-      if (iframe.readyState === 'complete' || iframe.readyState === 'interactive') {
-        onIframeLoad();
-      }
-      modal._videoModalListeners.push({ el: iframe, type: 'load', handler: onIframeLoad });
+  function setActiveChapter(currentTime, videoDuration) {
+    if (!chapterActiveTime || !chapterActiveLabel || chapters.length === 0) {
+      return;
     }
-    function setActiveChapter(currentTime) {
-      if (!chapterActiveTime || !chapterActiveLabel || chapters.length === 0) {
-        return;
-      }
-      let activeIndex = chapters.length - 1;
-      for (let i = 0; i < chapters.length; i++) {
-        if (currentTime < chapters[i].seconds) {
-          activeIndex = i - 1;
-          break;
-        }
-      }
-      if (activeIndex < 0) activeIndex = 0;
-      if (activeIndex !== lastChapterIndex) {
-        chapterActiveTime.textContent = `${activeIndex + 1} / ${chapters.length}`;
-        chapterActiveLabel.textContent = chapters[activeIndex].label;
-        lastChapterIndex = activeIndex;
-      }
-      chapterItems.forEach((item, index) => {
-        if (index === activeIndex) {
-          item.classList.add('is-active');
-        }
-        else {
-          item.classList.remove('is-active');
-        }
-      });
-
-      // Update skip button states as playback progresses
-      updateChapterActionButtons();
-
-      // Update chapter progress bar
-      const isVideoChapterProgressEnabledElement = document.querySelector('#yl_chapter_progress_enabled');
-      const isVideoChapterProgressEnabled = isVideoChapterProgressEnabledElement?.getAttribute('data-yl-chapter-progress-enabled') === 'true';
-      if (chapterCurrentProgress && isVideoChapterProgressEnabled) {
-        let chapterStart = chapters[activeIndex].seconds;
-        let chapterEnd = (activeIndex + 1 < chapters.length) ? chapters[activeIndex + 1].seconds : null;
-        let percent = 0;
-        if (chapterEnd !== null && chapterEnd > chapterStart) {
-          percent = ((currentTime - chapterStart) / (chapterEnd - chapterStart)) * 100;
-        }
-        else if (chapterEnd === null && videoDuration && videoDuration > chapterStart) {
-          // Calculate last chapter length based on total video duration.
-          percent = ((currentTime - chapterStart) / (videoDuration - chapterStart)) * 100;
-        }
-        percent = Math.max(0, Math.min(100, percent));
-        chapterCurrentProgress.style.width = percent + '%';
+    let activeIndex = chapters.length - 1;
+    for (let i = 0; i < chapters.length; i++) {
+      if (currentTime < chapters[i].seconds) {
+        activeIndex = i - 1;
+        break;
       }
     }
-    function onYouTubeMessage(event) {
-      if (!event.data) return;
-      let data;
-      try {
-        data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-      } catch (e) { return; }
-      if (data.event === 'infoDelivery') {
-        if (typeof data.info?.duration === 'number') {
-          videoDuration = data.info.duration;
-        }
-        if (typeof data.info?.currentTime === 'number') {
-          setActiveChapter(data.info.currentTime);
-        }
-      }
+    if (activeIndex < 0) activeIndex = 0;
+    if (activeIndex !== lastChapterIndex) {
+      chapterActiveTime.textContent = `${activeIndex + 1} / ${chapters.length}`;
+      chapterActiveLabel.textContent = chapters[activeIndex].label;
+      lastChapterIndex = activeIndex;
     }
-    window.addEventListener('message', onYouTubeMessage);
-    modal._videoModalListeners.push({ el: window, type: 'message', handler: onYouTubeMessage });
-
-    // Add a listener to clean up the interval and event listener when the modal is removed
-    const observer = new MutationObserver(() => {
-      if (!document.body.contains(modal)) {
-        if (modal._chapterUpdateInterval) {
-          clearInterval(modal._chapterUpdateInterval);
-          modal._chapterUpdateInterval = null;
-        }
-        window.removeEventListener('message', onYouTubeMessage);
-        observer.disconnect();
+    chapterItems.forEach((item, index) => {
+      if (index === activeIndex) {
+        item.classList.add('is-active');
+      }
+      else {
+        item.classList.remove('is-active');
       }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
-    // Track observer for cleanup if needed
-    if (!modal._videoModalObservers) modal._videoModalObservers = [];
-    modal._videoModalObservers.push(observer);
+
+    // Update skip button states as playback progresses
+    updateChapterActionButtons();
+
+    // Update chapter progress bar
+    const isVideoChapterProgressEnabledElement = document.querySelector('#yl_chapter_progress_enabled');
+    const isVideoChapterProgressEnabled = isVideoChapterProgressEnabledElement?.getAttribute('data-yl-chapter-progress-enabled') === 'true';
+    if (chapterCurrentProgress && isVideoChapterProgressEnabled) {
+      let chapterStart = chapters[activeIndex].seconds;
+      let chapterEnd = (activeIndex + 1 < chapters.length) ? chapters[activeIndex + 1].seconds : null;
+      let percent = 0;
+      if (chapterEnd !== null && chapterEnd > chapterStart) {
+        percent = ((currentTime - chapterStart) / (chapterEnd - chapterStart)) * 100;
+      }
+      else if (chapterEnd === null && videoDuration && videoDuration > chapterStart) {
+        // Calculate last chapter length based on total video duration.
+        percent = ((currentTime - chapterStart) / (videoDuration - chapterStart)) * 100;
+      }
+      percent = Math.max(0, Math.min(100, percent));
+      chapterCurrentProgress.style.width = percent + '%';
+    }
   }
+
+  return { setActiveChapter };
 }
 
 function videoControlSeekTo(seconds, allowSeekAhead = true) {

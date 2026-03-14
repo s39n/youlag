@@ -29,6 +29,7 @@ function handleActiveVideo(eventOrVideoObject, isVideoObject = false) {
 
     videoObject = extractFeedItemData(feedItem);
     videoObject.feedItemEl = feedItem;
+    videoObject.playbackTime = getStoredPlaybackTime(videoObject.entryId);
     setVideoQueue(videoObject);
   }
 
@@ -102,11 +103,13 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
   // Video: Embed URL handling
   function getEmbedUrl(source) {
     // Get the correct embed URL for a given source
+    const startTime = videoObject.playbackTime > 0 ? Math.floor(videoObject.playbackTime) : null;
     if (source === 'invidious_1' && videoObject.video_invidious_instance_1 && videoObject.youtubeId) {
-      return `${videoObject.video_invidious_instance_1.replace(/\/$/, '')}/embed/${videoObject.youtubeId}`;
+      const base = `${videoObject.video_invidious_instance_1.replace(/\/$/, '')}/embed/${videoObject.youtubeId}`;
+      return startTime ? `${base}?t=${startTime}` : base;
     }
     else if (source === 'youtube') {
-      return videoObject.youtube_embed_url;
+      return startTime ? `${videoObject.youtube_embed_url}&start=${startTime}` : videoObject.youtube_embed_url;
     }
     return '';
   }
@@ -641,6 +644,20 @@ function renderRelatedVideos(videoObject) {
   appendRelatedVideos(videoObject.entryId, videoObject.authorId);
 }
 
+function getStoredPlaybackTime(entryId) {
+  // Provide the stored playback time for a given entryId.
+  // The playback time is stored by `setupVideoPlaybackPosition()`.  
+  if (!entryId) return 0;
+  try {
+    const stored = JSON.parse(localStorage.getItem(app.modal.queue.localStorageKey));
+    if (stored && Array.isArray(stored.queue)) {
+      const entry = stored.queue.find(v => v.entryId === entryId);
+      if (entry && entry.playbackTime > 0) return entry.playbackTime;
+    }
+  } catch(e) {}
+  return 0;
+}
+
 function setVideoQueue(videoObject) {
   // Store the videoObject in localStorage.youlagVideoQueue.
   // The video object is defined in `extractFeedItemData()`.
@@ -714,6 +731,7 @@ async function handleVideoDirectLink() {
     const entryElement = doc.querySelector(`[data-entry="${ylvideoEntryId}"]`);
     if (entryElement) {
       const videoObject = extractFeedItemData(entryElement);
+      videoObject.playbackTime = getStoredPlaybackTime(videoObject.entryId);
       // Set the direct link entry as active in video queue.
       const queueObj = {
         queue: [videoObject],
