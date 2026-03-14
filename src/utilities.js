@@ -594,6 +594,11 @@ function isVideoLabelsEnabled() {
   return document.getElementById('yl_video_labels')?.getAttribute('data-yl-video-labels') === 'true';
 }
 
+function isMiniplayerAutoplayEnabled() {
+  // Whether restoring miniplayer should auto-play.
+  return document.getElementById('yl_miniplayer_autoplay_enabled')?.getAttribute('data-yl-miniplayer-autoplay-enabled') === 'true';
+}
+
 function isUpdateCheckEnabled() {
   return document.getElementById('yl_update_check_enabled')?.getAttribute('data-yl-update-check-enabled') === 'true';
 }

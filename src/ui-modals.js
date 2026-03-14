@@ -104,12 +104,21 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
   function getEmbedUrl(source) {
     // Get the correct embed URL for a given source
     const startTime = videoObject.playbackTime > 0 ? Math.floor(videoObject.playbackTime) : null;
+    const autoplay = videoObject.autoplay ? 1 : 0;
     if (source === 'invidious_1' && videoObject.video_invidious_instance_1 && videoObject.youtubeId) {
       const base = `${videoObject.video_invidious_instance_1.replace(/\/$/, '')}/embed/${videoObject.youtubeId}`;
-      return startTime ? `${base}?t=${startTime}` : base;
+      const params = new URLSearchParams();
+      if (startTime) params.set('t', startTime);
+      if (autoplay) params.set('autoplay', '1');
+      const query = params.toString();
+      return query ? `${base}?${query}` : base;
     }
     else if (source === 'youtube') {
-      return startTime ? `${videoObject.youtube_embed_url}&start=${startTime}` : videoObject.youtube_embed_url;
+      const params = new URLSearchParams();
+      if (startTime) params.set('start', startTime);
+      if (autoplay) params.set('autoplay', '1');
+      const query = params.toString();
+      return query ? `${videoObject.youtube_embed_url}&${query}` : videoObject.youtube_embed_url;
     }
     return '';
   }
@@ -350,7 +359,7 @@ function setupModalVideoEventListeners(videoObject) {
 
   // Mode miniplayer: Settings state handling, if swipe-to-miniplayer is enabled.
   const miniplayerSwipeEnabledElement = document.querySelector('#yl_miniplayer_swipe_enabled');
-  const miniplayerSwipeEnabled = miniplayerSwipeEnabledElement?.getAttribute('data-yl-mini-player-swipe-enabled') === 'true';
+  const miniplayerSwipeEnabled = miniplayerSwipeEnabledElement?.getAttribute('data-yl-miniplayer-swipe-enabled') === 'true';
   if (miniplayerSwipeEnabled) {
     setupSwipeToMiniplayer(modal);
   }
@@ -712,6 +721,10 @@ function restoreVideoQueue() {
 
   if (queueObj && Array.isArray(queueObj.queue) && typeof queueObj.queue_active_index === 'number' && queueObj.queue.length > 0) {
     setModeMiniplayer(true); // Restored video queue always opens in miniplayer mode.
+    const activeEntry = queueObj.queue[queueObj.queue_active_index];
+    if (isMiniplayerAutoplayEnabled() && activeEntry?.playerState === 'playing') {
+      activeEntry.autoplay = true;
+    }
     handleActiveVideo(queueObj, true);
   }
 

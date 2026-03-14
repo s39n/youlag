@@ -80,7 +80,7 @@ declare(strict_types=1);
       <?php endif; ?>
 
       <h4 class="mb-0">
-        Mini player
+        Miniplayer
       </h4>
       <label for="yl_miniplayer_swipe_enabled" class="flex">
           <input type="checkbox" id="yl_miniplayer_swipe_enabled" name="yl_miniplayer_swipe_enabled" value="1" class="mb-auto"
@@ -89,6 +89,16 @@ declare(strict_types=1);
           Swipe down in video mode to activate mini player
           <div class="yl-form-group-help">
             Touch devices: only swipes outside the video itself are recognized.
+          </div>
+        </div>
+      </label>
+      <label for="yl_miniplayer_autoplay_enabled" class="flex">
+          <input type="checkbox" id="yl_miniplayer_autoplay_enabled" name="yl_miniplayer_autoplay_enabled" value="1" class="mb-auto"
+            <?php echo ($this->yl_miniplayer_autoplay_enabled) ? ' checked="checked"' : ''; ?>>
+        <div class="inline-block">
+          Continuous video playback in miniplayer
+          <div class="yl-form-group-help">
+            If miniplayer was playing before navigating away, it will resume its playback state when restored.
           </div>
         </div>
       </label>

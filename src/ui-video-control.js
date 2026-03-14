@@ -167,9 +167,10 @@ function setupModalVideoControlEventListeners() {
 
   // Display the current chapter and wire playback tracking.
   const { setActiveChapter } = updateActiveChapterDisplay();
-  setupVideoPlaybackPosition(modal, (currentTime, videoDuration) => {
+  setupVideoPlaybackPosition(modal, (currentTime, videoDuration, playerState) => {
     setActiveChapter(currentTime, videoDuration);
-    // Store current playback time to resume miniplayer from the same position.
+    
+    // Store current playback time and state to resume miniplayer from the same position.
     const entryId = modal.getAttribute('data-entry');
     if (entryId) {
       try {
@@ -178,6 +179,9 @@ function setupModalVideoControlEventListeners() {
           const entry = stored.queue.find(v => v.entryId === entryId);
           if (entry) {
             entry.playbackTime = Math.floor(currentTime);
+            if (playerState !== null) {
+              entry.playerState = playerState === 1 ? 'playing' : 'paused';
+            }
             localStorage.setItem(app.modal.queue.localStorageKey, JSON.stringify(stored));
           }
         }
@@ -192,6 +196,7 @@ function setupVideoPlaybackPosition(modal, onTimeUpdate) {
   if (!iframe) return;
 
   let videoDuration = null;
+  let currentPlayerState = null;
 
   const onIframeLoad = function() {
     try {
@@ -231,8 +236,11 @@ function setupVideoPlaybackPosition(modal, onTimeUpdate) {
       if (typeof data.info?.duration === 'number') {
         videoDuration = data.info.duration;
       }
+      if (typeof data.info?.playerState === 'number') {
+        currentPlayerState = data.info.playerState;
+      }
       if (typeof data.info?.currentTime === 'number') {
-        onTimeUpdate(data.info.currentTime, videoDuration);
+        onTimeUpdate(data.info.currentTime, videoDuration, currentPlayerState);
       }
     }
   };
