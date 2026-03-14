@@ -780,7 +780,7 @@ async function checkForUpdates() {
 
       if (latestVersion !== currentVersion) {
         showNotification({
-          title: 'New update available', 
+          title: 'New Youlag update available', 
           message: `Version &nbsp;<span class="yl-badge">${latestVersion}</span>&nbsp; has been released. Head to the release page for more details.`, 
           action: 'View update', 
           link: data.html_url,

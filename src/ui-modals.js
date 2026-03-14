@@ -18,6 +18,7 @@ function handleActiveVideo(eventOrVideoObject, isVideoObject = false) {
     const activeVideo = queueObj.queue[queueObj.queue_active_index];
     if (!activeVideo) return;
     videoObject = { ...activeVideo };
+    setVideoQueue(videoObject);
   }
   else {
     // Extract the feed item from the DOM event/element
@@ -69,11 +70,7 @@ function renderModalVideo(videoObject) {
 
   requestAnimationFrame(() => {
     // Ensure DOM is updated after innerHTML in `templateModalVideo()`.
-
-    setTimeout(() => {
-      // Additional safe guard for awaiting innerHTML update completetion.
-      setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
-    }, 150);
+    setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
   });
 
   renderRelatedVideos(videoObject);
@@ -463,9 +460,6 @@ function restoreModalEventListeners() {
   const videoObject = videoQueue.queue.find(v => v.entryId === entryId);
   if (!videoObject) return;
 
-  const hasVideoIframe = !!modal.querySelector(`#${app.modal.id.videoIframe}`);
-  if (!hasVideoIframe) return;
-
   setupModalVideoEventListeners(videoObject);
   setupModalVideoControlEventListeners();
 }
@@ -496,6 +490,7 @@ function forceFrssEntryToCollapse(target) {
 }
 
 function closeModalVideo() {
+  console.log('Closing modal video');
   const modal = getModalVideo();
 
   // Remove all modal-specific listeners or states before removing the modal element

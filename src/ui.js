@@ -851,7 +851,7 @@ function showUpdateAvailableInSettings() {
               // Add a notice next to the extension name.
               if (!item.querySelector('.youlag-update-notice')) {
 
-                // "New update available" link
+                // "New Youlag update available" link
                 const updateNotice = document.createElement('a');
                 Object.assign(updateNotice, {
                   href: 'https://github.com/civilblur/youlag/releases',
@@ -1043,7 +1043,12 @@ function toggleFavorite(url, container, feedItemEl = null) {
   favoriteButtonIcon.style.filter = 'invert(1)';
   favoriteButtonIcon.style.backgroundSize = '1.2rem';
 
-  fetch(url, { method: 'GET' })
+  const csrfToken = document.querySelector('#stream-footer input[name="_csrf"]')?.getAttribute('value') || '';
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ ajax: true, _csrf: csrfToken })
+  })
     .then(response => {
 
       // Remove loading spinner

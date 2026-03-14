@@ -37,7 +37,7 @@ function init() {
   setMissingLogo();
   showUpdateAvailableInSettings();
   handleSliderHashChange(); // TODO: Remove once `FreshRSS/FreshRSS/issues/8488` is addressed.
-  handleExperimentalFeature(); // TODO: Temporary handler for experimental features, remove later.
+  handleExperimentalFeature(); // TODO: Temporary handler for experimental features, remove once experimental features are fully implemented or omitted.
   removeYoulagLoadingState();
 
   app.state.youlag.init = true;
@@ -63,7 +63,7 @@ function setupVisibilityEventListeners() {
 }
 
 function handleExperimentalFeature() {
-  // Temporary handler for experimental features.
+  // Temporary handler for experimental features, remove once experimental features are fully implemented or omitted.
 
   // Show the category filter toggle if the feature is disabled.
   if (!isWatchLaterPage()) return;
