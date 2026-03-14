@@ -178,7 +178,7 @@ function extractVideoDescriptionChapters(videoDescription) {
   for (let cleanLine of lines) {
     if (!cleanLine) continue;
     // Match HH:MM:SS or MM:SS at the start of the line.
-    let match = cleanLine.match(/^(\d{1,2}:\d{2}:\d{2}|\d{1,2}:\d{2})\s*(.+)?$/);
+    let match = cleanLine.match(/^\[?(\d{1,2}:\d{2}:\d{2}|\d{1,2}:\d{2})\]?\s*(.+)?$/);
     if (match) {
       let ts = match[1];
       let label = (match[2] || '').trim();
