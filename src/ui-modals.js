@@ -68,10 +68,7 @@ function renderModalVideo(videoObject) {
   renderModalVideoChapters(videoObject.video_chapters);
   setupModalVideoControlEventListeners();
 
-  requestAnimationFrame(() => {
-    // Ensure DOM is updated after innerHTML in `templateModalVideo()`.
-    setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
-  });
+  setupModalVideoEventListeners(videoObject); // Handles: Close, Minimize, Favorite, Tags, Escape key.
 
   renderRelatedVideos(videoObject);
 
@@ -490,7 +487,6 @@ function forceFrssEntryToCollapse(target) {
 }
 
 function closeModalVideo() {
-  console.log('Closing modal video');
   const modal = getModalVideo();
 
   // Remove all modal-specific listeners or states before removing the modal element
