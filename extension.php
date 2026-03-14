@@ -28,12 +28,12 @@ class YoulagExtension extends Minz_Extension
    */
   public $yl_watch_later_category_filter_enabled = false;
   /**
-   * Enable swipe-to-mini-player by default
+   * Enable swipe-to-miniplayer by default
    * @var bool
    */
   public $yl_miniplayer_swipe_enabled = true;
   /**
-   * Enable continuous playback in mini player
+   * Enable continuous playback in miniplayer
    * @var bool
    */
   public $yl_miniplayer_autoplay_enabled = false;
