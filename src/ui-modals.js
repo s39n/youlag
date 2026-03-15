@@ -610,6 +610,14 @@ function renderRelatedVideos(videoObject) {
     relatedVideos.then(videos => {
       if (!Array.isArray(videos) || videos.length === 0) return;
 
+      // Refetch the modal and related videos container as modal content could have been rerendered since the relatedVideos promise was initiated
+      const modal = getModalVideo();
+      const container = modal?.querySelector(`#${app.modal.id.relatedContainer}`);
+      if (!container) return;
+
+      // Clear previously appended related videos
+      container.querySelectorAll(`.${app.modal.class.relatedVideoEntry}`).forEach(el => el.remove());
+
       videos.forEach(async videoObject => {
         let thumbnail;
         const isVideoFeedItem = getVideoIdFromUrl(videoObject.external_link) ? true : false;
@@ -626,10 +634,10 @@ function renderRelatedVideos(videoObject) {
 
         const videoHtml = template(videoObject, thumbnail, directLink);
         if (videoObject.entryId === currentlyViewing) return; // Skip currently viewing video.
-        relatedVideosContainer.insertAdjacentHTML('beforeend', videoHtml);
+        container.insertAdjacentHTML('beforeend', videoHtml);
       });
       // Display the related videos container once appended.
-      relatedVideosContainer.classList.remove('display-none');
+      container.classList.remove('display-none');
     });
 
     // Remove any previous relatedVideosContainer click listeners and attach new ones.
