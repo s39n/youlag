@@ -81,11 +81,13 @@ function extractFeedItemData(feedItem) {
     extractedVideoUrl = feedItem.querySelector('.enclosure-content a[href*="youtube"], .enclosure-content a[href*="/watch?v="]');
     extractedVideoUrl = sanitizeExtractedVideoUrl(extractedVideoUrl);
   }
-  const isVideoFeedItem = extractedVideoUrl !== '';
+
+  const videoId = getVideoIdFromUrl(extractedVideoUrl);
+  const isVideoFeedItem = videoId ? true : false;
+  app.state.modal.youtubeId = videoId;
   const videoDescriptionExists = feedItem.querySelector('.enclosure-description') !== null;
   const videoDescription = videoDescriptionExists ? feedItem.querySelector('.enclosure-description')?.innerHTML.trim() : '';
   const videoBaseUrl = isVideoFeedItem ? getBaseUrl(extractedVideoUrl) : '';
-  app.state.modal.youtubeId = extractedVideoUrl ? getVideoIdFromUrl(extractedVideoUrl) : '';
   const youtubeUrl = app.state.modal.youtubeId ? `https://www.youtube.com/watch?v=${app.state.modal.youtubeId}` : '';
   const youtubeEmbedUrl = app.state.modal.youtubeId ? `https://www.youtube.com/embed/${app.state.modal.youtubeId}?enablejsapi=1` : '';
   const videoEmbedUrl = app.state.modal.youtubeId ? `${videoBaseUrl}/embed/${app.state.modal.youtubeId}` : '';
@@ -107,11 +109,11 @@ function extractFeedItemData(feedItem) {
     feedItem.querySelector('article div.text')?.innerHTML.trim() || '';
   video_description = appendOriginalSrc(video_description);
 
+  // Wrap video description intro in divs to setup for the setting "Hide description intro containing links". 
   if (isVideoFeedItem && videoDescriptionExists) {
     video_description = wrapVideoDescription(video_description);
 
     if (isHideDescriptionIntroEnabled()) {
-      // Hides the intro of YouTube video descriptions, which often contains sponsored content above the fold.
       video_description = hideVideoDescriptionIntro(video_description);
     }
   }

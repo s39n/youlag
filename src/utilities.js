@@ -172,19 +172,37 @@ function updateAddFeedLink() {
 }
 
 function getVideoIdFromUrl(url) {
-  // Match video ID from various sources, including YouTube, Invidious, Piped, and thumbnail URLs like ytimg.com/vi/[VIDEO_ID]/[quality].jpg
+  /**
+   * Match video ID without relying of base domain, to support YouTube, Invidious, Piped, etc.
+   * 
+   * Patterns:
+   * ?v=ID or ?id=ID (/watch?v=ID)
+   * /shorts/ID, /embed/ID
+   * /e/ID, /v/ID, /vi/ID (ytimg.com/vi/VIDEO_ID/[quality].jpg)
+   * /ID (youtu.be/ID)
+   */
+  let videoId = '';
+  const videoIdRegex = /^[a-zA-Z0-9_-]{11}$/;
 
-  // Standard video URL patterns
-  const regex = /(?:\/|^)(?:shorts\/|v\/|e(?:mbed)?\/|\S*?[?&]v=|\S*?[?&]id=|v=)([a-zA-Z0-9_-]{11})(?:[\/\?]|$)/;
-  let match = url.match(regex);
-  if (match) return match[1];
+  try {
+    const { pathname, searchParams } = new URL(url);
 
-  // YouTube thumbnail URL pattern: ytimg.com/vi/[VIDEO_ID]/[quality].jpg
-  const thumbRegex = /ytimg\.com\/vi\/([a-zA-Z0-9_-]{11})\//;
-  match = url.match(thumbRegex);
-  if (match) return match[1];
+    // Query param ?v= or ?id=
+    const v = searchParams.get('v') || searchParams.get('id');
+    if (v && videoIdRegex.test(v)) videoId = v;
 
-  return '';
+    // Named path prefix: /shorts/ID, /embed/ID, /e/ID, /v/ID, /vi/ID
+    const pathRegex = pathname.match(/\/(?:shorts|embed|e|v|vi)\/([a-zA-Z0-9_-]{11})(?:\/|$)/);
+    if (pathRegex) videoId = pathRegex[1];
+
+    // Sole path segment: /ID
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length === 1 && videoIdRegex.test(segments[0])) videoId = segments[0];
+  } catch (_) {}
+
+  console.log(`Extracted video ID: "${videoId}", from URL: "${url}"`);
+
+  return videoId || '';
 }
 
 function getBaseUrl(url) {
