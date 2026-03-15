@@ -511,33 +511,46 @@ function closeModalVideo() {
   if (app.state && app.state.modal) app.state.modal.chapterLastActiveIndex = -1;
   if (modal) modal.remove();
 
-  setHistoryPopstate(false); // Signal that a new pop state can be pushed for the next video
+  // Clean up history state added by video modal to allow proper back navigation.
+  setHistoryPopstate(false); // Signal that a new pop state can be pushed for the next video.
 
-  // Remove param ylvideo from URL, which is used for direct linking to a video.
+  // Remove ylvideo param from URL (used for direct linking to a video).
   const url = new URL(window.location);
   url.searchParams.delete('ylvideo');
-  window.history.replaceState({}, '', url);
+  window.history.replaceState(history.state, '', url);
 
-  if (
-    !app.state.popstate.allowBack && 
-    history.state && 
-    history.state.modalOpen && 
-    isModeFullscreen()
-  ) {
-    // Only trigger history.back() once, and set the ignore flags.
-    app.state.popstate.allowBack = false;
-    app.state.popstate.ignoreNext = true;
-    history.back();
-  }
-  else {
-    app.state.popstate.ignoreNext = false;
-    resetHistoryState();
-  }
+  resetModalHistoryState();
   setModalState(false);
   setModeMiniplayer(false);
   setModeFullscreen(false);
   setPageTitle();
   clearVideoQueue();
+}
+
+function resetModalHistoryState() {
+  /**
+   * Handle history pop state cleanup when closing the video modal,
+   * either via the modal close button, or browser back button.
+   *
+   * The video modal adds a new history state on open to allow users to use the back button to close the modal.
+   */
+
+  // Reset state for next modal.
+  app.state.popstate.allowBack = true;
+
+  // Determines if pushState entry needs to be consumed via history.back().
+  const wasAtPushState = !!history.state?.modalOpen;
+
+  if (wasAtPushState) {
+    // Modal close button: consume the pushState entry to only require one back press to leave.
+    app.state.popstate.ignoreNext = true;
+    history.back();
+  }
+  else {
+    // Back navigation close: already past the pushState entry, just clean up current state.
+    app.state.popstate.ignoreNext = false;
+    resetHistoryState();
+  }
 }
 
 function renderRelatedVideos(videoObject) {

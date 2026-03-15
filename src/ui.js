@@ -81,7 +81,7 @@ function setupVideoClickListener() {
   });
 
   window.addEventListener('popstate', function popstateHandler(e) {
-    if (isHashUrl(app.state.popstate.pathPrev)) return;
+    if (isHashUrl()) return;
     if (isModeFullscreen() && getModalVideo()) {
       app.state.popstate.allowBack = false;
       closeModalVideo();

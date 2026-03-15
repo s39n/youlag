@@ -421,7 +421,7 @@ function addVideoParamUrl(entryId) {
   const url = new URL(window.location.href);
   url.searchParams.set('ylvideo', entryId);
   const newUrl = url.toString();
-  window.history.replaceState({}, '', newUrl);
+  window.history.replaceState(history.state, '', newUrl);
   return newUrl;
 }
 
@@ -435,7 +435,7 @@ function removeVideoParamUrl(element = null) {
     element.setAttribute('href', newUrl);
   }
   else {
-    window.history.replaceState({}, '', newUrl);
+    window.history.replaceState(history.state, '', newUrl);
   }
 }
 

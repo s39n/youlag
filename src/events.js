@@ -85,7 +85,7 @@ function removeYoulagLoadingState() {
 }
 
 function initFallback() {
-  // NOTE: Using FreshRSS' `freshrss:globalContextLoaded` event hasn't been reliable, thus this fallback method.
+  // NOTE: Using FreshRSS' `freshrss:globalContextLoaded` event hasn't been reliable, hence this fallback method.
   if (document.readyState === 'complete' || document.readyState === 'interactive' || app.state.youlag.init === true) {
     init();
   }
