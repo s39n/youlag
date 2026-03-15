@@ -129,10 +129,13 @@ function extractFeedItemData(feedItem) {
   if (!isVideoFeedItem && thumbnail && video_description) {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = video_description;
-    const firstImage = tempDiv.querySelector('img');
-    if (firstImage && firstImage.src === thumbnail) {
-      firstImage.classList.add('display-none');
-      video_description = tempDiv.innerHTML;
+    const firstImageContainer = tempDiv.querySelector('figure') || tempDiv.querySelector('img');
+    if (firstImageContainer) {
+      const img = firstImageContainer.querySelector('img') || firstImageContainer;
+      if (img.src === thumbnail) {
+        firstImageContainer.classList.add('display-none');
+        video_description = tempDiv.innerHTML;
+      }
     }
   }
 
