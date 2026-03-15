@@ -296,19 +296,23 @@ function wrapVideoDescription(description) {
 function hideVideoDescriptionIntro(description) {
   /** 
    * Hides the intro of YouTube video descriptions, which often contains sponsored content above the fold.
-   * Assumes the intro is wrapped in a div by `wrapVideoDescription()`.
+   * Assumes the intro is wrapped in divs by `wrapVideoDescription()`.
    */
   const temp = document.createElement('div');
   temp.innerHTML = description;
   const firstParagraph = temp.querySelector(`.${app.modal.class.descParagraph1}`);
+  const secondParagraph = temp.querySelector(`.${app.modal.class.descParagraph2}`);
+
   if (firstParagraph && firstParagraph.querySelector('a')) {
     firstParagraph.classList.add('display-none');
-
-    const secondParagraph = temp.querySelector(`.${app.modal.class.descParagraph2}`);
-    if (secondParagraph && firstParagraph.textContent.length <= 200) {
-      secondParagraph.classList.add('display-none');
-    }
   }
+
+  const combinedLength = (firstParagraph?.textContent.length ?? 0) + (secondParagraph?.textContent.length ?? 0);
+  if (secondParagraph && combinedLength <= 200 && secondParagraph.querySelector('a')) {
+    firstParagraph?.classList.add('display-none');
+    secondParagraph.classList.add('display-none');
+  }
+
   return temp.innerHTML;
 }
 
