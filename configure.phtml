@@ -122,6 +122,20 @@ declare(strict_types=1);
       </label>
 
       <h4 class="mb-0">
+        Video description
+      </h4>
+      <label for="yl_description_hide_intro_enabled" class="flex">
+          <input type="checkbox" id="yl_description_hide_intro_enabled" name="yl_description_hide_intro_enabled" value="1" class="mb-auto"
+            <?php echo ($this->yl_description_hide_intro_enabled) ? ' checked="checked"' : ''; ?>>
+        <div class="inline-block">
+          Hide description intro with links
+          <div class="yl-form-group-help">
+            Sponsored content is often placed at the top of the description; hide the intro to reduce chance of seeing it.
+          </div>
+        </div>
+      </label>
+
+      <h4 class="mb-0">
         Watch more suggestions
 
         <div class="yl-form-group-help">

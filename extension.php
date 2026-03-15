@@ -43,6 +43,11 @@ class YoulagExtension extends Minz_Extension
    */
   public $yl_chapter_progress_enabled = true;
   /**
+   * Hide first intro of video descriptions if links are present
+   * @var bool
+   */
+  public $yl_description_hide_intro_enabled = false;
+  /**
    * Use video platform labels (Favorite → Watch later, Tags → Playlists)
    * @var bool
    */
@@ -93,15 +98,16 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setMiniplayerSwipeEnabled'), 13);
     $this->registerHook('nav_entries', array($this, 'setMiniplayerAutoplayEnabled'), 14);
     $this->registerHook('nav_entries', array($this, 'setChapterProgressEnabled'), 15);
-    $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 16);
-    $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 17);
-    $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 18);
-    $this->registerHook('nav_entries', array($this, 'setFeedThumbnailScreencapEnabled'), 19);
-    $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 20);
-    $this->registerHook('nav_entries', array($this, 'setUpdateCheckEnabled'), 21);
+    $this->registerHook('nav_entries', array($this, 'setDescriptionHideIntroEnabled'), 16);
+    $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 17);
+    $this->registerHook('nav_entries', array($this, 'setRelatedVideosSource'), 18);
+    $this->registerHook('nav_entries', array($this, 'setFeedViewLayoutMobileGrid'), 19);
+    $this->registerHook('nav_entries', array($this, 'setFeedThumbnailScreencapEnabled'), 20);
+    $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 21);
+    $this->registerHook('nav_entries', array($this, 'setUpdateCheckEnabled'), 22);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
-      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 22);
+      $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 23);
     }
 
     // Add Youlag theme and script to all extension pages
@@ -166,6 +172,9 @@ class YoulagExtension extends Minz_Extension
 
     $chapterProgressEnabled = FreshRSS_Context::userConf()->attributeBool('yl_chapter_progress_enabled');
     $this->yl_chapter_progress_enabled = ($chapterProgressEnabled === null) ? true : $chapterProgressEnabled;
+
+    $descriptionHideIntroEnabled = FreshRSS_Context::userConf()->attributeBool('yl_description_hide_intro_enabled');
+    $this->yl_description_hide_intro_enabled = ($descriptionHideIntroEnabled === null) ? false : $descriptionHideIntroEnabled;
 
     $feedViewMobileGridEnabled = FreshRSS_Context::userConf()->attributeBool('yl_feed_view_mobile_grid_enabled');
     $this->yl_feed_view_mobile_grid_enabled = ($feedViewMobileGridEnabled === null) ? false : $feedViewMobileGridEnabled;
@@ -278,6 +287,12 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_chapter_progress_enabled ? 'true' : 'false';
     return '<div id="yl_chapter_progress_enabled" data-yl-chapter-progress-enabled="' . $enabled . '"></div>';
+  }
+
+  public function setDescriptionHideIntroEnabled(): string
+  {
+    $enabled = $this->yl_description_hide_intro_enabled ? 'true' : 'false';
+    return '<div id="yl_description_hide_intro_enabled" data-yl-description-hide-intro-enabled="' . $enabled . '"></div>';
   }
 
   /**
@@ -742,6 +757,10 @@ class YoulagExtension extends Minz_Extension
       // Chapter progress indicator
       $chapterProgressEnabled = Minz_Request::paramBoolean('yl_chapter_progress_enabled', true);
       FreshRSS_Context::userConf()->_attribute('yl_chapter_progress_enabled', $chapterProgressEnabled);
+
+      // Description hide intro
+      $descriptionHideIntroEnabled = Minz_Request::paramBoolean('yl_description_hide_intro_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_description_hide_intro_enabled', $descriptionHideIntroEnabled);
 
       // Video platform labels
       $labelsEnabled = Minz_Request::paramBoolean('yl_video_labels_enabled', true);

@@ -107,6 +107,15 @@ function extractFeedItemData(feedItem) {
     feedItem.querySelector('article div.text')?.innerHTML.trim() || '';
   video_description = appendOriginalSrc(video_description);
 
+  if (isVideoFeedItem && videoDescriptionExists) {
+    video_description = wrapVideoDescription(video_description);
+
+    if (isHideDescriptionIntroEnabled()) {
+      // Hides the intro of YouTube video descriptions, which often contains sponsored content above the fold.
+      video_description = hideVideoDescriptionIntro(video_description);
+    }
+  }
+
   // Video thumbnail, and fallback for article thumbnail
   let thumbnail = feedItem.querySelector('.thumbnail img')?.src || ''; // Default thumbnail rendered in DOM
   let thumbnail_video = '';

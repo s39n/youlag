@@ -274,6 +274,44 @@ function appendOriginalSrc(element) {
   return root;
 }
 
+function wrapVideoDescription(description) {
+  // Wrap first and second paragraph of a YouTube video description in a div.
+  // YouTube video descriptions uses <br><br> to separate paragraphs.
+
+  const regex = /^([\s\S]*?<br\s*\/?>\s*<br\s*\/?>)([\s\S]*)$/i; // brbr pattern
+
+  const match1 = description.match(regex);
+  if (!match1) return description;
+
+  const match2 = match1[2].match(regex);
+  if (!match2) {
+    return `<div class="${app.modal.class.descParagraph1}">${match1[1]}</div>` +
+           match1[2]; // Remainder
+  }
+  return `<div class="${app.modal.class.descParagraph1}">${match1[1]}</div>` +
+         `<div class="${app.modal.class.descParagraph2}">${match2[1]}</div>` +
+         match2[2];
+}
+
+function hideVideoDescriptionIntro(description) {
+  /** 
+   * Hides the intro of YouTube video descriptions, which often contains sponsored content above the fold.
+   * Assumes the intro is wrapped in a div by `wrapVideoDescription()`.
+   */
+  const temp = document.createElement('div');
+  temp.innerHTML = description;
+  const firstParagraph = temp.querySelector(`.${app.modal.class.descParagraph1}`);
+  if (firstParagraph && firstParagraph.querySelector('a')) {
+    firstParagraph.classList.add('display-none');
+
+    const secondParagraph = temp.querySelector(`.${app.modal.class.descParagraph2}`);
+    if (secondParagraph && firstParagraph.textContent.length <= 200) {
+      secondParagraph.classList.add('display-none');
+    }
+  }
+  return temp.innerHTML;
+}
+
 function getDearrowScreencap(youtubeId) {
   // Returns the Dearrow thumbnail URL synchronously (no fallback check).
   if (!youtubeId) return '';
@@ -598,6 +636,11 @@ function isMiniplayerAutoplayEnabled() {
   // Whether restoring miniplayer should auto-play.
   console.log(document.getElementById('yl_miniplayer_autoplay_enabled')?.getAttribute('data-yl-miniplayer-autoplay-enabled') === 'true')
   return document.getElementById('yl_miniplayer_autoplay_enabled')?.getAttribute('data-yl-miniplayer-autoplay-enabled') === 'true';
+}
+
+function isHideDescriptionIntroEnabled() {
+  // Hides first intro of YouTube video descriptions, which often contains sponsored content above the fold.
+  return document.getElementById('yl_description_hide_intro_enabled')?.getAttribute('data-yl-description-hide-intro-enabled') === 'true';
 }
 
 function isUpdateCheckEnabled() {
