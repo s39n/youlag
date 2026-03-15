@@ -533,6 +533,68 @@ async function handleFeedDearrowFeatures() {
   }
 }
 
+function handleSwipeSidebar() {
+  // Mobile: Swipe left to right to open sidebar, and opposite to close. 
+  
+  const stream = document.getElementById('stream');
+  const sidenav = document.getElementById('aside_feed');
+  if (!stream || !sidenav) return;
+
+  // Swipe start threshold and cap.
+  const swipeStartThreshold = Math.min(window.innerWidth * 0.25, 100); // 25vw, capped at 100px
+  const swipeMinDistance = swipeStartThreshold * 0.5;
+
+  let touchStartX = null;
+  let touchStartY = null;
+
+  function touchStartHandler(e) {
+    if (e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }
+
+  function touchEndHandler(e) {
+    if (e.changedTouches.length !== 1 || touchStartX === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+
+    // Calculate swipe distance
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      // Ignore vertical swipes
+      touchStartX = null;
+      touchStartY = null;
+      return;
+    }
+
+    const isSidebarVisible = sidenav.classList.contains('visible');
+
+    // Open sidebar
+    if (!isSidebarVisible && touchStartX < swipeStartThreshold && deltaX > swipeMinDistance) {
+      sidenav.classList.add('visible');
+      sidenav.style.display = '';
+      setSidenavState();
+    }
+    // Close sidebar
+    else if (isSidebarVisible && deltaX < -swipeMinDistance) {
+      sidenav.classList.remove('visible');
+      sidenav.style.display = 'none';
+      setSidenavState();
+    }
+
+    touchStartX = null;
+    touchStartY = null;
+  }
+
+  stream.addEventListener('touchstart', touchStartHandler, { passive: true });
+  stream.addEventListener('touchend', touchEndHandler, { passive: true });
+  sidenav.addEventListener('touchstart', touchStartHandler, { passive: true });
+  sidenav.addEventListener('touchend', touchEndHandler, { passive: true });
+}
+
 /*****************************************
  * END "UI CLASS HANDLERS"
  ****************************************/

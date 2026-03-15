@@ -24,6 +24,7 @@ function init() {
         setWatchLaterCategoryFilter();
       }
     }
+    handleSwipeSidebar();
     handleFeedDearrowFeatures();
     onNewFeedItems();
     isUpdateCheckEnabled() && checkForUpdates();

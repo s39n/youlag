@@ -200,8 +200,6 @@ function getVideoIdFromUrl(url) {
     if (segments.length === 1 && videoIdRegex.test(segments[0])) videoId = segments[0];
   } catch (_) {}
 
-  console.log(`Extracted video ID: "${videoId}", from URL: "${url}"`);
-
   return videoId || '';
 }
 
