@@ -5111,7 +5111,7 @@ a.yl-video-action-button[href=""] {
 .youlag-mode--miniplayer #youlagTheaterModal {
   overflow: hidden;
   z-index: 50;
-  transition: .2s; /* Time to minimize to mini player */
+  transition: .2s; /* Time to minimize to miniplayer */
   will-change: width, bottom, right, aspect-ratio, height, border-radius, background, box-shadow, transform;
 
   & {
