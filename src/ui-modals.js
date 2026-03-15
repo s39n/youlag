@@ -510,16 +510,9 @@ function closeModalVideo() {
   }
   if (app.state && app.state.modal) app.state.modal.chapterLastActiveIndex = -1;
   if (modal) modal.remove();
-
-  // Clean up history state added by video modal to allow proper back navigation.
+  
   setHistoryPopstate(false); // Signal that a new pop state can be pushed for the next video.
-
-  // Remove ylvideo param from URL (used for direct linking to a video).
-  const url = new URL(window.location);
-  url.searchParams.delete('ylvideo');
-  window.history.replaceState(history.state, '', url);
-
-  resetModalHistoryState();
+  resetModalHistoryState(); // Clean up history state added by video modal to allow proper back navigation.
   setModalState(false);
   setModeMiniplayer(false);
   setModeFullscreen(false);
@@ -547,8 +540,9 @@ function resetModalHistoryState() {
     history.back();
   }
   else {
-    // Back navigation close: already past the pushState entry, just clean up current state.
+    // Back navigation close: already past the pushState entry, clean URL and state.
     app.state.popstate.ignoreNext = false;
+    removeVideoParamUrl();
     resetHistoryState();
   }
 }

@@ -90,6 +90,7 @@ function setupVideoClickListener() {
     if (app.state.popstate.ignoreNext) {
       app.state.popstate.ignoreNext = false;
       app.state.popstate.allowBack = false;
+      removeVideoParamUrl();
       return;
     }
     if (isModeMiniplayer()) {
