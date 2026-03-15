@@ -36,7 +36,7 @@ class YoulagExtension extends Minz_Extension
    * Enable continuous playback in miniplayer
    * @var bool
    */
-  public $yl_miniplayer_autoplay_enabled = false;
+  public $yl_miniplayer_autoplay_enabled = true;
   /**
    * Enable chapter progress indicator in video player
    * @var bool
@@ -162,7 +162,7 @@ class YoulagExtension extends Minz_Extension
     $this->yl_miniplayer_swipe_enabled = ($miniplayerSwipeEnabled === null) ? true : $miniplayerSwipeEnabled;
 
     $miniplayerAutoplayEnabled = FreshRSS_Context::userConf()->attributeBool('yl_miniplayer_autoplay_enabled');
-    $this->yl_miniplayer_autoplay_enabled = ($miniplayerAutoplayEnabled === null) ? false : $miniplayerAutoplayEnabled;
+    $this->yl_miniplayer_autoplay_enabled = ($miniplayerAutoplayEnabled === null) ? true : $miniplayerAutoplayEnabled;
 
     $chapterProgressEnabled = FreshRSS_Context::userConf()->attributeBool('yl_chapter_progress_enabled');
     $this->yl_chapter_progress_enabled = ($chapterProgressEnabled === null) ? true : $chapterProgressEnabled;

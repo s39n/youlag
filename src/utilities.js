@@ -596,6 +596,7 @@ function isVideoLabelsEnabled() {
 
 function isMiniplayerAutoplayEnabled() {
   // Whether restoring miniplayer should auto-play.
+  console.log(document.getElementById('yl_miniplayer_autoplay_enabled')?.getAttribute('data-yl-miniplayer-autoplay-enabled') === 'true')
   return document.getElementById('yl_miniplayer_autoplay_enabled')?.getAttribute('data-yl-miniplayer-autoplay-enabled') === 'true';
 }
 
