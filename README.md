@@ -41,7 +41,7 @@ Optimized for both watching videos and reading articles.
   - Switch between YouTube and Invidious playback sources
 - 🖥️ **Desktop & Mobile**
   - Mobile: Swipe down in video mode to activate miniplayer
-  - Mobile: Swipe right to open/close sidebar
+  - Mobile: Swipe to open/close sidebar
   - Use `Esc` key or the browser's `Back` navigation to exit videos and articles
 - 📰 **FreshRSS features**
   - Subscribe to YouTube creators without needing an account
