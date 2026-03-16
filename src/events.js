@@ -13,7 +13,8 @@ function init() {
   setBodyClass();
   if (isFeedPage()) {
     setupClickListener();
-    setupVisibilityEventListeners();
+    setupSwipeSidebar();
+    setupVisibilityEventListeners(); // Restore event listeners after page inactvity, e.g. when switching tabs.
     setupTagsDropdownOverride();
     renderToolbar();
     if (isLayoutVideo()) {
@@ -24,7 +25,6 @@ function init() {
         setWatchLaterCategoryFilter();
       }
     }
-    handleSwipeSidebar();
     handleFeedDearrowFeatures();
     onNewFeedItems();
     isUpdateCheckEnabled() && checkForUpdates();
@@ -59,6 +59,7 @@ function setupVisibilityEventListeners() {
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       restoreModalEventListeners();
+      setupSwipeSidebar();
     }
   });
 }

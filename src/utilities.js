@@ -630,6 +630,10 @@ function getFeedRoot() {
   return document.querySelector(app.frss.el.feedRoot);
 }
 
+function getSidebar() {
+  return document.querySelector(app.frss.el.sidebar);
+}
+
 function getLayout() {
   return app.state.page.layout; // 'video' or 'article'
 }

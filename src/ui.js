@@ -534,12 +534,19 @@ async function handleFeedDearrowFeatures() {
   }
 }
 
-function handleSwipeSidebar() {
+function setupSwipeSidebar() {
   // Mobile: Swipe left to right to open sidebar, and opposite to close. 
   
-  const stream = document.getElementById('stream');
-  const sidenav = document.getElementById('aside_feed');
-  if (!stream || !sidenav) return;
+  const feedRoot = getFeedRoot();
+  const sidebar = getSidebar();
+  if (!feedRoot || !sidebar) return;
+
+  if (feedRoot._swipeSidebarListeners) {
+    for (const { el, type, handler } of feedRoot._swipeSidebarListeners) {
+      el.removeEventListener(type, handler);
+    }
+  }
+  feedRoot._swipeSidebarListeners = [];
 
   // Swipe start threshold and cap.
   const swipeStartThreshold = Math.min(window.innerWidth * 0.25, 100); // 25vw, capped at 100px
@@ -571,18 +578,19 @@ function handleSwipeSidebar() {
       return;
     }
 
-    const isSidebarVisible = sidenav.classList.contains('visible');
+    const isSidebarVisible = sidebar.classList.contains('visible');
 
     // Open sidebar
     if (!isSidebarVisible && touchStartX < swipeStartThreshold && deltaX > swipeMinDistance) {
-      sidenav.classList.add('visible');
-      sidenav.style.display = '';
+      sidebar.classList.add('visible');
+      sidebar.style.display = '';
       setSidenavState();
     }
+    
     // Close sidebar
     else if (isSidebarVisible && deltaX < -swipeMinDistance) {
-      sidenav.classList.remove('visible');
-      sidenav.style.display = 'none';
+      sidebar.classList.remove('visible');
+      sidebar.style.display = 'none';
       setSidenavState();
     }
 
@@ -590,10 +598,15 @@ function handleSwipeSidebar() {
     touchStartY = null;
   }
 
-  stream.addEventListener('touchstart', touchStartHandler, { passive: true });
-  stream.addEventListener('touchend', touchEndHandler, { passive: true });
-  sidenav.addEventListener('touchstart', touchStartHandler, { passive: true });
-  sidenav.addEventListener('touchend', touchEndHandler, { passive: true });
+  function addTracked(el, type, handler) {
+    el.addEventListener(type, handler, { passive: true });
+    feedRoot._swipeSidebarListeners.push({ el, type, handler });
+  }
+
+  addTracked(feedRoot, 'touchstart', touchStartHandler);
+  addTracked(feedRoot, 'touchend', touchEndHandler);
+  addTracked(sidebar, 'touchstart', touchStartHandler);
+  addTracked(sidebar, 'touchend', touchEndHandler);
 }
 
 /*****************************************
