@@ -471,6 +471,13 @@ function restoreModalEventListeners() {
 
   setupModalVideoEventListeners(videoObject);
   setupModalVideoControlEventListeners();
+
+  // Related videos render fallback
+  // TODO: In some cases when opening up a direct link in a new tab, the related video may not render. 
+  const relatedContainer = modal.querySelector(`#${app.modal.id.relatedContainer}`);
+  if (getRelatedVideosSetting() !== 'none' && relatedContainer?.classList.contains('display-none')) {
+    renderRelatedVideos(videoObject);
+  }
 }
 
 function forceFrssEntryToCollapse(target) {
