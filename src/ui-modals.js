@@ -742,7 +742,8 @@ function restoreVideoQueue() {
   if (queueObj && Array.isArray(queueObj.queue) && typeof queueObj.queue_active_index === 'number' && queueObj.queue.length > 0) {
     setModeMiniplayer(true); // Restored video queue always opens in miniplayer mode.
     const activeEntry = queueObj.queue[queueObj.queue_active_index];
-    if (document.getElementById('yl_miniplayer_autoplay_enabled')?.getAttribute('data-yl-miniplayer-autoplay-enabled') === 'true' && activeEntry?.playerState === 'playing') {
+    if (activeEntry) activeEntry.autoplay = false;
+    if (isMiniplayerAutoplayEnabled() && activeEntry?.playerState === 'playing') {
       activeEntry.autoplay = true;
     }
     handleActiveVideo(queueObj, true);

@@ -179,8 +179,13 @@ function setupModalVideoControlEventListeners() {
           const entry = stored.queue.find(v => v.entryId === entryId);
           if (entry) {
             entry.playbackTime = Math.floor(currentTime);
-            if (playerState !== null) {
-              entry.playerState = playerState === 1 ? 'playing' : 'paused';
+            if (playerState === 1 || playerState === 3) {
+              // Treat state 1 (playing) and 3 (buffering) as playing
+              entry.playerState = 'playing'; 
+            }
+            else if (playerState === 2) {
+              // State 2: explicitly paused
+              entry.playerState = 'paused'; 
             }
             localStorage.setItem(app.modal.queue.localStorageKey, JSON.stringify(stored));
           }
