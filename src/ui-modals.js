@@ -104,7 +104,11 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
   // Video: Embed URL handling
   function getEmbedUrl(source) {
     // Get the correct embed URL for a given source
-    const startTime = videoObject.playbackTime > 0 ? Math.floor(videoObject.playbackTime) : null;
+    
+    const playbackTime = videoObject.playbackTime > 0 ? Math.floor(videoObject.playbackTime) : null;
+    const videoDuration = videoObject.videoDuration > 0 ? videoObject.videoDuration : null;
+    const nearEnd = videoDuration && playbackTime && (videoDuration - playbackTime <= 3);
+    const startTime = nearEnd ? null : playbackTime; // Don't include start time if it's right by the end.
     const autoplay = videoObject.autoplay ? 1 : 0;
     if (source === 'invidious_1' && videoObject.video_invidious_instance_1 && videoObject.youtubeId) {
       const base = `${videoObject.video_invidious_instance_1.replace(/\/$/, '')}/embed/${videoObject.youtubeId}`;
