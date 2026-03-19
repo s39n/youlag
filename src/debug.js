@@ -66,7 +66,10 @@ function renderDebugButtons() {
 	btnC.textContent = 'C';
 	btnC.title = 'Show console logs';
 	btnC.style.cssText = btnStyle;
-	btnC.addEventListener('click', renderConsoleLogs);
+	btnC.addEventListener('click', function() {
+		try { localStorage.setItem('ylDebugConsoleLogsOpen', 'true'); } catch (e) {}
+		renderConsoleLogs();
+	});
 
 	// LocalStorage button (L)
 	const btnL = document.createElement('button');
@@ -74,7 +77,10 @@ function renderDebugButtons() {
 	btnL.textContent = 'L';
 	btnL.title = 'Show localStorage state';
 	btnL.style.cssText = btnStyle;
-	btnL.addEventListener('click', renderLocalStorageStates);
+	btnL.addEventListener('click', function() {
+		try { localStorage.setItem('ylDebugLocalStorageOpen', 'true'); } catch (e) {}
+		renderLocalStorageStates();
+	});
 
 	btns.appendChild(btnC);
 	btns.appendChild(btnL);
@@ -157,6 +163,12 @@ function renderConsoleLogs() {
 		title: 'Youlag Console',
 		bottom: '42px'
 	});
+	const closeBtn = panel.querySelector('button');
+	if (closeBtn) {
+		closeBtn.addEventListener('click', function() {
+			try { localStorage.setItem('ylDebugConsoleLogsOpen', 'false'); } catch (e) {}
+		}, { once: true });
+	}
 	const body = panel.querySelector('.yl-debug-panel-body');
 
 	if (!window.__ylConsoleDebugState) {
@@ -205,11 +217,16 @@ function renderLocalStorageStates() {
 	const panel = renderDebugPanel({
 		id: 'yl-debug-localstorage',
 		title: 'Youlag localStorage',
-		top: '8px'
+		top: '80px'
 	});
+	const closeBtn = panel.querySelector('button');
+	if (closeBtn) {
+		closeBtn.addEventListener('click', function() {
+			try { localStorage.setItem('ylDebugLocalStorageOpen', 'false'); } catch (e) {}
+		}, { once: true });
+	}
+
 	const body = panel.querySelector('.yl-debug-panel-body');
-
-
 
 	function parseValue(raw) {
 		try {
@@ -297,3 +314,10 @@ function renderLocalStorageStates() {
 	}
 }
 
+function autoOpenDebugPanels() {
+	if (!isDebugEnabled()) return;
+	try {
+		if (localStorage.getItem('ylDebugConsoleLogsOpen') === 'true') renderConsoleLogs();
+		if (localStorage.getItem('ylDebugLocalStorageOpen') === 'true') renderLocalStorageStates();
+	} catch (e) {}
+}

@@ -44,6 +44,7 @@ function init() {
 
   if (isDebugEnabled()) {
     renderDebugButtons();
+    autoOpenDebugPanels();
   }
 }
 
