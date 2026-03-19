@@ -60,6 +60,7 @@ function renderModalVideo(videoObject) {
   }
 
   // If modal already exists, just update the container with new content.
+  modal.setAttribute('data-entry', videoObject.entryId);
   modal.querySelector(`.${app.modal.class.container}`).innerHTML = templateModalVideo(videoObject, 'container');
   
   setPageTitle(videoObject.title);
@@ -116,7 +117,10 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
     else if (source === 'youtube') {
       const params = new URLSearchParams();
       if (startTime) params.set('start', startTime);
-      if (autoplay) params.set('autoplay', '1');
+      if (autoplay) {
+        params.set('autoplay', '1');
+        params.set('playsinline', '1');
+      }
       const query = params.toString();
       return query ? `${videoObject.youtube_embed_url}&${query}` : videoObject.youtube_embed_url;
     }
@@ -163,7 +167,7 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
           <iframe id="${app.modal.id.videoIframe}"
                   class="youlag-iframe"
                   data-yl-is-video="${videoSourceDefaultNormalized}"
-                  src="${defaultEmbedUrl}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+                  src="${defaultEmbedUrl}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen" allowfullscreen>
           </iframe>
         </div>
       </div>
