@@ -169,6 +169,7 @@ app.types = {
     queue_active_index: -1,
     playbackTime: 0, // In seconds
     playerState: 'paused', // 'playing' | 'paused'
+    videoDuration: 0, // Total length in seconds
   },
 
   videoChapter: {

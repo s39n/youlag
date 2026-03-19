@@ -179,6 +179,7 @@ function setupModalVideoControlEventListeners() {
           const entry = stored.queue.find(v => v.entryId === entryId);
           if (entry) {
             entry.playbackTime = Math.floor(currentTime);
+            if (videoDuration) entry.videoDuration = Math.floor(videoDuration);
             if (playerState === 1 || playerState === 3) {
               // Treat state 1 (playing) and 3 (buffering) as playing
               entry.playerState = 'playing'; 

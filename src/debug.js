@@ -251,8 +251,9 @@ function renderLocalStorageStates() {
 		let activeVideo = null;
 		let playbackTime = null;
 		let playerState = null;
-
+		let videoDuration = null;
 		let isMiniplayer = null;
+		
 		try {
 			queue = parseValue(localStorage.getItem('youlagVideoQueue'));
 			if (queue && typeof queue === 'object') {
@@ -262,6 +263,7 @@ function renderLocalStorageStates() {
 					activeVideo = queue.queue[activeIndex];
 					playbackTime = activeVideo.playbackTime;
 					playerState = activeVideo.playerState;
+					videoDuration = activeVideo.videoDuration;
 				}
 			}
 		} catch (e) {}
@@ -278,6 +280,8 @@ function renderLocalStorageStates() {
 		summary += 'isMiniplayer: <div class="' + mpBadge + '">' + isMiniplayer + '</div><br>';
 		summary += 'playbackTime: <div class="' + ptBadge + '">' + playbackTime + '</div><br>';
 		summary += 'playerState: <div class="' + psBadge + '">' + playerState + '</div><br>';
+		let vdBadge = 'inline-block yl-badge ' + (videoDuration > 0 ? 'yl-badge--success' : 'yl-badge--warning');
+		summary += 'videoDuration: <div class="' + vdBadge + '">' + videoDuration + '</div><br>';
 		if (iframePath) {
 			let iframeBadge = 'inline-block yl-badge ' + (iframeSrc.includes('autoplay=1') ? 'yl-badge--success' : 'yl-badge--warning');
 			summary += 'iframe: <div class="' + iframeBadge + '">' + iframePath + '</div>';

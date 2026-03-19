@@ -745,16 +745,25 @@ function restoreVideoQueue() {
       queueObj = JSON.parse(stored);
     }
     catch (e) {
-      console.error('Error parsing youlagVideoQueue from localStorage:', e);
+      console.error('Youlag: Error parsing youlagVideoQueue from localStorage:', e);
     }
   }
   if (!queueObj || queueObj.isMiniplayer !== true) return;
 
-  if (queueObj && Array.isArray(queueObj.queue) && typeof queueObj.queue_active_index === 'number' && queueObj.queue.length > 0) {
+  if (
+    queueObj && Array.isArray(queueObj.queue) && 
+    typeof queueObj.queue_active_index === 'number' && 
+    queueObj.queue.length > 0
+  ) {
     setModeMiniplayer(true); // Restored video queue always opens in miniplayer mode.
     const activeEntry = queueObj.queue[queueObj.queue_active_index];
     if (activeEntry) activeEntry.autoplay = false;
-    if (isMiniplayerAutoplayEnabled() && activeEntry?.playerState === 'playing') {
+    if (
+      isMiniplayerAutoplayEnabled() && 
+      activeEntry?.playerState === 'playing' &&
+      activeEntry?.playbackTime &&
+      !(activeEntry?.videoDuration && activeEntry.videoDuration - activeEntry.playbackTime <= 3) // Prevent ended videos from autoplaying
+    ) {
       activeEntry.autoplay = true;
     }
     handleActiveVideo(queueObj, true);
