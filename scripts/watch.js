@@ -26,8 +26,9 @@ const srcFiles = [
   '../src/ui-modals.js',
   '../src/ui-video-control.js',
   '../src/ui-modes.js',
-   '../src/forms.js',
-   '../src/events.js',
+  '../src/forms.js',
+  '../src/events.js',
+  '../src/debug.js',
 ];
 const minScriptPath = path.resolve(__dirname, '../static/script.min.js');
 const scriptTempDest = path.join(tempDir, 'script.min.js');

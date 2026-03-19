@@ -40,8 +40,11 @@ function init() {
   handleSliderHashChange(); // TODO: Remove once `FreshRSS/FreshRSS/issues/8488` is addressed.
   handleExperimentalFeature(); // TODO: Temporary handler for experimental features, remove once experimental features are fully implemented or omitted.
   removeYoulagLoadingState();
-
   app.state.youlag.init = true;
+
+  if (isDebugEnabled()) {
+    renderDebugButtons();
+  }
 }
 
 async function initialVideoState() {

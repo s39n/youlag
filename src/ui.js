@@ -285,6 +285,14 @@ function isHashUrl() {
   return isHash;
 }
 
+function renderConsoleLogs() {
+  
+}
+
+function renderLocalStorageStates() {
+
+}
+
 /*****************************************
  * END "EVENT LISTENERS"
  ****************************************/
