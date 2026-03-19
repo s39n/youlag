@@ -32,7 +32,7 @@ function renderDebugButtons() {
 		'position:fixed',
 		'bottom:12px',
 		'left:12px',
-		'z-index:2147483647',
+		'z-index:999999',
 		'display:flex',
 		'gap:8px',
 		'pointer-events:auto'
@@ -40,9 +40,9 @@ function renderDebugButtons() {
 
 	// Button styles
 	const btnStyle = [
-		'width:28px',
+		'width:52px',
 		'height:28px',
-		'border-radius:50%',
+		'border-radius:8px',
 		'background:#181818',
 		'color:#fff',
 		'border:1px solid #444',
@@ -89,8 +89,8 @@ function renderDebugPanel({ id, title, top, bottom }) {
 	panel.id = id;
 	panel.style.cssText = [
 		'position:fixed',
-		'left:8px',
-		'right:8px',
+		'left:1rem',
+		'right:5rem',
 		top ? `top:${top}` : '',
 		bottom ? `bottom:${bottom}` : '',
 		'max-height:40vh',
@@ -100,7 +100,7 @@ function renderDebugPanel({ id, title, top, bottom }) {
 		'color:#f2f2f2',
 		'border:1px solid rgba(255,255,255,0.18)',
 		'border-radius:8px',
-		'z-index:2147483647',
+		'z-index:999999',
 		'font:12px/1.45 Menlo,Monaco,Consolas,monospace',
 		'box-shadow:0 8px 24px rgba(0,0,0,0.35)'
 	].filter(Boolean).join(';');
@@ -220,10 +220,6 @@ function renderLocalStorageStates() {
 		}
 	}
 
-	function colorSpan(val, color, className) {
-		return `<b class="${className}">${val}</b>`;
-	}
-
 	function render() {
     const prevScroll = body.scrollTop;
 		// Summary
@@ -246,15 +242,15 @@ function renderLocalStorageStates() {
 			}
 		} catch (e) {}
 
-		if (activeVideo) {
-			let ptClass = (playbackTime > 0) ? 'yl-pt-green' : 'yl-pt-red';
-			let psClass = (playerState === 'playing') ? 'yl-ps-green' : 'yl-ps-red';
-			summary += `<div style="margin-bottom:10px;font-size:13px;line-height:1.6;background:rgba(30,30,30,0.85);padding:8px 10px;border-radius:6px;">
-				<b>Active video:</b><br>
-				playbackTime: ${colorSpan(playbackTime, '', ptClass)}<br>
-				playerState: ${colorSpan(playerState, '', psClass)}
-			</div>`;
-		}
+	if (activeVideo) {
+		let ptBadge = 'inline-block yl-badge ' + (playbackTime > 0 ? 'yl-badge--success' : 'yl-badge--warning');
+		let psBadge = 'inline-block yl-badge ' + (playerState === 'playing' ? 'yl-badge--success' : 'yl-badge--warning');
+		summary += '<div class="yl-mb-md">';
+		summary += '<b>Active video:</b><br>';
+		summary += 'playbackTime: <div class="' + ptBadge + '">' + playbackTime + '</div><br>';
+		summary += 'playerState: <div class="' + psBadge + '">' + playerState + '</div>';
+		summary += '</div>';
+	}
 
 		// All localStorage keys
 		const keys = Object.keys(localStorage)
@@ -276,16 +272,20 @@ function renderLocalStorageStates() {
 			out.push('');
 		});
 
-		body.innerHTML = summary + '<pre style="margin:0;padding:0;background:none;border:none;box-shadow:none;">' + out.join('\n') + '</pre>';
-		// Apply color via JS for playbackTime and playerState
-		const ptGreen = body.querySelector('.yl-pt-green');
-		if (ptGreen) ptGreen.style.color = '#1ecb1e';
-		const ptRed = body.querySelector('.yl-pt-red');
-		if (ptRed) ptRed.style.color = '#e74c3c';
-		const psGreen = body.querySelector('.yl-ps-green');
-		if (psGreen) psGreen.style.color = '#1ecb1e';
-		const psRed = body.querySelector('.yl-ps-red');
-		if (psRed) psRed.style.color = '#e74c3c';
+    body.innerHTML = '';
+    if (summary) {
+        const summaryDiv = document.createElement('div');
+        summaryDiv.innerHTML = summary;
+        body.appendChild(summaryDiv.firstElementChild);
+    }
+    const pre = document.createElement('pre');
+    pre.style.margin = '0';
+    pre.style.padding = '0';
+    pre.style.background = 'none';
+    pre.style.border = 'none';
+    pre.style.boxShadow = 'none';
+    pre.textContent = out.join('\n');
+    body.appendChild(pre);		const ptGreen = body.querySelector('.yl-pt-green');
 		body.scrollTop = prevScroll;
   }
 

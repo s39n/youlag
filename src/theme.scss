@@ -5575,6 +5575,11 @@ body.youlag-tags-modal-open {
     @include yl-gradient-bg(#fbb324, #b97d0d, false);
     color: #fbb324;
   }
+
+  &--success {
+    @include yl-gradient-bg(#28a745, #218838, false);
+    color: #28a745;
+  }
 }
 
 @media (min-width: 841px) {
