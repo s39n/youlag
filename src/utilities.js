@@ -148,7 +148,7 @@ function updateSidenavLinks() {
 
   if (isWatchLaterSortModified) {
     updateAnchorLink(
-      '/i/?a=normal&get=s&sort=lastUserModified&order=DESC',
+      `${app.frss.urlPrefix}/i/?a=normal&get=s&sort=lastUserModified&order=DESC`,
       document.querySelector('#aside_feed #sidebar .category.favorites > a')
     );
   }
@@ -164,7 +164,7 @@ function updateAddFeedLink() {
     const categoryIdSource = page.parentId || page.id;
     const categoryId = categoryIdSource && categoryIdSource.startsWith('c_') ? categoryIdSource.match(/^c_(\d+)$/) : null;
     updateAnchorLink(
-      `/i/?c=subscription&a=add&yl_category_id=${categoryId ? categoryId[1] : ''}`,
+      `${app.frss.urlPrefix}/i/?c=subscription&a=add&yl_category_id=${categoryId ? categoryId[1] : ''}`,
       document.querySelector('#btn-add')
     );
     return;
@@ -509,14 +509,14 @@ function getCurrentPage() {
 
   const routes = [
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       match: () => urlParams.get('a') === 'normal' && urlParams.has('search'),
       className: 'search_results',
       name: 'search_results',
       id: null,
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       // Home page: no 'get' or 'c' param
       match: () => !urlParams.has('get') && !urlParams.has('c'),
       className: 'home',
@@ -524,35 +524,35 @@ function getCurrentPage() {
       id: null,
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       match: () => urlParams.get('c') === 'extension',
       className: 'extension',
       name: 'extension',
       id: null,
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       match: () => urlParams.get('get') === 'i',
       className: 'important',
       name: 'important',
       id: () => urlParams.get('get'),
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       match: () => urlParams.get('get') === 's',
       className: 'watch_later',
       name: 'watch_later',
       id: () => urlParams.get('get'),
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       match: () => urlParams.get('get') === 'T',
       className: 'playlists',
       name: 'playlists',
       id: () => urlParams.get('get'),
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       match: () => /^t_\d+$/.test(urlParams.get('get') || ''),
       className: () => {
         const n = (urlParams.get('get') || '').substring(2);
@@ -562,7 +562,7 @@ function getCurrentPage() {
       id: () => urlParams.get('get'),
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       // Category page: get param starts with c_
       match: () => urlParams.get('get') && urlParams.get('get').startsWith('c_'),
       className: () => {
@@ -573,7 +573,7 @@ function getCurrentPage() {
       id: () => urlParams.get('get'),
     },
     {
-      path: '/i/',
+      path: app.frss.urlPrefix + '/i/',
       match: () => (urlParams.get('get') && urlParams.get('get').startsWith('f_')),
       className: () => {
         const n = urlParams.get('get').substring(2);
@@ -757,7 +757,7 @@ async function fetchRelatedItems(category = 'watch_later', order = 'rand', limit
   }
 
   try {
-    const response = await fetch(`/i/?a=normal&${getParam}&sort=${order}`);
+    const response = await fetch(`${app.frss.urlPrefix}/i/?a=normal&${getParam}&sort=${order}`);
     if (!response.ok) {
       throw new Error('HTTP ' + response.status);
     }

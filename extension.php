@@ -99,6 +99,7 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setFeedThumbnailScreencapEnabled'), 20);
     $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 21);
     $this->registerHook('nav_entries', array($this, 'setUpdateCheckEnabled'), 22);
+    $this->registerHook('nav_entries', array($this, 'setBaseUrl'), 23);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
       $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 23);
@@ -330,6 +331,20 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_update_check_enabled ? 'true' : 'false';
     return '<div id="yl_update_check_enabled" data-yl-update-check-enabled="' . $enabled . '"></div>';
+  }
+
+  /**
+    * Pass the FreshRSS installation base URL
+    * The frontend js handles the behavior based on this the value in `data-base-url`.
+    *
+    * TODO: FreshRSS could supply this information to js directly so that this and other
+    * extensions do not have to do this.
+    * @return string
+    */
+  public function setBaseUrl(): string
+  {
+    $baseUrl = FreshRSS_Context::systemConf()->base_url;
+    return '<div id="yl_base_url" data-base-url="' . $baseUrl . '"></div>';
   }
 
   /**
@@ -649,9 +664,10 @@ class YoulagExtension extends Minz_Extension
   public function createFreshRssLogo(): string
   {
     $logoSrc = '../themes/icons/FreshRSS-logo.svg';
+    $linkUrl = Minz_Url::display('/i/');
     $html = <<<HTML
       <div id="yl_freshrss_logo_container">
-        <a href="/i/">
+        <a href="{$linkUrl}">
           <img id="yl_freshrss_logo" src="{$logoSrc}" alt="FreshRSS" loading="lazy" />
         </a>
       </div>

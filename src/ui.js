@@ -689,7 +689,7 @@ function renderToolbar() {
     // Create shortcut button to Youlag settings page.
     const settingsShortcut = document.createElement('div');
     settingsShortcut.id = 'yl_nav_menu_settings_shortcut';
-    settingsShortcut.innerHTML = `<a href="/i/?c=extension&a=configure&e=Youlag" class="btn" target="_blank" rel="noopener noreferrer">
+    settingsShortcut.innerHTML = `<a href="${app.frss.urlPrefix}/i/?c=extension&a=configure&e=Youlag" class="btn" target="_blank" rel="noopener noreferrer">
                                     More settings
                                   </a>`;
     menuContent.appendChild(settingsShortcut);
@@ -704,7 +704,7 @@ function renderToolbar() {
       if (page.id && /^f_\d+$/.test(page.id)) {
         manageFeed = Object.assign(document.createElement('a'), {
           id: 'yl_nav_menu_manage_current_feed',
-          href: `/i/?c=subscription&a=feed&id=${feedIdNumber}`,
+          href: `${app.frss.urlPrefix}/i/?c=subscription&a=feed&id=${feedIdNumber}`,
           target: '_blank',
           rel: 'noopener noreferrer',
           textContent: isVideoLabelsEnabled() && isLayoutVideo() ? 'Manage channel' : 'Manage feed'
@@ -903,7 +903,7 @@ function setMissingLogo() {
   const logo = document.createElement('div');
   logo.id = app.frss.id.logo;
   logo.innerHTML = `
-    <a href="/i/">
+    <a href="${app.frss.urlPrefix}/i/">
       <img id="${app.frss.id.logoImg}" src="../themes/icons/FreshRSS-logo.svg" alt="FreshRSS" loading="lazy">
     </a>
   `;

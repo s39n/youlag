@@ -1132,7 +1132,7 @@ nav.aside.aside_feed {
         display: block;
         width: 14px;
         height: 36px; /* For centering the icon vertically, actual icon size is determined by the width. */
-        background-image: url('../themes/Mapco/icons/view-normal.svg'); /* Existing image from FreshRSS theme "Mapco" */
+        background-image: url('./themes/Mapco/icons/view-normal.svg'); /* Existing image from FreshRSS theme "Mapco" */
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
@@ -1431,7 +1431,7 @@ nav.nav_menu {
         content: "";
         width: 16px;
         height: 14px;
-        background-image: url("../themes/Mapco/icons/view-normal.svg");
+        background-image: url('./themes/Mapco/icons/view-normal.svg');
         background-size: contain;
         display: inline-block;
         filter: brightness(3);
@@ -4747,12 +4747,12 @@ body {
   min-width: 60px;
 
   &.youlag-favorited--false .youlag-favorited-icon {
-    background-image: url('../themes/Mapco/icons/non-starred.svg');
+    background-image: url('./themes/Mapco/icons/non-starred.svg');
     filter: brightness(1.6);
   }
-  
+
   &.youlag-favorited--true .youlag-favorited-icon {
-    background-image: url('../themes/Mapco/icons/starred.svg');
+    background-image: url('./themes/Mapco/icons/starred.svg');
     filter: brightness(1.5) sepia(1) hue-rotate(-25deg) saturate(4) contrast(1.2);
   }
 

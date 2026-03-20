@@ -88,7 +88,7 @@ function setAddFeedCategoryValue() {
 
   const page = getCurrentPage();
   const pathname = window.location.pathname;
-  if (page && pathname === '/i/' && page.url.includes('c=subscription') && page.url.includes('a=add')) {
+  if (page && pathname === `${app.frss.urlPrefix}/i/` && page.url.includes('c=subscription') && page.url.includes('a=add')) {
 
     const urlParams = new URLSearchParams(window.location.search);
     const categoryId = urlParams.get('yl_category_id');

@@ -392,6 +392,22 @@ function isPageWhitelisted(whitelist, currentPageClass) {
   return false;
 }
 
+function getFreshRSSUrlPrefix() {
+  // Returns prefix that has to be appended to freshrss page urls. For example, if freshrss
+  // is installed at http://localhost/freshrss/, returns '/freshrss'. If it is installed at
+  // http://localhost/, returns ''.
+  // `setBaseUrl()` in `extension.php` outputs the user data to the DOM.
+
+  const el = document.querySelector('#yl_base_url');
+  if (!el) return '';
+
+  const data = el.getAttribute('data-base-url');
+  if (!data || data == '') return '';
+
+  const pathname = URL.parse(data).pathname;
+  return pathname.replace(/\/+$/, '');
+}
+
 function isVideoLabelsEnabled() {
   // Check if video platform label setting is enabled.
   // TODO: Refactor this once `Minz_HookType::JsVars` is implemented.

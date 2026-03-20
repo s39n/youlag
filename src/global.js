@@ -129,7 +129,8 @@ app.frss = {
     favoriteInactive: '../themes/Mapco/icons/non-starred.svg',
     favoriteActive: '../themes/Mapco/icons/starred.svg',
     chevronDown: '../themes/Mapco/icons/down.svg',
-  }
+  },
+  urlPrefix: getFreshRSSUrlPrefix()
 }
 
 app.types = {
