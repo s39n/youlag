@@ -33,11 +33,6 @@ class YoulagExtension extends Minz_Extension
    */
   public $yl_miniplayer_swipe_enabled = true;
   /**
-   * Enable continuous playback in miniplayer
-   * @var bool
-   */
-  public $yl_miniplayer_autoplay_enabled = true;
-  /**
    * Enable chapter progress indicator in video player
    * @var bool
    */
@@ -96,7 +91,6 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setVideoLabels'), 11);
     $this->registerHook('nav_entries', array($this, 'setVideoUnreadBadge'), 12);
     $this->registerHook('nav_entries', array($this, 'setMiniplayerSwipeEnabled'), 13);
-    $this->registerHook('nav_entries', array($this, 'setMiniplayerAutoplayEnabled'), 14);
     $this->registerHook('nav_entries', array($this, 'setChapterProgressEnabled'), 15);
     $this->registerHook('nav_entries', array($this, 'setDescriptionHideIntroEnabled'), 16);
     $this->registerHook('nav_entries', array($this, 'setVideoSortModifiedEnabled'), 17);
@@ -166,9 +160,6 @@ class YoulagExtension extends Minz_Extension
 
     $miniplayerSwipeEnabled = FreshRSS_Context::userConf()->attributeBool('yl_miniplayer_swipe_enabled');
     $this->yl_miniplayer_swipe_enabled = ($miniplayerSwipeEnabled === null) ? true : $miniplayerSwipeEnabled;
-
-    $miniplayerAutoplayEnabled = FreshRSS_Context::userConf()->attributeBool('yl_miniplayer_autoplay_enabled');
-    $this->yl_miniplayer_autoplay_enabled = ($miniplayerAutoplayEnabled === null) ? true : $miniplayerAutoplayEnabled;
 
     $chapterProgressEnabled = FreshRSS_Context::userConf()->attributeBool('yl_chapter_progress_enabled');
     $this->yl_chapter_progress_enabled = ($chapterProgressEnabled === null) ? true : $chapterProgressEnabled;
@@ -275,12 +266,6 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_miniplayer_swipe_enabled ? 'true' : 'false';
     return '<div id="yl_miniplayer_swipe_enabled" data-yl-miniplayer-swipe-enabled="' . $enabled . '"></div>';
-  }
-
-  public function setMiniplayerAutoplayEnabled(): string
-  {
-    $enabled = $this->yl_miniplayer_autoplay_enabled ? 'true' : 'false';
-    return '<div id="yl_miniplayer_autoplay_enabled" data-yl-miniplayer-autoplay-enabled="' . $enabled . '"></div>';
   }
 
   public function setChapterProgressEnabled(): string
@@ -749,10 +734,6 @@ class YoulagExtension extends Minz_Extension
       // Mini player swipe
       $miniplayerSwipeEnabled = Minz_Request::paramBoolean('yl_miniplayer_swipe_enabled', true);
       FreshRSS_Context::userConf()->_attribute('yl_miniplayer_swipe_enabled', $miniplayerSwipeEnabled);
-
-      // Mini player autoplay
-      $miniplayerAutoplayEnabled = Minz_Request::paramBoolean('yl_miniplayer_autoplay_enabled', false);
-      FreshRSS_Context::userConf()->_attribute('yl_miniplayer_autoplay_enabled', $miniplayerAutoplayEnabled);
 
       // Chapter progress indicator
       $chapterProgressEnabled = Minz_Request::paramBoolean('yl_chapter_progress_enabled', true);

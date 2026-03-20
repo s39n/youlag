@@ -29,6 +29,7 @@ app.state = {
     miniplayerScrollTop: 0,     // Store scroll position of miniplayer before collapsing.
     youtubeId: null,
     chapterLastActiveIndex: -1, // Current modal's video chapter last active index.
+    nearEndThreshold: 3,        // Seconds from end of video to considered "nearEnd", for autoplay logic.
   },
   page: {
     layout: null,               // {'video' || 'article'}. Previously boolean "youlagActive" and "!youlagActive" (youlag inactive = article layout).
@@ -170,6 +171,7 @@ app.types = {
     playbackTime: 0, // In seconds
     playerState: 'paused', // 'playing' | 'paused'
     videoDuration: 0, // Total length in seconds
+    autoplay: 1, // 1: autoplay, 0: no autoplay
   },
 
   videoChapter: {

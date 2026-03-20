@@ -30,6 +30,7 @@ function handleActiveVideo(eventOrVideoObject, isVideoObject = false) {
     videoObject = extractFeedItemData(feedItem);
     videoObject.feedItemEl = feedItem;
     videoObject.playbackTime = getStoredPlaybackTime(videoObject.entryId);
+    videoObject.autoplay = 1;
     setVideoQueue(videoObject);
   }
 
@@ -104,16 +105,16 @@ function templateModalVideo(videoObject, elementToReturn = 'modal') {
   // Video: Embed URL handling
   function getEmbedUrl(source) {
     // Get the correct embed URL for a given source
-    
+
     const playbackTime = videoObject.playbackTime > 0 ? Math.floor(videoObject.playbackTime) : null;
     const videoDuration = videoObject.videoDuration > 0 ? videoObject.videoDuration : null;
-    const nearEnd = videoDuration && playbackTime && (videoDuration - playbackTime <= 3);
-    const startTime = nearEnd ? null : playbackTime; // Don't include start time if it's right by the end.
+    const nearEnd = videoDuration && playbackTime && (videoDuration - playbackTime <= app.state.modal.nearEndThreshold);
+    const startTime = nearEnd ? 0 : playbackTime; // If nearEnd, restart from 0, otherwise use playbackTime.
     const autoplay = videoObject.autoplay ? 1 : 0;
     if (source === 'invidious_1' && videoObject.video_invidious_instance_1 && videoObject.youtubeId) {
       const base = `${videoObject.video_invidious_instance_1.replace(/\/$/, '')}/embed/${videoObject.youtubeId}`;
       const params = new URLSearchParams();
-      if (startTime) params.set('t', startTime);
+      if (startTime) params.set('start', startTime);
       if (autoplay) params.set('autoplay', '1');
       const query = params.toString();
       return query ? `${base}?${query}` : base;
@@ -761,15 +762,15 @@ function restoreVideoQueue() {
   ) {
     setModeMiniplayer(true); // Restored video queue always opens in miniplayer mode.
     const activeEntry = queueObj.queue[queueObj.queue_active_index];
-    if (activeEntry) activeEntry.autoplay = false;
-    if (
-      isMiniplayerAutoplayEnabled() && 
-      activeEntry?.playerState === 'playing' &&
-      activeEntry?.playbackTime &&
-      !(activeEntry?.videoDuration && activeEntry.videoDuration - activeEntry.playbackTime <= 3) // Prevent ended videos from autoplaying
-    ) {
-      activeEntry.autoplay = true;
-    }
+    if (!activeEntry) return;
+
+    const nearEnd = activeEntry.videoDuration &&
+      (activeEntry.videoDuration - activeEntry.playbackTime) <= app.state.modal.nearEndThreshold;
+
+    // Miniplayer: don't autoplay if paused or nearEnd, otherwise autoplay
+    const shouldAutoplay = !(activeEntry.playerState === 'paused' || nearEnd);
+    activeEntry.autoplay = shouldAutoplay ? 1 : 0;
+
     handleActiveVideo(queueObj, true);
   }
 
@@ -790,6 +791,7 @@ async function handleVideoDirectLink() {
     if (entryElement) {
       const videoObject = extractFeedItemData(entryElement);
       videoObject.playbackTime = getStoredPlaybackTime(videoObject.entryId);
+      videoObject.autoplay = 1;
       // Set the direct link entry as active in video queue.
       const queueObj = {
         queue: [videoObject],
