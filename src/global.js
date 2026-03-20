@@ -11,6 +11,10 @@ app.metadata = {
   version: 'X.Y.Z' // Assigned during build.
 }
 
+app.db = {
+  name: 'youlag-cache'  // IndexedDB database name
+}
+
 app.state = {
   youlag: {
     init: false,                // Whether the Youlag script has initialized.
