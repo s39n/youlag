@@ -3,7 +3,7 @@
  * IndexedDB wrapper for caching
  * Primarily for storing dearrow data, to reduce API calls.
  * 
- * Note: This is a simple wrapper and does not include features like versioning, multiple object stores, etc.
+ * NOTE: This is a simple wrapper and does not include features like versioning, multiple object stores, etc.
  *
  * Usage:
  *   await dbSet('dearrow', videoId, data); // Store data for a videoId

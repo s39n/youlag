@@ -1178,11 +1178,11 @@ function toggleFavorite(url, container, feedItemEl = null) {
         }
       }
       else {
-        console.error('Failed to toggle favorite status');
+        console.error('Youlag: Failed to toggle favorite status');
       }
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Youlag: Error toggling favorite status:', error);
     });
 }
 

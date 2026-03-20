@@ -11,7 +11,7 @@
  */
 
 function isDebugEnabled() {
-	// Checks if the root stylesheet has --yl-debug: true
+	// Checks if the root stylesheet has `:root { --yl-debug: true }`.
 	try {
 		const val = getComputedStyle(document.documentElement).getPropertyValue('--yl-debug');
 		return val && val.trim() === 'true';
@@ -269,23 +269,33 @@ function renderLocalStorageStates() {
 		} catch (e) {}
 
 	if (activeVideo) {
-		let ptBadge = 'inline-block yl-badge ' + (playbackTime > 0 ? 'yl-badge--success' : 'yl-badge--warning');
-		let psBadge = 'inline-block yl-badge ' + (playerState === 'playing' ? 'yl-badge--success' : 'yl-badge--warning');
-		summary += '<div class="yl-mb-md">';
-		summary += '<b>Active video:</b><br>';
-		let mpBadge = 'inline-block yl-badge ' + (isMiniplayer ? 'yl-badge--success' : 'yl-badge--warning');
+		const badgeClass = (isSuccess) => 'inline-block yl-badge ' + (isSuccess ? 'yl-badge--success' : 'yl-badge--warning');
 		const iframeSrc = document.querySelector('#ylVideoIframe')?.src || '';
 		const iframePath = iframeSrc ? iframeSrc.replace(/^https?:\/\/[^\/]+/, '') : null;
+
+		summary += '<div class="yl-mb-md"><b>Active video:</b><br>';
 		if (activeVideo.title) summary += activeVideo.title + '<br>';
-		summary += 'isMiniplayer: <div class="' + mpBadge + '">' + isMiniplayer + '</div><br>';
-		summary += 'playbackTime: <div class="' + ptBadge + '">' + playbackTime + '</div><br>';
-		summary += 'playerState: <div class="' + psBadge + '">' + playerState + '</div><br>';
-		let vdBadge = 'inline-block yl-badge ' + (videoDuration > 0 ? 'yl-badge--success' : 'yl-badge--warning');
-		summary += 'videoDuration: <div class="' + vdBadge + '">' + videoDuration + '</div><br>';
+		summary += 'isMiniplayer: <div class="' + badgeClass(isMiniplayer) + '">' + isMiniplayer + '</div><br>';
+		summary += 'playbackTime: <div class="' + badgeClass(playbackTime > 0) + '">' + playbackTime + '</div><br>';
+		summary += 'playerState: <div class="' + badgeClass(playerState === 'playing') + '">' + playerState + '</div><br>';
+		summary += 'videoDuration: <div class="' + badgeClass(videoDuration > 0) + '">' + videoDuration + '</div><br>';
 		if (iframePath) {
-			let iframeBadge = 'inline-block yl-badge ' + (iframeSrc.includes('autoplay=1') ? 'yl-badge--success' : 'yl-badge--warning');
-			summary += 'iframe: <div class="' + iframeBadge + '">' + iframePath + '</div>';
+			summary += 'iframe: <div class="' + badgeClass(iframeSrc.includes('autoplay=1')) + '">' + iframePath + '</div><br>';
 		}
+
+		// iOS autoplay workaround state
+		try {
+			const ios = parseValue(localStorage.getItem('ylIOSDebug'));
+			if (ios && typeof ios === 'object') {
+				const badge = 'inline-block yl-badge ' + (ios.interactionTriggered && ios.success ? 'yl-badge--success' : 'yl-badge--warning');
+				const text = ios.interactionTriggered
+					? (ios.success ? '✓ triggered & success' : '✗ triggered but failed') + ' (' + (ios.interactionType || 'unknown') + ')'
+					: 'waiting for interaction';
+				summary += 'iOS autoplay: <div class="' + badge + '">' + text + '</div>';
+			}
+		}
+		catch (e) {}
+
 		summary += '</div>';
 	}
 

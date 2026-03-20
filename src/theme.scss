@@ -687,7 +687,7 @@ nav.aside.aside_feed {
       border-bottom-right-radius: 8px;
 
       &:before {
-        /* Hack: When hovering #btn-add, also highlight #btn-subscription */
+        /* HACK: When hovering #btn-add, also highlight #btn-subscription */
         content: "";
         width: calc(100% - 68px);
         height: 100%;

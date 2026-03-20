@@ -208,7 +208,7 @@ function getBaseUrl(url) {
     const parsedUrl = new URL(url);
     return `${parsedUrl.protocol}//${parsedUrl.host}`;
   } catch (error) {
-    console.error('Invalid URL:', error);
+    console.error('Youlag: Invalid URL:', error);
     return '';
   }
 }
@@ -796,7 +796,7 @@ async function fetchRelatedItems(category = 'watch_later', order = 'rand', limit
     });
     return videoObjects;
   } catch (e) {
-    console.error('Fetching related entries error:', e);
+    console.error('Youlag: Error fetching related entries:', e);
   }
 }
 
@@ -828,8 +828,8 @@ async function fetchManageFeedOptions(feedId, categoryId) {
 }
 
 async function checkForUpdates() {
-  // Check for updates 2 weeks
-  // Note: This communicates with Github (Microsoft). You can disable the update check in Youlag's settings page.
+  // Check for updates every 2 weeks
+  // NOTE: This communicates with Github (Microsoft). You can disable the update check in Youlag's settings page.
   
   const now = Date.now();
   const lastChecked = localStorage.getItem('ylLastUpdateCheck');

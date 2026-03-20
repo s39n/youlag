@@ -367,6 +367,8 @@ function updateActiveChapterDisplay() {
 }
 
 function videoControlSeekTo(seconds, allowSeekAhead = true) {
+  // SeekTo a specific time in the YouTube iframe video player.
+
   const modal = getModalVideo();
   if (!modal) return;
 
@@ -376,4 +378,34 @@ function videoControlSeekTo(seconds, allowSeekAhead = true) {
   iframe.contentWindow.postMessage(
     '{"event":"command","func":"seekTo","args":["' + seconds + '", ' + allowSeekAhead + ']}', '*'
   );
+}
+
+function videoControlPlay() {
+  // Trigger playVideo on the YouTube iframe video player.
+
+  const modal = getModalVideo();
+  if (!modal) return;
+
+  const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
+  if (!iframe || !iframe.contentWindow) return;
+
+  iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
+
+  // Send playVideo command with a small delay to ensure iframe is ready
+  try {
+    iframe.contentWindow.postMessage(
+      '{"event":"command","func":"playVideo","args":[]}', '*'
+    );
+  }
+  catch (e) {
+    try {
+      const debugKey = 'ylIOSDebug';
+      const current = JSON.parse(localStorage.getItem(debugKey)) || {};
+      localStorage.setItem(debugKey, JSON.stringify({
+        ...current,
+        videoControlPlayError: e.message,
+        lastUpdate: new Date().toISOString()
+      }));
+    } catch (storageErr) {}
+  }
 }

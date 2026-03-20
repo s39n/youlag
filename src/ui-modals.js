@@ -694,7 +694,8 @@ function getStoredPlaybackTime(entryId) {
       const entry = stored.queue.find(v => v.entryId === entryId);
       if (entry && entry.playbackTime > 0) return entry.playbackTime;
     }
-  } catch(e) {}
+  }
+  catch(e) {}
   return 0;
 }
 
@@ -711,7 +712,8 @@ function setVideoQueue(videoObject) {
       if (Array.isArray(parsed.queue)) queue = parsed.queue;
       if (typeof parsed.queue_active_index === 'number') queue_active_index = parsed.queue_active_index;
     }
-  } catch (e) { }
+  }
+  catch (e) { }
 
   const entryId = videoObject.entryId;
   const foundIndex = queue.findIndex(v => v.entryId === entryId);
@@ -772,9 +774,106 @@ function restoreVideoQueue() {
     activeEntry.autoplay = shouldAutoplay ? 1 : 0;
 
     handleActiveVideo(queueObj, true);
+
+    if (shouldAutoplay) {
+      // IOS HACK: Miniplayer: trigger play on user first interaction.
+      setupIOSAutoplayWorkaround();
+    }
   }
 
   app.state.youlag.restoreVideoInit = true;
+}
+
+function setupIOSAutoplayWorkaround() {
+  /**
+   * IOS HACK: Miniplayer: trigger play on user first interaction.
+   * 
+   * Autoplay on iOS only works if the content is muted. This workaround will try to play the video
+   * immediately after the user's first interaction, either a touch scroll, or click/tap.
+   * Regular scroll does not count as first interaction.
+   */
+
+  const modal = getModalVideo();
+  if (!modal) return;
+
+  const iframe = modal.querySelector(`#${app.modal.id.videoIframe}`);
+  if (!iframe) return;
+
+  if (!iframe.src.includes('autoplay=1')) return;
+
+  if (iframe.getAttribute('data-yl-is-video') !== 'youtube') return;
+
+  // Store iOS workaround state in localStorage for debugging
+  const debugKey = 'ylIOSDebug';
+  const updateIOSDebugState = (updates) => {
+    try {
+      const current = JSON.parse(localStorage.getItem(debugKey)) || {};
+      const updated = { ...current, ...updates, lastUpdate: new Date().toISOString() };
+      localStorage.setItem(debugKey, JSON.stringify(updated));
+    }
+    catch (e) {}
+  };
+
+  updateIOSDebugState({
+    setup: true,
+    autoplay: true,
+    interactionTriggered: false,
+    playbackAttempted: false
+  });
+
+  const isInteractiveElement = (el) => {
+    const interactiveTags = ['button', 'a', 'input', 'textarea', 'select'];
+    if (interactiveTags.includes(el.tagName.toLowerCase())) return true;
+    if (el.onclick) return true;
+    if (el.closest('button, a[href], [role="button"], [role="link"]')) return true;
+    return false;
+  };
+
+  const handleFirstInteraction = (event) => {
+    // Handler for first user interaction, either by click/tap or touchstart.
+
+    if (event.type === 'click' && isInteractiveElement(event.target)) {
+      // Ignore attempt to autoplay via `videoControlPlay()` if the click was on an interactive element (button, link, etc.),
+      // to avoid triggering play just before navigating to a new page.
+
+      updateIOSDebugState({
+        interactionTriggered: true,
+        interactionType: event.type,
+        interactionSkipped: true,
+        skipReason: 'interactive element',
+        interactionTime: new Date().toISOString()
+      });
+    }
+    else {
+      try {
+        videoControlPlay();
+        updateIOSDebugState({
+          interactionTriggered: true,
+          interactionType: event.type,
+          playbackAttempted: true,
+          success: true,
+          interactionTime: new Date().toISOString()
+        });
+      }
+      catch (e) {
+        updateIOSDebugState({
+          interactionTriggered: true,
+          interactionType: event.type,
+          playbackAttempted: true,
+          success: false,
+          error: e.message,
+          interactionTime: new Date().toISOString()
+        });
+      }
+    }
+
+    // Remove all listeners after first interaction
+    document.removeEventListener('click', handleFirstInteraction);
+    document.removeEventListener('touchstart', handleFirstInteraction);
+  };
+
+  document.addEventListener('click', handleFirstInteraction, { once: true });
+  document.addEventListener('touchstart', handleFirstInteraction, { once: true });
 }
 
 async function handleVideoDirectLink() {
@@ -800,11 +899,11 @@ async function handleVideoDirectLink() {
       handleActiveVideo(queueObj, true);
     }
     else {
-      console.error('Could not find entry element for direct link:', ylvideoEntryId);
+      console.error('Youlag: Could not find entry element for direct link:', ylvideoEntryId);
     }
   }
   catch (e) {
-    console.error('Error fetching or parsing video data for direct link:', e);
+    console.error('Youlag: Error fetching or parsing video data for direct link:', e);
   }
 }
 

@@ -24,7 +24,7 @@ async function getItemTags(itemId) {
     }
   }
   catch (error) {
-    console.error('Error fetching tags:', error);
+    console.error('Youlag: Error fetching tags:', error);
   }
   return [];
 }
@@ -57,16 +57,16 @@ async function setItemTag(entryId, tag) {
           const result = JSON.parse(text);
         }
         catch (jsonError) {
-          console.error('Error parsing tag update response:', jsonError);
+          console.error('Youlag: Error parsing tag update response:', jsonError);
         }
       }
     }
     else {
-      console.error('Failed to update tag:', response.status);
+      console.error('Youlag: Failed to update tag:', response.status);
     }
   }
   catch (error) {
-    console.error('Error updating tag:', error);
+    console.error('Youlag: Error updating tag:', error);
   }
 }
 
