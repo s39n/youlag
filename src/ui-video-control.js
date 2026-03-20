@@ -391,7 +391,6 @@ function videoControlPlay() {
 
   iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
 
-  // Send playVideo command with a small delay to ensure iframe is ready
   try {
     iframe.contentWindow.postMessage(
       '{"event":"command","func":"playVideo","args":[]}', '*'
