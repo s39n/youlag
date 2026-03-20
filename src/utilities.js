@@ -800,33 +800,6 @@ async function fetchRelatedItems(category = 'watch_later', order = 'rand', limit
   }
 }
 
-async function fetchManageFeedOptions(feedId, categoryId) {
-  // DEPRECATED 2026-02-06: Replaced with `setupManageFeedButton()` under `renderToolbar()`.
-
-  // Fetch feed management options HTML for the "Manage feed" modal.
-  // Returns the HTML string for the modal form, or null on error.
-  if (!feedId || !categoryId) return null;
-  const url = '/i/?c=subscription&a=feed&id=' + encodeURIComponent(feedId) + '&get=' + encodeURIComponent(categoryId) + '&from=normal&ajax=1';
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'text/html,application/xhtml+xml,application/xml',
-      },
-      credentials: 'same-origin',
-    });
-    if (!response.ok) {
-      throw new Error('HTTP ' + response.status);
-    }
-    const html = await response.text();
-    return html;
-  }
-  catch (e) {
-    console.error('Error fetching manage feed options:', e);
-    return null;
-  }
-}
-
 async function checkForUpdates() {
   // Check for updates every 2 weeks
   // NOTE: This communicates with Github (Microsoft). You can disable the update check in Youlag's settings page.
