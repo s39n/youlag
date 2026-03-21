@@ -411,7 +411,7 @@ function getFreshRssUrlPrefix() {
 
 function setFreshRssUrlPrefix() {
   let prefix = getFreshRssUrlPrefix();
-  prefix ? app.frss.urlPrefix = prefix : app.fress.urlPrefix = '';
+  prefix ? app.frss.urlPrefix = prefix : app.frss.urlPrefix = '';
 }
 
 function isVideoLabelsEnabled() {
