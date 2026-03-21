@@ -461,6 +461,12 @@ function isMobile() {
   return window.innerWidth <= app.breakpoints.desktop_md_max;
 }
 
+function isIOS() {
+  // iPadOS 13+ reports as MacIntel to request desktop sites, so the second condition catches modern iPads.
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 function getRelatedVideosSetting() {
   return document.querySelector('#yl_related_videos_source')?.getAttribute('data-yl-related-videos-source') || 'none';
 }

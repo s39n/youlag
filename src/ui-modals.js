@@ -775,7 +775,7 @@ function restoreVideoQueue() {
 
     handleActiveVideo(queueObj, true);
 
-    if (shouldAutoplay) {
+    if (shouldAutoplay && isIOS()) {
       // IOS HACK: Miniplayer: trigger play on user first interaction.
       setupIOSAutoplayWorkaround();
     }
