@@ -283,6 +283,8 @@ function renderLocalStorageStates() {
 			summary += 'iframe: <div class="' + badgeClass(iframeSrc.includes('autoplay=1')) + '">' + iframePath + '</div><br>';
 		}
 
+		summary += 'iOS: <div class="' + badgeClass(isIOS()) + '">' + isIOS() + '</div><br>';
+
 		// iOS autoplay workaround state
 		try {
 			const ios = parseValue(localStorage.getItem('ylIOSDebug'));
