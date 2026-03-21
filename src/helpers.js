@@ -392,16 +392,17 @@ function isPageWhitelisted(whitelist, currentPageClass) {
   return false;
 }
 
-function getFreshRSSUrlPrefix() {
-  // Returns prefix that has to be appended to freshrss page urls. For example, if freshrss
-  // is installed at http://localhost/freshrss/, returns '/freshrss'. If it is installed at
-  // http://localhost/, returns ''.
-  // `setBaseUrl()` in `extension.php` outputs the user data to the DOM.
+function getFreshRssUrlPrefix() {
+  /**
+   * Provides prefix that is used for appendeding FreshRSS page URLs.
+   * For example, if freshrss is installed at http://localhost/freshrss/, return '/freshrss'. 
+   * If it is installed at http://localhost/, return ''.
+   */
 
   const el = document.querySelector('#yl_base_url');
   if (!el) return '';
 
-  const data = el.getAttribute('data-base-url');
+  const data = el.getAttribute('data-yl-base-url');
   if (!data || data == '') return '';
 
   const pathname = URL.parse(data).pathname;

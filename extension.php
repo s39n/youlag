@@ -335,16 +335,13 @@ class YoulagExtension extends Minz_Extension
 
   /**
     * Pass the FreshRSS installation base URL
-    * The frontend js handles the behavior based on this the value in `data-base-url`.
-    *
-    * TODO: FreshRSS could supply this information to js directly so that this and other
-    * extensions do not have to do this.
+    * The frontend js handles the behavior based on this the value in `data-yl-base-url`.
     * @return string
     */
   public function setBaseUrl(): string
   {
     $baseUrl = FreshRSS_Context::systemConf()->base_url;
-    return '<div id="yl_base_url" data-base-url="' . $baseUrl . '"></div>';
+    return '<div id="yl_base_url" data-yl-base-url="' . $baseUrl . '"></div>';
   }
 
   /**

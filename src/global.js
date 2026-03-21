@@ -134,7 +134,7 @@ app.frss = {
     favoriteActive: '../themes/Mapco/icons/starred.svg',
     chevronDown: '../themes/Mapco/icons/down.svg',
   },
-  urlPrefix: getFreshRSSUrlPrefix()
+  urlPrefix: getFreshRssUrlPrefix()
 }
 
 app.types = {
