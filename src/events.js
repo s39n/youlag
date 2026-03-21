@@ -10,6 +10,7 @@ function init() {
   if (app.state.youlag.init) return;
   
   clearPathHash();
+  setFreshRssUrlPrefix();
   setBodyClass();
   if (isFeedPage()) {
     setupClickListener();

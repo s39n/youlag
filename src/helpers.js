@@ -403,10 +403,15 @@ function getFreshRssUrlPrefix() {
   if (!el) return '';
 
   const data = el.getAttribute('data-yl-base-url');
-  if (!data || data == '') return '';
+  if (!data || data === '') return '';
 
   const pathname = URL.parse(data).pathname;
   return pathname.replace(/\/+$/, '');
+}
+
+function setFreshRssUrlPrefix() {
+  let prefix = getFreshRssUrlPrefix();
+  prefix ? app.frss.urlPrefix = prefix : app.fress.urlPrefix = '';
 }
 
 function isVideoLabelsEnabled() {
