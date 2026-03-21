@@ -256,10 +256,15 @@ async function getDearrowData(youtubeId) {
   try {
     cached = await dbGet('dearrow', youtubeId);
     if (cached) {
-      // Loaded from cache
+      // If youlag-cache-dearrow has no duration, check the persistent (1y TTL) youlag-cache-duration store.
+      // The youlag-cache-duration picks video duration from the YouTube iframe API when the video plays. 
+      if (!cached.videoDuration) {
+        cached.videoDuration = await dbGet('duration', youtubeId).catch(() => null) || null;
+      }
       return cached;
     }
-  } catch (e) {
+  } 
+  catch (e) {
   }
 
   const apiUrl = `https://sponsor.ajay.app/api/branding?videoID=${encodeURIComponent(youtubeId)}`;
@@ -283,6 +288,11 @@ async function getDearrowData(youtubeId) {
   } catch (e) {
   }
 
+  // Dearrow has no duration — check the persistent duration store (may have been set by the YouTube iframe API).
+  if (!videoDuration) {
+    videoDuration = await dbGet('duration', youtubeId).catch(() => null) || null;
+  }
+
   // Ignore Dearrow thumbnail data and rely on `getVideoScreencapWithFallback()`.
   const thumbnailWithFallback = await getVideoScreencapWithFallback(youtubeId);
   thumbnails = [{
@@ -302,6 +312,8 @@ async function getDearrowData(youtubeId) {
   };
   try {
     await dbSet('dearrow', youtubeId, resultObj);
+    // Also persist duration separately so it survives dearrow cache expiry.
+    if (videoDuration) await dbSet('duration', youtubeId, videoDuration, 52);
   } catch (e) {
   }
 

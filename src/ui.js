@@ -531,11 +531,14 @@ async function handleFeedDearrowFeatures() {
 
       // Video duration on top of thumbnail
       if (pageLayoutVideo && dearrowData.videoDuration) {
-        const durationEl = document.createElement('div');
         const videoDurationText = formatTime(dearrowData.videoDuration);
-        durationEl.className = 'yl-video-duration';
+        let durationEl = entryImg.parentElement.querySelector('.yl-video-duration');
+        if (!durationEl) {
+          durationEl = document.createElement('div');
+          durationEl.className = 'yl-video-duration';
+          entryImg.parentElement.appendChild(durationEl);
+        }
         durationEl.textContent = videoDurationText;
-        entryImg.parentElement.appendChild(durationEl);
         getEntryRootElement(entryImg)?.setAttribute('data-yl-video-duration', videoDurationText);
       }
     }

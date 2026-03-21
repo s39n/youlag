@@ -5,12 +5,15 @@
  *
  * Features:
  * - Connection caching for efficiency
- * - TTL-based expiration (2 weeks default, configurable per operation)
+ * - TTL-based expiration (4 weeks default, configurable per operation)
+ *   - youlag-cache-dearrow: Stores dearrow API responses for 4 weeks.
+ *   - youlag-cache-duration: Stores video duration for 52 weeks (1y).
  * - Proper transaction error handling
- * - Configurable database name via app.db.name
+ * - Each store gets its own database: '{app.db.name}-{storeName}' (e.g. 'youlag-cache-dearrow').
+ *   This sidesteps IndexedDB versioning — no version bump needed when adding new stores.
  *
  * Usage:
- *   await dbSet('dearrow', videoId, data);              // Store data for a videoId (2-week TTL)
+ *   await dbSet('dearrow', videoId, data);              // Store data for a videoId (4-week TTL)
  *   await dbSet('dearrow', videoId, data, 4);           // Store with custom 4-week TTL
  *   await dbGet('dearrow', videoId);                    // Retrieve data (returns undefined if expired)
  *
@@ -47,16 +50,16 @@ async function dbGetConnection(dbName, storeName) {
   return await dbOpen(dbName, storeName);
 }
 
-async function dbSet(storeName, key, value, ttlWeeks = 2) {
+async function dbSet(storeName, key, value, ttlWeeks = 4) {
   try {
-    const dbName = app?.db?.name || 'youlag-cache';
+    const dbName = `${app?.db?.name || 'youlag-cache'}-${storeName}`;
     const db = await dbGetConnection(dbName, storeName);
 
     return new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readwrite');
       const store = tx.objectStore(storeName);
 
-      // Store value with TTL metadata (2 weeks)
+      // Store value with TTL metadata (4 weeks default, configurable per operation)
       const dataWithMetadata = {
         value,
         timestamp: Date.now(),
@@ -85,7 +88,7 @@ async function dbSet(storeName, key, value, ttlWeeks = 2) {
 
 async function dbGet(storeName, key) {
   try {
-    const dbName = app?.db?.name || 'youlag-cache';
+    const dbName = `${app?.db?.name || 'youlag-cache'}-${storeName}`;
     const db = await dbGetConnection(dbName, storeName);
 
     return new Promise((resolve, reject) => {

@@ -167,9 +167,21 @@ function setupModalVideoControlEventListeners() {
 
   // Display the current chapter and wire playback tracking.
   const { setActiveChapter } = updateActiveChapterDisplay();
+  const youtubeId = app.state.modal.youtubeId || null;
+  let cachedVideoDuration = null;
+
   setupVideoPlaybackPosition(modal, (currentTime, videoDuration, playerState) => {
     setActiveChapter(currentTime, videoDuration);
-    
+
+    // Persist duration to its own store when first received from the YouTube iframe API.
+    // Stored separately from dearrow so it survives dearrow cache expiry (video duration never changes).
+    if (youtubeId && videoDuration && videoDuration !== cachedVideoDuration) {
+      cachedVideoDuration = videoDuration;
+      const durationFloor = Math.floor(videoDuration);
+      dbSet('duration', youtubeId, durationFloor, 52).catch(() => {});
+      updateFeedEntryDuration(youtubeId, durationFloor);
+    }
+
     // Store current playback time and state to resume miniplayer from the same position.
     const entryId = modal.getAttribute('data-entry');
     if (entryId) {
@@ -407,4 +419,23 @@ function videoControlPlay() {
       }));
     } catch (storageErr) {}
   }
+}
+
+function updateFeedEntryDuration(youtubeId, videoDuration) {
+  // Update or create the .yl-video-duration badge on a feed entry thumbnail.
+  // Finds the entry by matching youtubeId in the img src or data-yl-original-src (set when dearrow replaces the thumbnail).
+  const entryImg = document.querySelector(
+    `img[data-yl-original-src*="${youtubeId}"], ${app.frss.el.feedRoot} .item.thumbnail img[src*="${youtubeId}"]`
+  );
+  if (!entryImg) return;
+
+  const videoDurationText = formatTime(videoDuration);
+  let durationEl = entryImg.parentElement.querySelector('.yl-video-duration');
+  if (!durationEl) {
+    durationEl = document.createElement('div');
+    durationEl.className = 'yl-video-duration';
+    entryImg.parentElement.appendChild(durationEl);
+  }
+  durationEl.textContent = videoDurationText;
+  getEntryRootElement(entryImg)?.setAttribute('data-yl-video-duration', videoDurationText);
 }
