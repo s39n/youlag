@@ -39,6 +39,7 @@ Optimized for both watching videos and reading articles.
   - Block YouTube shorts
   - Apply video mode layout to chosen categories
   - Switch between YouTube and Invidious playback sources
+  - Hide video-description intros with links to avoid sponsored content
 - 🖥️ **Desktop & Mobile**
   - Mobile: Swipe down in video mode to activate miniplayer
   - Mobile: Swipe to open/close sidebar
