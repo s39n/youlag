@@ -417,7 +417,7 @@ function getFreshRssUrlPrefix() {
   const data = el.getAttribute('data-yl-base-url');
   if (!data || data === '') return '';
 
-  const pathname = URL.parse(data).pathname;
+  const pathname = new URL(data).pathname;
   return pathname.replace(/\/+$/, '');
 }
 
