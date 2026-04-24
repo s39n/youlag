@@ -80,6 +80,12 @@ class YoulagExtension extends Minz_Extension
    */
   public $yl_auto_detect_video_feeds = true;
 
+  /**
+   * Enable three-pane article view (article list + content pane side by side)
+   * @var bool
+   */
+  public $yl_article_three_pane_enabled = false;
+
   protected array $csp_policies = [
     'connect-src' => "'self' https://sponsor.ajay.app/ https://api.github.com/",
   ];
@@ -106,6 +112,7 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 21);
     $this->registerHook('nav_entries', array($this, 'setUpdateCheckEnabled'), 22);
     $this->registerHook('nav_entries', array($this, 'setBaseUrl'), 23);
+    $this->registerHook('nav_entries', array($this, 'setArticleThreePaneEnabled'), 24);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
       $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 23);
@@ -197,6 +204,9 @@ class YoulagExtension extends Minz_Extension
 
     $autoDetectVideoFeeds = FreshRSS_Context::userConf()->attributeBool('yl_auto_detect_video_feeds');
     $this->yl_auto_detect_video_feeds = ($autoDetectVideoFeeds === null) ? true : $autoDetectVideoFeeds;
+
+    $articleThreePaneEnabled = FreshRSS_Context::userConf()->attributeBool('yl_article_three_pane_enabled');
+    $this->yl_article_three_pane_enabled = ($articleThreePaneEnabled === null) ? false : $articleThreePaneEnabled;
   }
 
   /**
@@ -351,6 +361,12 @@ class YoulagExtension extends Minz_Extension
   {
     $enabled = $this->yl_update_check_enabled ? 'true' : 'false';
     return '<div id="yl_update_check_enabled" data-yl-update-check-enabled="' . $enabled . '"></div>';
+  }
+
+  public function setArticleThreePaneEnabled(): string
+  {
+    $enabled = $this->yl_article_three_pane_enabled ? 'true' : 'false';
+    return '<div id="yl_article_three_pane_enabled" data-yl-article-three-pane-enabled="' . $enabled . '"></div>';
   }
 
   /**
@@ -798,6 +814,10 @@ class YoulagExtension extends Minz_Extension
       // Auto-detect video feeds
       $autoDetectVideoFeeds = Minz_Request::paramBoolean('yl_auto_detect_video_feeds', true);
       FreshRSS_Context::userConf()->_attribute('yl_auto_detect_video_feeds', $autoDetectVideoFeeds);
+
+      // Three-pane article view
+      $articleThreePaneEnabled = Minz_Request::paramBoolean('yl_article_three_pane_enabled', false);
+      FreshRSS_Context::userConf()->_attribute('yl_article_three_pane_enabled', $articleThreePaneEnabled);
 
       FreshRSS_Context::$user_conf->save();
 

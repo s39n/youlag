@@ -25,6 +25,7 @@ app.state = {
     sliderListeners: null,      // Store slider event listener.
     categoryFilterEntryCount: {},   // Type: `categoryFilterEntryCountType`. Number of entries for each category filter on the Watch later filter menu.
     experimentalFeatureEnabled: false, // Whether experimental features are enabled.
+    threePaneInit: false,       // Whether the three-pane article layout has been initialized.
   },
   modal: {
     active: false,              // Whether an article/video is currently active. Miniplayer does not count as active.
@@ -112,6 +113,8 @@ app.modal = {
 app.ui = {
   id: {
     toolbar: 'yl_category_toolbar',
+    articlePane: 'yl_article_pane',
+    articlePaneResizer: 'yl_article_pane_resizer',
   }
 }
 

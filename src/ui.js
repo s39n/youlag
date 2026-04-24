@@ -31,12 +31,26 @@ function setupClickListener() {
   }
 
   document.addEventListener('keydown', function (event) {
+    if (isArticleThreePaneEnabled() && isLayoutArticle() && window.innerWidth > app.breakpoints.mobile_max) {
+      if ((event.key === 'j' || event.key === 'k') && !event.target.matches('input, textarea, [contenteditable]')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        navigateThreePaneArticle(event.key === 'j' ? 1 : -1);
+        return;
+      }
+    }
+
     if (event.key === 'Escape') {
       if (isLayoutVideo() && !isModeMiniplayer()) {
         const modal = getModalVideo();
         if (modal) closeModalVideo();
       }
       else if (isLayoutArticle()) {
+        // Three-pane mode: close pane if open
+        if (isArticleThreePaneEnabled() && window.innerWidth > app.breakpoints.mobile_max) {
+          if (getModalState()) closeArticlePane(event);
+          return;
+        }
         const openedArticle = document.querySelector(app.frss.el.current);
         if (openedArticle) closeArticle(event);
       }
@@ -44,6 +58,24 @@ function setupClickListener() {
   });
 
   app.state.youlag.clickListenerInit = true;
+}
+
+function navigateThreePaneArticle(direction) {
+  const entries = Array.from(document.querySelectorAll('#stream div[data-entry]'));
+  if (!entries.length) return;
+  const currentSelected = document.querySelector('#stream div[data-entry].yl-three-pane-selected');
+  // Collapse any inline-expanded entry before navigating
+  document.querySelectorAll('#stream div[data-entry].active').forEach(el => forceFrssEntryToCollapse(el));
+  let nextIndex;
+  if (!currentSelected) {
+    nextIndex = direction > 0 ? 0 : entries.length - 1;
+  } else {
+    const currentIndex = entries.indexOf(currentSelected);
+    nextIndex = currentIndex + direction;
+  }
+  if (nextIndex < 0 || nextIndex >= entries.length) return;
+  entries[nextIndex].click();
+  entries[nextIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 function setupVideoClickListener() {
@@ -126,6 +158,40 @@ function setupArticleClickListener() {
     // Auto-detect if item is a video and open in video modal if so
     if (target.getAttribute('data-yl-is-video') === 'true') {
       handleActiveVideo(event);
+      return;
+    }
+
+    // Three-pane mode: show content in side pane instead of inline
+    if (isArticleThreePaneEnabled() && isLayoutArticle() && window.innerWidth > app.breakpoints.mobile_max) {
+      const isCurrentlySelected = target.classList.contains('yl-three-pane-selected');
+
+      // Deselect and collapse previous
+      document.querySelectorAll('.yl-three-pane-selected').forEach(el => {
+        forceFrssEntryToCollapse(el);
+        el.classList.remove('yl-three-pane-selected');
+      });
+
+      if (isCurrentlySelected) {
+        // Clicking selected entry again closes the pane
+        closeArticlePane(event);
+      } else {
+        target.classList.add('yl-three-pane-selected');
+        setModalState(true);
+        // Let FreshRSS mark as read, then collapse inline expansion
+        const observer = new MutationObserver(() => {
+          if (target.classList.contains('active')) {
+            forceFrssEntryToCollapse(target);
+            renderArticlePane(target);
+            observer.disconnect();
+          }
+        });
+        observer.observe(target, { attributes: true, attributeFilter: ['class'] });
+        if (target.classList.contains('active')) {
+          forceFrssEntryToCollapse(target);
+          renderArticlePane(target);
+        }
+        handleActiveArticle(event);
+      }
       return;
     }
 
@@ -325,6 +391,12 @@ function setBodyClass() {
   setPageSortingClass();
   document.body.setAttribute('data-youlag-version', app.metadata.version);
   shouldCustomThumbnailTitle() && document.body.classList.add('yl-feed-custom-thumbnail-title');
+  setArticleThreePaneClass();
+}
+
+function setArticleThreePaneClass() {
+  const enabled = isArticleThreePaneEnabled() && isLayoutArticle() && window.innerWidth > app.breakpoints.mobile_max;
+  document.body.classList.toggle('yl-article-three-pane', enabled);
 }
 
 function setCategoryWhitelistClass() {
@@ -918,6 +990,100 @@ function setMissingLogo() {
     </a>
   `;
   pageContainer.appendChild(logo);
+}
+
+function setupArticleThreePaneLayout() {
+  if (!isArticleThreePaneEnabled() || !isFeedPage() || window.innerWidth <= app.breakpoints.mobile_max) return;
+  if (app.state.youlag.threePaneInit) return;
+  app.state.youlag.threePaneInit = true;
+
+  let pane = document.getElementById(app.ui.id.articlePane);
+  if (!pane) {
+    pane = document.createElement('div');
+    pane.id = app.ui.id.articlePane;
+    pane.className = 'yl-article-pane';
+    document.body.appendChild(pane);
+  }
+
+  const stream = document.querySelector(app.frss.el.feedRoot);
+  const streamLeft = stream ? stream.getBoundingClientRect().left : 0;
+  const availableWidth = window.innerWidth - streamLeft;
+  const maxWidth = Math.floor(availableWidth * 0.55);
+  const savedWidth = localStorage.getItem('yl-three-pane-list-width');
+  const parsed = savedWidth ? parseInt(savedWidth) : NaN;
+  if (!isNaN(parsed) && parsed >= 220 && parsed <= maxWidth) {
+    document.documentElement.style.setProperty('--yl-three-pane-list-width', parsed + 'px');
+  } else {
+    localStorage.removeItem('yl-three-pane-list-width');
+    const defaultWidth = Math.min(Math.max(360, Math.floor(availableWidth * 0.35)), maxWidth);
+    document.documentElement.style.setProperty('--yl-three-pane-list-width', defaultWidth + 'px');
+  }
+
+  let resizer = document.getElementById(app.ui.id.articlePaneResizer);
+  if (!resizer) {
+    resizer = document.createElement('div');
+    resizer.id = app.ui.id.articlePaneResizer;
+    resizer.className = 'yl-article-pane-resizer';
+    document.body.appendChild(resizer);
+  }
+  setupArticlePaneResizer(resizer);
+
+  positionArticlePane();
+
+  if (stream && window.ResizeObserver) {
+    const ro = new ResizeObserver(() => positionArticlePane());
+    ro.observe(stream);
+  }
+  window.addEventListener('resize', () => {
+    setArticleThreePaneClass();
+    positionArticlePane();
+  });
+}
+
+function positionArticlePane() {
+  const stream = document.querySelector(app.frss.el.feedRoot);
+  const pane = document.getElementById(app.ui.id.articlePane);
+  if (!stream || !pane) return;
+  if (window.innerWidth <= app.breakpoints.mobile_max) return;
+  const rect = stream.getBoundingClientRect();
+  pane.style.left = rect.right + 'px';
+  const resizer = document.getElementById(app.ui.id.articlePaneResizer);
+  if (resizer) resizer.style.left = rect.right + 'px';
+}
+
+function setupArticlePaneResizer(resizer) {
+  let isResizing = false;
+
+  resizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    resizer.classList.add('yl-resizing');
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    const stream = document.querySelector(app.frss.el.feedRoot);
+    if (!stream) return;
+    const streamLeft = stream.getBoundingClientRect().left;
+    const availableWidth = window.innerWidth - streamLeft;
+    const maxWidth = Math.floor(availableWidth * 0.6);
+    const newWidth = Math.min(maxWidth, Math.max(220, e.clientX - streamLeft));
+    document.documentElement.style.setProperty('--yl-three-pane-list-width', newWidth + 'px');
+    positionArticlePane();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isResizing) return;
+    isResizing = false;
+    resizer.classList.remove('yl-resizing');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    const width = getComputedStyle(document.documentElement).getPropertyValue('--yl-three-pane-list-width').trim();
+    const numWidth = parseInt(width);
+    if (!isNaN(numWidth)) localStorage.setItem('yl-three-pane-list-width', numWidth);
+  });
 }
 
 function showUpdateAvailableInSettings() {
