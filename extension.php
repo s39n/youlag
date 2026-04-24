@@ -80,6 +80,12 @@ class YoulagExtension extends Minz_Extension
    */
   public $yl_auto_detect_video_feeds = true;
 
+  /**
+   * Color scheme preference: 'auto' (follow OS), 'light', or 'dark'
+   * @var string
+   */
+  public $yl_color_scheme = 'auto';
+
   protected array $csp_policies = [
     'connect-src' => "'self' https://sponsor.ajay.app/ https://api.github.com/",
   ];
@@ -106,6 +112,7 @@ class YoulagExtension extends Minz_Extension
     $this->registerHook('nav_entries', array($this, 'setWatchLaterCategoryFilterEnabled'), 21);
     $this->registerHook('nav_entries', array($this, 'setUpdateCheckEnabled'), 22);
     $this->registerHook('nav_entries', array($this, 'setBaseUrl'), 23);
+    $this->registerHook('nav_entries', array($this, 'setColorScheme'), 24);
     if (Minz_Request::paramString('get', '') === 's') {
       // Watch later page: add category filter
       $this->registerHook('nav_entries', array($this, 'createWatchLaterCategoryFilter'), 23);
@@ -197,6 +204,9 @@ class YoulagExtension extends Minz_Extension
 
     $autoDetectVideoFeeds = FreshRSS_Context::userConf()->attributeBool('yl_auto_detect_video_feeds');
     $this->yl_auto_detect_video_feeds = ($autoDetectVideoFeeds === null) ? true : $autoDetectVideoFeeds;
+
+    $colorScheme = FreshRSS_Context::userConf()->attributeString('yl_color_scheme');
+    $this->yl_color_scheme = in_array($colorScheme, ['auto', 'light', 'dark']) ? $colorScheme : 'auto';
   }
 
   /**
@@ -362,6 +372,17 @@ class YoulagExtension extends Minz_Extension
   {
     $baseUrl = FreshRSS_Context::systemConf()->base_url;
     return '<div id="yl_base_url" data-yl-base-url="' . $baseUrl . '"></div>';
+  }
+
+  /**
+   * Pass the color scheme preference to be read in the DOM via nav_entries hook.
+   * The frontend JS reads `data-yl-color-scheme` and applies a body class to override prefers-color-scheme.
+   * @return string
+   */
+  public function setColorScheme(): string
+  {
+    $scheme = htmlspecialchars($this->yl_color_scheme);
+    return '<div id="yl_color_scheme" data-yl-color-scheme="' . $scheme . '"></div>';
   }
 
   /**
@@ -798,6 +819,13 @@ class YoulagExtension extends Minz_Extension
       // Auto-detect video feeds
       $autoDetectVideoFeeds = Minz_Request::paramBoolean('yl_auto_detect_video_feeds', true);
       FreshRSS_Context::userConf()->_attribute('yl_auto_detect_video_feeds', $autoDetectVideoFeeds);
+
+      // Color scheme
+      $colorScheme = Minz_Request::paramString('yl_color_scheme');
+      if (!in_array($colorScheme, ['auto', 'light', 'dark'])) {
+        $colorScheme = 'auto';
+      }
+      FreshRSS_Context::userConf()->_attribute('yl_color_scheme', $colorScheme);
 
       FreshRSS_Context::$user_conf->save();
 

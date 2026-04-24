@@ -192,6 +192,38 @@
   }
 }
 
+/* Explicit dark: user chose "Dark" in Youlag settings — overrides prefers-color-scheme */
+html.yl-scheme-dark {
+  --yl-color-body-background: #19191a;
+  --yl-color-gradient-surface-3: linear-gradient(135deg, #303030 0%, #3a3d3f 40%, #2d2d2d 100%);
+  --yl-color-text-default: #dedee4;
+  --yl-color-text-default-emphasis: #f8f8fb;
+  --yl-color-text-read: #c0c0c0;
+  --yl-color-surface-1: #303136;
+  --yl-color-surface-2: #424348;
+  --yl-color-surface-0: #1f1f1f;
+  --yl-color-modal-bg: #060606;
+  --yl-color-text-muted: #b3b3b3;
+  --yl-loading-spinner-background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='%23fff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E.spinner_V8m1%7Btransform-origin%3Acenter%3Banimation%3Aspinner_zKoa 2s linear infinite%7D.spinner_V8m1 circle%7Bstroke-linecap%3Around%3Banimation%3Aspinner_YpZS 1.5s ease-in-out infinite%7D%40keyframes spinner_zKoa%7B100%25%7Btransform%3Arotate(360deg)%7D%7D%40keyframes spinner_YpZS%7B0%25%7Bstroke-dasharray%3A0 150%3Bstroke-dashoffset%3A0%7D47.5%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-16%7D95%25%2C100%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-59%7D%7D%3C/style%3E%3Cg class='spinner_V8m1'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+  --frss-noThumbnailImage-background-color: #4d4d4d;
+}
+
+/* Explicit light: user chose "Light" in Youlag settings — overrides prefers-color-scheme */
+html.yl-scheme-light {
+  --yl-color-body-background: #f4f4f6;
+  --yl-color-gradient-surface-3: linear-gradient(135deg, #e8e8ec 0%, #dcdce0 40%, #e4e4e8 100%);
+  --yl-color-text-default: #26262c;
+  --yl-color-text-default-emphasis: #111116;
+  --yl-color-text-read: #777777;
+  --yl-color-surface-1: #e4e4e8;
+  --yl-color-surface-2: #d8d8dc;
+  --yl-color-surface-0: #f0f0f4;
+  --yl-color-modal-bg: #ffffff;
+  --yl-color-text-muted: #666666;
+  --yl-loading-spinner-background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='%23333' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E.spinner_V8m1%7Btransform-origin%3Acenter%3Banimation%3Aspinner_zKoa 2s linear infinite%7D.spinner_V8m1 circle%7Bstroke-linecap%3Around%3Banimation%3Aspinner_YpZS 1.5s ease-in-out infinite%7D%40keyframes spinner_zKoa%7B100%25%7Btransform%3Arotate(360deg)%7D%7D%40keyframes spinner_YpZS%7B0%25%7Bstroke-dasharray%3A0 150%3Bstroke-dashoffset%3A0%7D47.5%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-16%7D95%25%2C100%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-59%7D%7D%3C/style%3E%3Cg class='spinner_V8m1'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+  --frss-noThumbnailImage-background-color: #c0c0c0;
+}
+
 @media (max-width: 840px) {
   :root {
     --yl-favicon-avatar-size: 42px;
@@ -5783,7 +5815,8 @@ body.youlag-active:not(.reader) {
 [data-yl-miniplayer-autoplay-enabled],
 [data-yl-video-sort-modified],
 [data-yl-related-videos-source],
-[data-yl-feed-view-mobile-grid-enabled] {
+[data-yl-feed-view-mobile-grid-enabled],
+[data-yl-color-scheme] {
   /**
    * Elements containing user extension settings rendered in frontend.
    * This exposes the Youlag extension settings to allow `script.js`
@@ -5807,14 +5840,13 @@ figure.enclosure img.enclosure-thumbnail {
  *
  * BEGIN "LIGHT MODE OVERRIDES"
  *
- * Overrides for elements in the MAPCO
- * dark section that use hardcoded dark
- * gradients. Applied when the OS/browser
- * prefers a light color scheme.
+ * Applied when the OS prefers light OR
+ * when the user chose "Light" in Youlag settings.
+ * Uses a SCSS mixin to avoid duplication.
  *
  ****************************************/
 
-@media (prefers-color-scheme: light) {
+@mixin yl-light-mode-overrides {
 
   /* Feed card backgrounds (article mode) */
   html {
@@ -5976,7 +6008,14 @@ figure.enclosure img.enclosure-thumbnail {
   .yl-video-chapter-toggle-icon {
     filter: none !important;
   }
+}
 
+@media (prefers-color-scheme: light) {
+  @include yl-light-mode-overrides;
+}
+
+html.yl-scheme-light {
+  @include yl-light-mode-overrides;
 }
 
 /*****************************************
