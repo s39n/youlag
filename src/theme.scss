@@ -155,18 +155,41 @@
   --yl-sidenav-icon-size: 16px;
   --yl-sidenav-icon-label-gap: var(--yl-space-sm);
 
-  --yl-color-body-background: #19191a;
-  --yl-color-gradient-surface-3: linear-gradient(135deg, #303030 0%, #3a3d3f 40%, #2d2d2d 100%);
+  /* Light mode defaults — overridden to dark values by @media (prefers-color-scheme: dark) below */
+  --yl-color-body-background: #f4f4f6;
+  --yl-color-gradient-surface-3: linear-gradient(135deg, #e8e8ec 0%, #dcdce0 40%, #e4e4e8 100%);
   --yl-color-gradient-active: #{yl-fn-gradient-btn-bg(#2761d5, #1b51bb)};
-  --yl-color-text-default: #dedee4;
+  --yl-color-text-default: #26262c;
   --main-font-color: var(--yl-color-text-default); /* Replace FreshRSS default font color */
-  --yl-color-text-default-emphasis: #f8f8fb; /* Stronger contrast than default text color, e.g. for titles */
-  --yl-color-text-read: #c0c0c0; /* Read feed item text color */
+  --yl-color-text-default-emphasis: #111116; /* Stronger contrast than default text color, e.g. for titles */
+  --yl-color-text-read: #777777; /* Read feed item text color */
+  --yl-color-surface-1: #e4e4e8; /* Button/input background */
+  --yl-color-surface-2: #d8d8dc; /* Button/input hover */
+  --yl-color-surface-0: #f0f0f4; /* Modal content background (e.g. tags modal) */
+  --yl-color-modal-bg: #ffffff; /* Theater modal background */
+  --yl-color-text-muted: #666666; /* Muted/secondary text */
 
-  --yl-loading-spinner-background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='%23fff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E.spinner_V8m1%7Btransform-origin%3Acenter%3Banimation%3Aspinner_zKoa 2s linear infinite%7D.spinner_V8m1 circle%7Bstroke-linecap%3Around%3Banimation%3Aspinner_YpZS 1.5s ease-in-out infinite%7D%40keyframes spinner_zKoa%7B100%25%7Btransform%3Arotate(360deg)%7D%7D%40keyframes spinner_YpZS%7B0%25%7Bstroke-dasharray%3A0 150%3Bstroke-dashoffset%3A0%7D47.5%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-16%7D95%25%2C100%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-59%7D%7D%3C/style%3E%3Cg class='spinner_V8m1'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+  --yl-loading-spinner-background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='%23333' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E.spinner_V8m1%7Btransform-origin%3Acenter%3Banimation%3Aspinner_zKoa 2s linear infinite%7D.spinner_V8m1 circle%7Bstroke-linecap%3Around%3Banimation%3Aspinner_YpZS 1.5s ease-in-out infinite%7D%40keyframes spinner_zKoa%7B100%25%7Btransform%3Arotate(360deg)%7D%7D%40keyframes spinner_YpZS%7B0%25%7Bstroke-dasharray%3A0 150%3Bstroke-dashoffset%3A0%7D47.5%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-16%7D95%25%2C100%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-59%7D%7D%3C/style%3E%3Cg class='spinner_V8m1'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
   --frss-loading-image: var(--yl-loading-spinner-background-image); /* Replace FreshRSS loading spinner icon. */
 
-  --frss-noThumbnailImage-background-color: #4d4d4d; /* FreshRSS striped background color, when image is not yet loaded */
+  --frss-noThumbnailImage-background-color: #c0c0c0; /* FreshRSS striped background color, when image is not yet loaded */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --yl-color-body-background: #19191a;
+    --yl-color-gradient-surface-3: linear-gradient(135deg, #303030 0%, #3a3d3f 40%, #2d2d2d 100%);
+    --yl-color-text-default: #dedee4;
+    --yl-color-text-default-emphasis: #f8f8fb;
+    --yl-color-text-read: #c0c0c0;
+    --yl-color-surface-1: #303136;
+    --yl-color-surface-2: #424348;
+    --yl-color-surface-0: #1f1f1f;
+    --yl-color-modal-bg: #060606;
+    --yl-color-text-muted: #b3b3b3;
+    --yl-loading-spinner-background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='%23fff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E.spinner_V8m1%7Btransform-origin%3Acenter%3Banimation%3Aspinner_zKoa 2s linear infinite%7D.spinner_V8m1 circle%7Bstroke-linecap%3Around%3Banimation%3Aspinner_YpZS 1.5s ease-in-out infinite%7D%40keyframes spinner_zKoa%7B100%25%7Btransform%3Arotate(360deg)%7D%7D%40keyframes spinner_YpZS%7B0%25%7Bstroke-dasharray%3A0 150%3Bstroke-dashoffset%3A0%7D47.5%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-16%7D95%25%2C100%25%7Bstroke-dasharray%3A42 150%3Bstroke-dashoffset%3A-59%7D%7D%3C/style%3E%3Cg class='spinner_V8m1'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+    --frss-noThumbnailImage-background-color: #4d4d4d;
+  }
 }
 
 @media (max-width: 840px) {
@@ -691,7 +714,7 @@ nav.aside.aside_feed {
         content: "";
         width: calc(100% - 68px);
         height: 100%;
-        background: #303136;
+        background: var(--yl-color-surface-1);
         left: 8px;
         position: absolute;
         border-top-left-radius: 8px;
@@ -702,7 +725,7 @@ nav.aside.aside_feed {
       }
 
       &:hover {
-        background-color: #424348;
+        background-color: var(--yl-color-surface-2);
 
         &:before {
           opacity: 1;
@@ -749,7 +772,7 @@ nav.aside.aside_feed {
       }
 
       &:hover {
-        background-color: #424348;
+        background-color: var(--yl-color-surface-2);
       }
     }
   }
@@ -926,11 +949,11 @@ nav.aside.aside_feed {
       max-width: 49px;
       margin: 0;
       padding: 0.85rem 1.25rem;
-      background: #303136;
+      background: var(--yl-color-surface-1);
       border: none;
   
       &:hover {
-        background-color: #424348;
+        background-color: var(--yl-color-surface-2);
       }
     }
   }
@@ -1666,7 +1689,7 @@ body.youlag-active:not(.reader) main#stream div.flux {
         width: 100%;
         height: auto;
         border-radius: 12px;
-        background: #303136;
+        background: var(--yl-color-surface-1);
         aspect-ratio: 16 / 9;
         object-fit: cover;
         object-position: center;
@@ -1681,7 +1704,7 @@ body.youlag-active:not(.reader) main#stream div.flux {
         top: 0;
         left: 0;
         padding-top: 56.25%;
-        background-color: #303136;
+        background-color: var(--yl-color-surface-1);
         background-image: linear-gradient(45deg, #121417, #17253f);
         border-radius: 12px;
         z-index: 0;
@@ -2350,9 +2373,9 @@ html {
   .nav_menu,
   .pagination .item,
   .nav_menu .btn {
-    background-color: #303136;
-    border-color: #303136;
-    border-top-color: #303136;
+    background-color: var(--yl-color-surface-1);
+    border-color: var(--yl-color-surface-1);
+    border-top-color: var(--yl-color-surface-1);
     color: var(--yl-color-text-default);
 
     & .stick .btn,
@@ -2368,9 +2391,9 @@ html {
     & .dropdown + .btn,
     & .dropdown + input,
     & .dropdown + .dropdown > .btn {
-      background-color: #303136;
-      border-color: #303136;
-      border-top-color: #303136;
+      background-color: var(--yl-color-surface-1);
+      border-color: var(--yl-color-surface-1);
+      border-top-color: var(--yl-color-surface-1);
       color: var(--yl-color-text-default);
     }
 
@@ -2389,7 +2412,7 @@ html {
   .pagination .item:hover,
   .nav_menu .btn:hover,
   .nav-list .item a:hover {
-    background-color: #424348;
+    background-color: var(--yl-color-surface-2);
   }
 
   #global {
@@ -2427,15 +2450,15 @@ html {
   /* Disabled input */
   input:disabled,
   select:disabled {
-    background-color: #303136;
-    border-color: #303136;
+    background-color: var(--yl-color-surface-1);
+    border-color: var(--yl-color-surface-1);
     border-style: solid;
     background-image: repeating-linear-gradient(
       45deg,
-      #303136,
-      #303136 10px,
-      #424348 10px,
-      #424348 20px
+      var(--yl-color-surface-1),
+      var(--yl-color-surface-1) 10px,
+      var(--yl-color-surface-2) 10px,
+      var(--yl-color-surface-2) 20px
     );
   }
 
@@ -2472,7 +2495,7 @@ html {
       /* Mobile: Dropdown search input field */
       border-bottom-left-radius: 8px;
       border-top-left-radius: 8px;
-      background-color: #303136;
+      background-color: var(--yl-color-surface-1);
       box-shadow: inset 0 0 0 1px hsla(0,0%,100%,.14);
       box-sizing: border-box;
 
@@ -2503,8 +2526,8 @@ html {
   /* Mobile dropdown, with media query increase selector specificity */
   .dropdown-target:target ~ .dropdown-toggle::after {
     /* Mobile dropdown triangle */  
-    background-color: #303136;
-    border-color: #303136;
+    background-color: var(--yl-color-surface-1);
+    border-color: var(--yl-color-surface-1);
   }
 
   body:not(.reader) main#stream div.flux li.item.share,
@@ -2592,7 +2615,7 @@ html {
           margin-right: 0;
           padding-right: 0;
           width: unset;
-          background-color: #303136;
+          background-color: var(--yl-color-surface-1);
         }
       }
 
@@ -2604,7 +2627,7 @@ html {
         justify-content: center;
 
         .btn {
-          background-color: #424348;
+          background-color: var(--yl-color-surface-2);
         }
 
         .icon {
@@ -2682,7 +2705,7 @@ li.item.feed .item-title {
 
 .dropdown-menu,
 .box {
-  background-color: #303136;
+  background-color: var(--yl-color-surface-1);
   color: var(--yl-color-text-default);
   border-radius: 12px;
 
@@ -2707,7 +2730,7 @@ li.item.feed .item-title {
 }
 
 .box .box-title {
-  background-color: #424348;
+  background-color: var(--yl-color-surface-2);
   color: var(--yl-color-text-default);
 
   .configure {
@@ -2758,12 +2781,12 @@ main#stream .box.category {
 .dropdown-menu input,
 .dropdown-menu .btn,
 .stick input + .btn {
-  background-color: #424348;
-  border-color: #424348;
+  background-color: var(--yl-color-surface-2);
+  border-color: var(--yl-color-surface-2);
 }
 
 main.prompt {
-	background: #303136;
+	background: var(--yl-color-surface-1);
 }
 
 main.post {
@@ -2965,7 +2988,7 @@ main.post {
         font-size: var(--yl-sidenav-sublabel-font-size);
 
         &:hover {
-          background-color: #303136;
+          background-color: var(--yl-color-surface-1);
         }
 
         a.dropdown-toggle {
@@ -3155,7 +3178,7 @@ body:not(.normal) {
         &.active a,
         &:hover,
         &:hover a {
-          background-color: #303136;
+          background-color: var(--yl-color-surface-1);
           background: var(--yl-color-gradient-surface-3);
           max-width: calc(100% - 1rem);
         }
@@ -3175,8 +3198,8 @@ body:not(.normal) {
 
 /* Settings page back button */ 
 .post a[href="./"] {
-  background-color: #303136;
-  border-color: #303136;
+  background-color: var(--yl-color-surface-1);
+  border-color: var(--yl-color-surface-1);
   color: var(--yl-color-text-default);
 }
 
@@ -4083,7 +4106,7 @@ body:has(.tree-folder.category.favorites.active) {
 
 
 #stream.reader .flux {
-  border-bottom: 1px solid #646464;
+  border-bottom: 1px solid color-mix(in oklab, var(--yl-color-text-default) 40%, transparent);
 
   &,
   .content{
@@ -4226,8 +4249,7 @@ body {
       width: calc(100% - var(--yl-sidenav-width));
       margin-left: var(--yl-sidenav-width); /* To display the sidenav while loading Youlag */
       box-sizing: border-box;
-      background: var(--yl-color-body-background);
-      background: rgb(25 25 25 / 80%);
+      background: color-mix(in oklab, var(--yl-color-body-background) 85%, transparent);
       z-index: 40;
       transition: 0.2s;
       opacity: 1;
@@ -4299,14 +4321,14 @@ body {
   height: 100vh;
   height: 100dvh;
   width: 100vw;
-  background: #060606;
+  background: var(--yl-color-modal-bg);
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
   transition: 0.3s; /* Time to restore to fullscreen */
   will-change: width, height, transform;
   /* For browsers with subpixel rendering issues, hide background content peeking through. */
-  box-shadow: 0 0 0 10px #060606;
+  box-shadow: 0 0 0 10px var(--yl-color-modal-bg);
   transform-origin: bottom right;
 
   &.youlag-modal-feed-item--text {
@@ -4344,8 +4366,8 @@ body {
       margin: 0 auto;
 
       a {
-        color: #dadada;
-        box-shadow: #fff 0 -1px 0 inset;
+        color: var(--yl-color-text-default);
+        box-shadow: var(--yl-color-text-default) 0 -1px 0 inset;
       }
 
       ul {
@@ -4358,7 +4380,7 @@ body {
 
       pre {
         overflow: auto;
-        background-color: #ffffff1c;
+        background-color: color-mix(in oklab, var(--yl-color-text-default) 10%, transparent);
         border-radius: 8px;
         padding: 1rem;
       }
@@ -4771,7 +4793,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #303136;
+  background-color: var(--yl-color-surface-1);
   color: var(--yl-color-text-default);
   font-weight: 600;
   font-size: var(--yl-text-xs);
@@ -4784,7 +4806,7 @@ body {
 
   &:hover {
     text-decoration: none;
-    background-color: #424348;
+    background-color: var(--yl-color-surface-2);
   }
 
   span.yl-video-action-button__icon {
@@ -4849,12 +4871,12 @@ a.yl-video-action-button[href=""] {
   width: 40px;
   height: 40px;
   font-size: var(--yl-text-lg);
-  background-color: #303136;
+  background-color: var(--yl-color-surface-1);
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.4);
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #424348;
+    background-color: var(--yl-color-surface-2);
   }
 }
 
@@ -4874,7 +4896,7 @@ a.yl-video-action-button[href=""] {
   }
 
   .youlag-video-description-container {
-    background: linear-gradient(135deg, #303030 0%, #232323 40%, #181818 100%);
+    background: var(--yl-color-surface-1);
     padding: var(--yl-p-sm);
     border-radius: 1rem;
     flex: 1;
@@ -4907,8 +4929,8 @@ a.yl-video-action-button[href=""] {
       max-width: 700px;
 
       a {
-        color: #dadada;
-        box-shadow: #fff 0 -1px 0 inset;
+        color: var(--yl-color-text-default);
+        box-shadow: var(--yl-color-text-default) 0 -1px 0 inset;
       }
     }
 
@@ -5122,8 +5144,8 @@ a.yl-video-action-button[href=""] {
     aspect-ratio: 16 / 9;
     height: auto;
     border-radius: 12px;
-    background: #303136;
-    box-shadow: 0 0 0 6px #303136;
+    background: var(--yl-color-surface-1);
+    box-shadow: 0 0 0 6px var(--yl-color-surface-1);
   }
 
   .youlag-video-header {
@@ -5234,7 +5256,7 @@ body.youlag-tags-modal-open {
 
 
   .yl-tags-content {
-    background-color: #1f1f1f;
+    background-color: var(--yl-color-surface-0);
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
     width: 90%;
@@ -5279,7 +5301,7 @@ body.youlag-tags-modal-open {
       border-radius: 8px;
 
       &:hover {
-        background-color: #303136;
+        background-color: var(--yl-color-surface-1);
       }
 
       label {
@@ -5349,7 +5371,7 @@ body.youlag-tags-modal-open {
 .yl-extension-settings-form {
 
   .yl-form-section {
-    border: 1px solid #ffffff45;
+    border: 1px solid color-mix(in oklab, var(--yl-color-text-default) 20%, transparent);
     padding: 1rem;
     border-radius: 12px;
     margin: 1rem 0;
@@ -5365,7 +5387,7 @@ body.youlag-tags-modal-open {
 
   .yl-form-group-help {
     font-size: 0.9rem;
-    color: #b3b3b3;
+    color: var(--yl-color-text-muted);
     margin-bottom: 0.25rem;
     font-weight: normal;
     max-width: 450px;
@@ -5399,7 +5421,7 @@ body.youlag-tags-modal-open {
     }
 
     input[readonly] {
-      color: #959595;
+      color: var(--yl-color-text-muted);
       user-select: none;
       cursor: default;
       pointer-events: none;
@@ -5778,4 +5800,185 @@ figure.enclosure img.enclosure-thumbnail {
 
 /*****************************************
  * END "YOULAG HELPER CLASSES"
+ ****************************************/
+
+
+/*****************************************
+ *
+ * BEGIN "LIGHT MODE OVERRIDES"
+ *
+ * Overrides for elements in the MAPCO
+ * dark section that use hardcoded dark
+ * gradients. Applied when the OS/browser
+ * prefers a light color scheme.
+ *
+ ****************************************/
+
+@media (prefers-color-scheme: light) {
+
+  /* Feed card backgrounds (article mode) */
+  html {
+
+    /* Active/expanded card */
+    main#stream .flux.active:not(.current),
+    main#stream .flux.active {
+      background: var(--yl-color-surface-1) !important;
+    }
+
+    /* Sidenav category items */
+    nav.aside.aside_feed {
+      background-color: var(--yl-color-body-background);
+
+      .tree .tree-folder .tree-folder-title,
+      .tree-folder-items .item,
+      .nav-list .item {
+        background-color: var(--yl-color-body-background);
+        color: var(--yl-color-text-default);
+      }
+    }
+
+    /* Disabled inputs: replace striped dark gradient */
+    input:disabled,
+    select:disabled {
+      background-color: var(--yl-color-surface-1);
+      background-image: none;
+    }
+
+    /* Table header */
+    table th {
+      background: color-mix(in oklab, var(--yl-color-text-default) 10%, transparent);
+    }
+
+    /* Icon brightness in light mode — dark icons, no need to invert */
+    input, select, textarea, button, .btn, kbd, .nav_menu, .nav_menu .btn {
+      .icon {
+        filter: none;
+      }
+    }
+
+    /* Dropdown search input */
+    .dropdown-menu form .search input {
+      background-color: var(--yl-color-surface-1);
+      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--yl-color-text-default) 14%, transparent);
+      &:focus {
+        box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--yl-color-text-default) 25%, transparent);
+      }
+    }
+
+    /* Mobile: dropdown triangle */
+    @media (max-width: 840px) {
+      .dropdown-target:target ~ .dropdown-toggle::after {
+        background-color: var(--yl-color-surface-1);
+        border-color: var(--yl-color-surface-1);
+      }
+    }
+  }
+
+  /* Youlag theater modal: dark header gradient → light */
+  .youlag-video-header {
+    background: linear-gradient(to bottom, color-mix(in oklab, var(--yl-color-body-background) 90%, transparent) 0%, transparent 100%);
+  }
+
+  /* Miniplayer background */
+  .youlag-mode--miniplayer #youlagTheaterModal {
+    background: var(--yl-color-surface-1);
+    box-shadow: 0 0 0 6px var(--yl-color-surface-1);
+  }
+
+  /* Tags modal overlay */
+  #youlagTagsModal {
+    background-color: rgba(0, 0, 0, 0.3);
+    .yl-tags-list .yl-tags-list-item:hover {
+      background-color: var(--yl-color-surface-1);
+    }
+  }
+
+  /* Chapter list items */
+  #ylVideoChaptersContainer {
+    .yl-video-chapter-current {
+      border-bottom-color: color-mix(in oklab, var(--yl-color-text-default) 12%, transparent);
+      &__order {
+        border-color: color-mix(in oklab, var(--yl-color-text-default) 24%, transparent);
+      }
+    }
+    .yl-video-chapter-list {
+      border-bottom-color: color-mix(in oklab, var(--yl-color-text-default) 12%, transparent);
+      &-item:hover {
+        background-color: color-mix(in oklab, var(--yl-color-text-default) 8%, transparent);
+      }
+      &-item__time {
+        background-color: color-mix(in oklab, var(--yl-color-text-default) 12%, transparent);
+      }
+    }
+    #ylVideoChaptersActionContainer .yl-video-chapter-action {
+      border-left-color: color-mix(in oklab, var(--yl-color-text-default) 12%, transparent);
+      &:hover {
+        background-color: color-mix(in oklab, var(--yl-color-text-default) 5%, transparent);
+      }
+      &__icon {
+        /* Invert arrow icons so they show dark on light background */
+        filter: invert(1);
+      }
+    }
+    #ylVideoChaptersPanel:hover {
+      background-color: color-mix(in oklab, var(--yl-color-text-default) 5%, transparent);
+    }
+  }
+
+  /* Video action button dividers */
+  .yl-video-action-button-group .yl-video-action-button:not(:last-child) {
+    border-right-color: color-mix(in oklab, var(--yl-color-text-default) 20%, transparent);
+  }
+
+  /* Favorite icon in light mode */
+  .youlag-favorited {
+    &.youlag-favorited--false .youlag-favorited-icon {
+      filter: none;
+    }
+    .youlag-favorited-icon {
+      filter: invert(0);
+    }
+  }
+
+  /* Modal close/minimize buttons */
+  #youlagCloseModal,
+  #youlagMinimizeModal {
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Notification */
+  #yl_notification {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* FreshRSS logo: invert for light mode (was brightened for dark) */
+  #yl_freshrss_logo_container img {
+    filter: none;
+  }
+
+  /* Category filter hover */
+  .yl-stream-category-filter-options__item:hover {
+    background: var(--yl-color-gradient-surface-3);
+  }
+
+  /* Button group: active state icons */
+  #global .btn.active .icon,
+  #global .btn-important .icon {
+    filter: brightness(5);
+  }
+
+  /* Input/button icon brightness: keep icons visible */
+  .icon {
+    filter: none;
+  }
+
+  /* Chapter toggle icon: dark arrow on light bg */
+  .yl-video-chapter-toggle-icon {
+    filter: none !important;
+  }
+
+}
+
+/*****************************************
+ * END "LIGHT MODE OVERRIDES"
  ****************************************/
