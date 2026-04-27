@@ -11,7 +11,6 @@ function init() {
   
   clearPathHash();
   setFreshRssUrlPrefix();
-  applyColorScheme();
   setBodyClass();
   if (isFeedPage()) {
     setupClickListener();
@@ -83,14 +82,6 @@ function handleExperimentalFeature() {
     app.state.youlag.experimentalFeatureEnabled = true;
     categoryFilterToggle.style.setProperty('display', 'flex', 'important');
   }
-}
-
-function applyColorScheme() {
-  const el = document.getElementById('yl_color_scheme');
-  const scheme = el?.getAttribute('data-yl-color-scheme');
-  document.documentElement.classList.remove('yl-scheme-light', 'yl-scheme-dark');
-  if (scheme === 'light') document.documentElement.classList.add('yl-scheme-light');
-  else if (scheme === 'dark') document.documentElement.classList.add('yl-scheme-dark');
 }
 
 function removeYoulagLoadingState() {

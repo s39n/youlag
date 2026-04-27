@@ -17,30 +17,6 @@ declare(strict_types=1);
 
       <h3>Appearance & behavior</h3>
 
-      <div class="form-group">
-        <div class="group-name">Color scheme</div>
-        <div class="yl-form-group-help">Controls the light or dark appearance. &ldquo;Auto&rdquo; follows your operating system setting.</div>
-        <div class="yl-form-group--radio">
-          <div class="yl-form-group--radio-input-container">
-            <div class="yl-form-control-radio-input">
-              <input type="radio" id="yl_color_scheme_auto" name="yl_color_scheme" value="auto"
-                <?php echo ($this->yl_color_scheme === 'auto') ? ' checked="checked"' : ''; ?>>
-              <label for="yl_color_scheme_auto">Auto</label>
-            </div>
-            <div class="yl-form-control-radio-input">
-              <input type="radio" id="yl_color_scheme_light" name="yl_color_scheme" value="light"
-                <?php echo ($this->yl_color_scheme === 'light') ? ' checked="checked"' : ''; ?>>
-              <label for="yl_color_scheme_light">Light</label>
-            </div>
-            <div class="yl-form-control-radio-input">
-              <input type="radio" id="yl_color_scheme_dark" name="yl_color_scheme" value="dark"
-                <?php echo ($this->yl_color_scheme === 'dark') ? ' checked="checked"' : ''; ?>>
-              <label for="yl_color_scheme_dark">Dark</label>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <h4 class="mb-0">
         Video mode
         <div class="yl-form-group-help">
