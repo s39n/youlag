@@ -907,6 +907,46 @@ async function handleVideoDirectLink() {
   }
 }
 
+function renderArticlePane(feedItemEl) {
+  const pane = document.getElementById(app.ui.id.articlePane);
+  if (!pane) return;
+
+  const titleLinkEl = feedItemEl.querySelector('.flux_header .item.titleAuthorSummaryDate .title a');
+  const titleText = titleLinkEl?.textContent?.trim() || '';
+  const titleHref = titleLinkEl?.href || '#';
+  const websiteEl = feedItemEl.querySelector('.flux_header .item.website .websiteName');
+  const dateEl = feedItemEl.querySelector('.flux_header .item.titleAuthorSummaryDate .date time');
+  const contentEl = feedItemEl.querySelector('.flux_content');
+
+  pane.innerHTML = `
+    <button class="yl-article-pane__close" id="yl_article_pane_close" aria-label="Close">&#x2715;</button>
+    <div class="yl-article-pane__scroll">
+      <div class="yl-article-pane__meta">
+        ${websiteEl ? `<span class="yl-article-pane__author">${websiteEl.textContent.trim()}</span>` : ''}
+        ${dateEl ? `<time class="yl-article-pane__date">${dateEl.textContent.trim()}</time>` : ''}
+      </div>
+      <h1 class="yl-article-pane__title">
+        <a href="${titleHref}" target="_blank" rel="noopener noreferrer">${titleText}</a>
+      </h1>
+      <div class="yl-article-pane__body">${contentEl?.innerHTML || ''}</div>
+    </div>
+  `;
+
+  pane.classList.add('yl-article-pane--open');
+  pane.querySelector('#yl_article_pane_close')?.addEventListener('click', closeArticlePane);
+}
+
+function closeArticlePane(event) {
+  const pane = document.getElementById(app.ui.id.articlePane);
+  if (pane) {
+    pane.classList.remove('yl-article-pane--open');
+    pane.innerHTML = '';
+  }
+  document.querySelectorAll('.yl-three-pane-selected').forEach(el => el.classList.remove('yl-three-pane-selected'));
+  setModalState(false);
+  event?.stopPropagation?.();
+}
+
 function handleActiveArticle() {
   pushHistoryState('articleOpen', true);
 }

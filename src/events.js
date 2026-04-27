@@ -29,6 +29,9 @@ function init() {
     handleFeedDearrowFeatures();
     onNewFeedItems();
     isUpdateCheckEnabled() && checkForUpdates();
+    if (isLayoutArticle()) {
+      setupArticleThreePaneLayout();
+    }
   }
   updateSidenavLinks();
   settingsPageEventListeners();

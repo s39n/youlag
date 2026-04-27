@@ -2,101 +2,71 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## What this project is
+
+Youlag is a FreshRSS extension (PHP + vanilla JS + SCSS) that overrides the FreshRSS UI to provide a video-centric experience for YouTube RSS feeds and a modernized article reading view.
+
+## Build commands
 
 ```bash
-npm run build        # Minify JS + compile SCSS → dist zip + static/
-npm run build-js     # JS only (produces static/script.min.js)
-npm run build-css    # SCSS only (produces static/theme.min.css)
-npm run watch        # Dev mode: watch JS + SCSS, sync to local FreshRSS folder
+npm install           # Install dependencies
+npm run build         # Minify JS + compile SCSS → dist/ (production zip)
+npm run watch         # Dev mode: unminified JS + sass --watch, with optional file sync to FreshRSS
+npm run build-js      # JS only (terser)
+npm run build-css     # SCSS only (sass)
 ```
 
-`npm run watch` reads `.env` (copy `.env.example`) for `FRESHRSS_DEV_FOLDER` and `FRESHRSS_DEV_FOLDER_FILE_SYNC=true` to sync files into a local FreshRSS install automatically.
+No test suite exists (`npm test` exits with an error by default).
 
-There are no tests (`npm test` exits 1 by default).
+## Dev environment setup
+
+Copy `.env.example` to `.env`. Set `FRESHRSS_DEV_FOLDER` to your local FreshRSS extensions path and `FRESHRSS_DEV_FOLDER_FILE_SYNC=true` to have `npm run watch` automatically sync changes there. Without this, `watch` still compiles but doesn't copy files.
 
 ## Architecture
 
-Youlag is a **FreshRSS extension** — a PHP extension that injects vanilla JS and SCSS into a FreshRSS/Mapco-themed interface. There is no module system; all JS functions are global.
+### PHP side (`extension.php`, `configure.phtml`)
 
-### Entry points
+`extension.php` is the FreshRSS extension entry point. It:
+- Registers `nav_entries` hooks that inject small `<div>` elements into the page carrying user settings as `data-*` attributes (e.g. `data-yl-category-whitelist`, `data-yl-miniplayer-swipe-enabled`). This is the primary bridge from PHP settings to the JS frontend.
+- Registers `entry_before_display` to rewrite YouTube URLs to Invidious when configured.
+- Registers `entry_before_insert` to optionally block YouTube Shorts before they are saved to the DB.
+- Forces specific FreshRSS user config values (theme, topline layout, etc.) that Youlag's CSS depends on.
 
+`configure.phtml` renders the settings form; `handleConfigureAction()` in `extension.php` saves values to `FreshRSS_Context::userConf()`.
+
+### JS side (`src/`)
+
+All JS files are concatenated in order (defined in `scripts/build.js` and `scripts/watch.js`) into a single `static/script.min.js`. There is no module system — all functions are global.
+
+File responsibilities:
 | File | Role |
-|------|------|
-| `extension.php` | PHP extension class: registers hooks, reads/saves settings, outputs hidden DOM elements |
-| `configure.phtml` | Extension settings page rendered in FreshRSS admin UI |
-| `metadata.json` | Extension name/version (version injected into built JS at build time) |
+|---|---|
+| `global.js` | `window.app` — all global state, constants, type definitions (IDs, class names, breakpoints) |
+| `db.js` | IndexedDB wrapper for caching DeArrow API responses and video durations |
+| `utilities.js` | General-purpose helpers (DOM queries, URL params, layout detection); `isLayoutVideo()` / `isLayoutArticle()` determine the current page mode; `markVideoFeedItems()` stamps `data-yl-is-video="true"` on video entries |
+| `helpers.js` | Per-entry logic: extracting video data from DOM, tag management, category whitelist checks; `extractFeedItemData()` sets `isVideoFeedItem` by detecting YouTube/Invidious URLs |
+| `ui.js` | Click listeners, popstate, article/video open/close flows; `setupArticleThreePaneLayout()` builds the resizable article-list + content side-by-side pane |
+| `ui-modals.js` | Video/article modal rendering and content population |
+| `ui-video-control.js` | YouTube iframe API integration (playback, chapters, autoplay) |
+| `ui-modes.js` | Fullscreen ↔ miniplayer mode transitions |
+| `forms.js` | Settings page interactions and form helpers |
+| `events.js` | `init()` entry point — called on page load; orchestrates feature setup |
+| `debug.js` | Debug panel and logging (only active when debug mode is on) |
 
-### JS source files (concatenated + minified in order by `scripts/build.js`)
+### CSS (`src/theme.scss`)
 
-| File | Role |
-|------|------|
-| `src/global.js` | `app` global: all state (`app.state`), selectors (`app.frss`), type definitions (`app.types`), CSS id/class maps (`app.modal`, `app.ui`) |
-| `src/utilities.js` | Pure helpers: URL parsing, page detection (`isFeedPage`, `isLayoutVideo`, `isLayoutArticle`), state getters/setters, date formatting, API fetches |
-| `src/helpers.js` | DOM helpers: `extractFeedItemData()`, chapter parsing, tag API calls, DeArrow thumbnail fetching |
-| `src/ui.js` | Core UI: click listeners, toolbar, sidebar, body class management, swipe gestures, video card rendering |
-| `src/ui-modals.js` | Theater modal: `handleActiveVideo()`, `handleActiveArticle()`, `renderModalVideo()`, `closeModalVideo()`, `closeArticle()`, video queue, tags modal |
-| `src/ui-video-control.js` | YouTube IFrame API: chapter rendering, playback position tracking, chapter navigation |
-| `src/ui-modes.js` | Miniplayer/fullscreen toggle logic and swipe-to-miniplayer |
-| `src/forms.js` | Settings page JS behavior |
-| `src/events.js` | `init()` orchestrator + `initialVideoState()` for direct video links |
-| `src/db.js` | IndexedDB wrapper for caching |
-| `src/debug.js` | Debug panel (only loaded when debug mode is on) |
+Single SCSS file compiled to `static/theme.min.css`. Youlag overrides the FreshRSS `Mapco` theme.
 
-### PHP → JS data flow
+### Build output
 
-PHP cannot call JS directly; settings are written to the page as hidden `<div data-yl-*>` elements via `registerHook('nav_entries', ...)`. JS reads these at init time. Pattern used for every setting:
+`npm run build` produces `dist/youlag-{version}.zip` containing `xExtension-Youlag/` — the exact folder structure needed for FreshRSS's extensions directory.
 
-```php
-// extension.php
-public function setColorScheme(): string {
-    return '<div id="yl_color_scheme" data-yl-color-scheme="' . $scheme . '"></div>';
-}
-```
+## Key conventions
 
-```js
-// JS reads it
-const scheme = document.getElementById('yl_color_scheme')?.getAttribute('data-yl-color-scheme');
-```
-
-CSS hides these elements via the `[data-yl-*] { display: none }` block at the bottom of `theme.scss`.
-
-### CSS / SCSS (`src/theme.scss`)
-
-Single file compiled to `static/theme.min.css`. Key sections (in order):
-
-1. **`:root` variables** — spacing, typography, color variables. Color vars default to **light mode**; `@media (prefers-color-scheme: dark)` and `html.yl-scheme-dark`/`html.yl-scheme-light` override them for explicit theme control.
-2. **MAPCO THEME DARK MODE** (lines ~2200–3980) — overrides FreshRSS/Mapco's default light styles to dark. Contains both color rules and structural layout rules (fixed sidebar, nav_menu positioning). This entire section always applies; colors adapt via CSS variables.
-3. **Youlag theater modal / miniplayer / tags modal / settings** — Youlag-specific UI built on top of FreshRSS.
-4. **LIGHT MODE OVERRIDES** (end of file) — a SCSS mixin `yl-light-mode-overrides` applied to both `@media (prefers-color-scheme: light)` and `html.yl-scheme-light`.
-
-### Color scheme system
-
-Three sources of truth, in order of precedence (highest last wins in CSS):
-1. `:root` — light defaults
-2. `@media (prefers-color-scheme: dark)` — OS preference
-3. `html.yl-scheme-dark` / `html.yl-scheme-light` — explicit Youlag setting (applied by `applyColorScheme()` in `events.js` at init time)
-
-The explicit setting is stored server-side as `yl_color_scheme` (`'auto'`/`'light'`/`'dark'`) and written to the DOM via `nav_entries` hook.
-
-### Key CSS variables
-
-| Variable | Purpose |
-|----------|---------|
-| `--yl-color-body-background` | Page background |
-| `--yl-color-text-default` | Body text |
-| `--yl-color-surface-1` | Button/input bg (dark: `#303136`, light: `#e4e4e8`) |
-| `--yl-color-surface-2` | Hover state (dark: `#424348`, light: `#d8d8dc`) |
-| `--yl-color-surface-0` | Modal content bg (dark: `#1f1f1f`, light: `#f0f0f4`) |
-| `--yl-color-modal-bg` | Theater modal bg (dark: `#060606`, light: `#ffffff`) |
-| `--yl-color-gradient-active` | Active/selected button gradient (always blue) |
-| `--yl-topnav-height` | Top header height (57px desktop, 54px mobile) |
-
-### Key non-obvious patterns
-
-- **FreshRSS forces Mapco theme**: `extension.php` line 120 sets `theme = 'Mapco'` unconditionally, overriding the user's FreshRSS theme picker. The Youlag settings page exposes its own Color scheme option instead.
-- **All JS is global**: no imports/exports. Execution order matters — `build.js` concatenates files in a fixed order.
-- **`stopImmediatePropagation` required for keydown**: FreshRSS registers its own `keydown` listener on `document`. `stopPropagation()` does not prevent sibling listeners; `stopImmediatePropagation()` is required for J/K nav keys.
-- **`--yl-three-pane-list-width` CSS variable**: drives both `#stream` width and article pane position in three-pane layout. Set by JS and saved to localStorage.
-- **`body.youlag-inactive` centering**: FreshRSS applies `margin: 0 auto` to `#stream` in article mode; three-pane overrides need `margin: 0 !important` to suppress it.
-- **Loading overlay**: `#global:after` covers the feed with a blurred backdrop until `body.youlag-loaded` is added by `removeYoulagLoadingState()` at the end of `init()`, giving JS time to apply classes (e.g. color scheme) before content is visible.
+- **Settings bridge**: PHP writes user settings as `data-*` attributes on injected `<div>` elements. JS reads these from the DOM during `init()`. New settings require a PHP hook method, a DOM element in the PHP output, and a corresponding JS reader.
+- **Global state**: All runtime state lives in `app.state.*` (defined in `global.js`). Check there before searching for where state is managed.
+- **No module system**: All functions are globally scoped. When adding a function, place it in the most semantically appropriate file; there's no import/export.
+- **Version injection**: `app.metadata.version` is a placeholder `'X.Y.Z'` in source; `build.js`/`watch.js` replace it at compile time from `metadata.json`.
+- **DeArrow integration**: The `dearrow` IndexedDB store (4-week TTL) caches thumbnail/title replacement data from `sponsor.ajay.app`.
+- **Auto-detect video feeds**: PHP checks `FreshRSS_Context::$feed` URL for YouTube/Invidious patterns and emits `data-yl-is-video-feed="true"` on the injected settings div. JS calls `markVideoFeedItems()` to stamp individual entries. The `isVideoFeedItem` field on the video object reflects per-entry detection (handles mixed feeds, e.g. when the YouTube Video Feed extension is installed).
+- **Three-pane article layout**: Controlled by the `yl_article_three_pane_enabled` user setting. PHP injects `<div id="yl_article_three_pane_enabled" data-yl-article-three-pane-enabled="…">`. JS reads it in `setupArticleThreePaneLayout()` (called only when `isLayoutArticle()`) to build a draggable resizer between the feed list and the article content pane. State tracked via `app.state.youlag.threePaneInit`.

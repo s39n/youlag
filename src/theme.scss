@@ -5806,5 +5806,130 @@ figure.enclosure img.enclosure-thumbnail {
 }
 
 /*****************************************
+ * BEGIN "THREE-PANE ARTICLE LAYOUT"
+ ****************************************/
+
+body.yl-article-three-pane {
+  main#stream {
+    flex: none !important;
+    width: var(--yl-three-pane-list-width) !important;
+    max-width: var(--yl-three-pane-list-width) !important;
+    margin: 0 !important;
+    overflow-x: hidden;
+  }
+
+  /* Keep the toolbar aligned with the stream, not centered */
+  nav.aside_feed.visible ~ .nav_menu,
+  .nav_menu {
+    max-width: var(--yl-three-pane-list-width) !important;
+    margin: 0 !important;
+  }
+}
+
+.yl-three-pane-selected {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.yl-article-pane-resizer {
+  position: fixed;
+  top: var(--yl-topnav-height);
+  bottom: 0;
+  width: 5px;
+  cursor: ew-resize;
+  z-index: 100;
+
+  &:hover,
+  &.yl-resizing {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.yl-article-pane {
+  position: fixed;
+  top: var(--yl-topnav-height);
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  background-color: var(--yl-color-body-background);
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  display: none;
+  z-index: 50;
+
+  &--open {
+    display: block;
+  }
+
+  &__close {
+    position: absolute;
+    top: var(--yl-space-2xs);
+    right: var(--yl-space-2xs);
+    z-index: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--yl-color-text-default);
+    font-size: var(--yl-text-xs);
+    line-height: 1;
+    padding: var(--yl-p-3xs) var(--yl-p-2xs);
+    border-radius: 6px;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  &__scroll {
+    height: 100%;
+    overflow-y: auto;
+    padding: var(--yl-p-sm);
+    padding-top: calc(var(--yl-p-sm) + 2rem);
+  }
+
+  &__meta {
+    display: flex;
+    gap: var(--yl-m-xs);
+    font-size: var(--yl-text-2xs);
+    color: var(--yl-color-text-read);
+    margin-bottom: var(--yl-m-2xs);
+  }
+
+  &__title {
+    font-size: var(--yl-text-sm);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: var(--yl-m-xs);
+    color: var(--yl-color-text-default-emphasis);
+
+    a {
+      color: inherit;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__body {
+    font-size: var(--yl-text-xs);
+    line-height: 1.7;
+    color: var(--yl-color-text-default);
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    a {
+      color: var(--yl-color-text-default-emphasis);
+    }
+  }
+}
+
+/*****************************************
+ * END "THREE-PANE ARTICLE LAYOUT"
+ ****************************************/
+
+/*****************************************
  * END "YOULAG HELPER CLASSES"
  ****************************************/

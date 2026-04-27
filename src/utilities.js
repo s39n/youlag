@@ -722,6 +722,10 @@ function formatTime(seconds) {
   }
 }
 
+function isArticleThreePaneEnabled() {
+  return document.getElementById('yl_article_three_pane_enabled')?.getAttribute('data-yl-article-three-pane-enabled') === 'true';
+}
+
 function shouldCustomThumbnailTitle() {
   const setting = document.querySelector('#yl_custom_thumbnail_title_enabled');
   if (!setting) return false;

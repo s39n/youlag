@@ -193,6 +193,16 @@ declare(strict_types=1);
           </div>
         </div>
       </label>
+      <label for="yl_article_three_pane_enabled" class="flex">
+          <input type="checkbox" id="yl_article_three_pane_enabled" name="yl_article_three_pane_enabled" value="1" class="mb-auto"
+            <?php echo ($this->yl_article_three_pane_enabled) ? ' checked="checked"' : ''; ?>>
+        <div class="inline-block">
+          Article reader pane
+          <div class="yl-form-group-help">
+            Desktop: Show article content in a side pane instead of expanding inline in the list.
+          </div>
+        </div>
+      </label>
       <label for="yl_custom_thumbnail_title_enabled" class="flex">
           <input type="checkbox" id="yl_custom_thumbnail_title_enabled" name="yl_custom_thumbnail_title_enabled" value="1" class="mb-auto"
             <?php echo ($this->yl_custom_thumbnail_title_enabled) ? ' checked="checked"' : ''; ?>>
