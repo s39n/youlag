@@ -117,7 +117,7 @@ class YoulagExtension extends Minz_Extension
 
     // Required user settings to properly render Youlag styling
     // See FreshRSS `config-user.php` and the html form fields with `for="{setting_name}"` in settings for reference. This is not in the official documentation.
-    FreshRSS_Context::userConf()->theme = 'Mapco';
+    // FreshRSS_Context::userConf()->theme = 'Mapco'; // Removed: allow user to choose their own FreshRSS theme
     FreshRSS_Context::userConf()->topline_website = 'full';
     FreshRSS_Context::userConf()->topline_thumbnail = 'landscape';
     FreshRSS_Context::userConf()->topline_summary = true;
